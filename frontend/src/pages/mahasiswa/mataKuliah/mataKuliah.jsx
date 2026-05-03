@@ -1,27 +1,74 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
-import "./mataKuliah.css";import "./videoMataKuliah.css";
+import "./mataKuliah.css";
 import "./videoMataKuliah.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
-const AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
-
-const modules = [
-  { id: 1, title: "Modul 1: Pengenal...", meta: "1.2 MB • Diperbarui 2 hari lalu", type: "pdf",   action: "download", status: "done" },
-  { id: 2, title: "Modul 2: Konsep ...",  meta: "Sedang diputar...",               type: "video", action: "play",     status: "active" },
-  { id: 3, title: "Modul 3: Normalis...", meta: "2.4 MB • PDF",                    type: "pdf",   action: "download", status: "" },
-  { id: 4, title: "Modul 4: Dasar SQ...", meta: "1.8 MB • PDF",                   type: "pdf",   action: "download", status: "" },
-];
-
-export default function MataKuliah({ onNavigate, onLogout }) {
+export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [activeModule, setActiveModule] = useState(2);
+  const [activeModule, setActiveModule] = useState(null);
+  const [activeVideo, setActiveVideo] = useState(null);
   const [toast, setToast] = useState(null);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [course, setCourse] = useState(null);
+  const [modules, setModules] = useState([]);
+  const [stats, setStats] = useState({ modulPdf: 0, videoAjar: 0, tugas: 0, kuis: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        const detailRes = await apiClient.get(`/api/mata-kuliah/${idMataKuliah}/detail`);
+        const payload = detailRes?.data || detailRes;
+        setCourse(payload);
+        setStats(payload?.statistik || { modulPdf: 0, videoAjar: 0, tugas: 0, kuis: 0 });
+
+        const formattedModules = (payload?.modulAjar || []).map((m, index) => {
+          const tipe = (m.tipe_modul || "").toLowerCase();
+          const fileUrl = (m.fileUrl || "").toLowerCase();
+          const url = m.fileUrl || m.url || "";
+          const isVideo = tipe.includes("video") || fileUrl.endsWith(".mp4") || fileUrl.endsWith(".mov") || fileUrl.endsWith(".webm");
+          return {
+            id: m.idModulAjar || index + 1,
+            title: m.judul || `Modul ${index + 1}`,
+            meta: isVideo ? "Video Ajar" : "Modul PDF",
+            type: isVideo ? "video" : "pdf",
+            action: isVideo ? "play" : "download",
+            status: "active",
+            url,
+            deskripsi: m.deskripsi || "Deskripsi materi tidak tersedia.",
+            tanggal: m.tanggal,
+          };
+        });
+
+        setModules(formattedModules.length > 0 ? formattedModules : [
+          { id: 1, title: "Belum ada materi", meta: "-", type: "pdf", action: "none", status: "" }
+        ]);
+        if (formattedModules.length > 0) {
+          setActiveModule(formattedModules[0].id);
+          const firstVideo = formattedModules.find((m) => m.type === "video");
+          setActiveVideo(firstVideo || null);
+        }
+
+      } catch (error) {
+        console.error("Gagal memuat mata kuliah", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourseData();
+  }, [idMataKuliah]);
+
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+  if (loading) {
+    return <div className="page-shell"><main className="page-main"><div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>Memuat materi...</div></main></div>;
+  }
+
+
 
   return (
     <div className="page-shell">
@@ -47,16 +94,15 @@ export default function MataKuliah({ onNavigate, onLogout }) {
               <span className="material-symbols-outlined">close</span>
             </button>
             <div className="mk-video-modal-header">
-              <h3>Video Ajar: Konsep ERD</h3>
-              <p>Durasi: 24 Menit • Modul 2</p>
+              <h3>{activeVideo?.title || "Video Ajar"}</h3>
+              <p>Sumber materi dari database</p>
             </div>
             <div className="mk-video-player-wrapper">
               <video
                 className="mk-video-player"
                 controls
                 autoPlay
-                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                poster="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop"
+                src={activeVideo?.url}
               >
                 Browser Anda tidak mendukung tag video.
               </video>
@@ -81,9 +127,9 @@ export default function MataKuliah({ onNavigate, onLogout }) {
               <span className="material-symbols-outlined">school</span>
               FAKULTAS INFORMATIKA
             </span>
-            <h2 className="mk-course-title">Mata Kuliah: Sistem Basis Data</h2>
+            <h2 className="mk-course-title">Mata Kuliah: {course?.namaMataKuliah || course?.nama || "Mata Kuliah"}</h2>
             <p className="mk-course-desc">
-              Pelajari dasar-dasar perancangan data, normalisasi, dan manajemen sistem basis data relasional untuk membangun fondasi sistem informasi yang handal.
+              Silakan pelajari materi dan kerjakan tugas yang tersedia.
             </p>
           </div>
 
@@ -105,8 +151,8 @@ export default function MataKuliah({ onNavigate, onLogout }) {
                     <span className="mk-video-lbl">Putar Video</span>
                   </div>
                   <div className="mk-video-info">
-                    <p className="mk-video-title">Video Ajar: Konsep ERD</p>
-                    <p className="mk-video-meta">Durasi: 24 Menit • Modul 2</p>
+                    <p className="mk-video-title">{activeVideo?.title || "Belum ada video ajar"}</p>
+                    <p className="mk-video-meta">{activeVideo?.meta || "Tambahkan modul video di backend"}</p>
                   </div>
                 </div>
               </div>
@@ -118,11 +164,24 @@ export default function MataKuliah({ onNavigate, onLogout }) {
                   Deskripsi Materi
                 </h3>
                 <p className="mk-desc-body">
-                  Sesi ini membahas transisi dari kebutuhan bisnis ke skema database teknis melalui teknik permodelan ERD (Entity-Relationship Diagram). Anda akan mempelajari bagaimana entitas, atribut, dan relasi saling berinteraksi.
+                  Data materi, statistik, dan daftar aktivitas pada halaman ini diambil langsung dari database LMS.
                 </p>
                 <div className="mk-stats-row">
-                  {[["12","Modul PDF","mataKuliah"],["05","Video Ajar","mataKuliah"],["03","Tugas","daftarTugas"],["01","Kuis","kuis"]].map(([n,l,page]) => (
-                    <div key={l} className="mk-stat-chip" style={{ cursor: "pointer" }} onClick={() => onNavigate && onNavigate(page)}>
+                  {[
+                    [String(stats.modulPdf), "Modul PDF", null],
+                    [String(stats.videoAjar), "Video Ajar", null],
+                    [String(stats.tugas), "Tugas", { page: "daftarTugas", idMataKuliah }],
+                    [String(stats.kuis), "Kuis", course?.kuis?.[0]?.idKuis ? { page: "kuis", idKuis: course.kuis[0].idKuis } : null],
+                  ].map(([n, l, page]) => (
+                    <div
+                      key={l}
+                      className="mk-stat-chip"
+                      style={{ cursor: page ? "pointer" : "default" }}
+                      onClick={() => {
+                        if (!page || !onNavigate) return;
+                        onNavigate(page);
+                      }}
+                    >
                       <p className="mk-stat-num">{n}</p>
                       <p className="mk-stat-lbl">{l}</p>
                     </div>
@@ -137,7 +196,7 @@ export default function MataKuliah({ onNavigate, onLogout }) {
               <div className="mk-module-card">
                 <div className="mk-module-header">
                   <h3>Daftar Materi</h3>
-                  <span className="mk-prog-badge">SELESAI 4/12</span>
+                  <span className="mk-prog-badge">{modules.length} MODUL</span>
                 </div>
                 <div className="mk-module-list">
                   {modules.map((m) => {
@@ -148,7 +207,8 @@ export default function MataKuliah({ onNavigate, onLogout }) {
                         className={`mk-mod-item ${isActive ? "mk-mod-active" : ""}`}
                         onClick={() => {
                           setActiveModule(m.id);
-                          if (m.type === "video") {
+                          if (m.type === "video" && m.url) {
+                            setActiveVideo(m);
                             setVideoOpen(true);
                           }
                         }}
@@ -162,8 +222,14 @@ export default function MataKuliah({ onNavigate, onLogout }) {
                           <p className={`mk-mod-title ${isActive ? "mk-mod-title--active" : ""}`}>{m.title}</p>
                           <p className={`mk-mod-meta  ${isActive ? "mk-mod-meta--active"  : ""}`}>{m.meta}</p>
                           {isActive && <div className="mk-bar-track"><div className="mk-bar-fill"></div></div>}
-                          {m.action === "download" && (
-                            <button className="mk-dl-btn" onClick={() => showToast(`Mengunduh: ${m.title}`)}>
+                          {m.action === "download" && m.url && (
+                            <button
+                              className="mk-dl-btn"
+                              onClick={() => {
+                                window.open(m.url, "_blank", "noopener,noreferrer");
+                                showToast(`Membuka modul: ${m.title}`);
+                              }}
+                            >
                               <span className="material-symbols-outlined">download</span>
                               Unduh Modul
                             </button>

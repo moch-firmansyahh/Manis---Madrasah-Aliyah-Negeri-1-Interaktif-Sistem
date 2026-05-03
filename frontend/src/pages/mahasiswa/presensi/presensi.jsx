@@ -4,46 +4,14 @@ import "./presensi.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
 const QR_TTL = 15 * 60; // 15 minutes in seconds
 
-const INITIAL_STUDENTS = [
-  {
-    id: 1,
-    initials: "AA",
-    color: "#8991fe",
-    name: "Aditya Arisandy",
-    nim: "2021081001",
-    status: "Hadir",
-  },
-  {
-    id: 2,
-    initials: "BP",
-    color: "#1e293b",
-    name: "Bella Puspita",
-    nim: "2021081042",
-    status: "Sakit",
-  },
-  {
-    id: 3,
-    initials: "DA",
-    color: "#c47f17",
-    name: "Dimas Anggara",
-    nim: "2021081056",
-    status: "Izin",
-  },
-  {
-    id: 4,
-    initials: null,
-    photo: "https://i.pravatar.cc/40?img=5",
-    name: "Eka Wahyuni",
-    nim: "2021081098",
-    status: "Hadir",
-  },
-];
+const INITIAL_STUDENTS = [];
 
 const STATUS_OPTS = ["Hadir", "Sakit", "Izin", "Alpa"];
 
@@ -71,7 +39,7 @@ function fmtTime(sec) {
 
 const PAGE_SIZE = 4;
 
-export default function Presensi({ onNavigate, onLogout }) {
+export default function Presensi({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [toast, setToast] = useState(null);
   const showToast = (msg) => {
@@ -81,10 +49,24 @@ export default function Presensi({ onNavigate, onLogout }) {
   const [token, setToken] = useState(generateToken);
   const [timeLeft, setTimeLeft] = useState(QR_TTL);
   const [qrLoaded, setQrLoaded] = useState(false);
-  const [students, setStudents] = useState(INITIAL_STUDENTS);
+  const [students, setStudents] = useState([]);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.ceil(41 / PAGE_SIZE); // 41 total students
+  const totalPages = Math.ceil(Math.max(1, students.length) / PAGE_SIZE); 
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await apiClient.get(`/api/presensi/mata-kuliah/${idMataKuliah}`);
+        if (res && res.data) {
+          setStudents(res.data);
+        }
+      } catch (error) {
+        setStudents([]);
+      }
+    };
+    fetchStudents();
+  }, [idMataKuliah]);
 
   // Countdown tick
   useEffect(() => {
@@ -379,7 +361,7 @@ export default function Presensi({ onNavigate, onLogout }) {
             {/* Pagination */}
             <div className="pr-pagination-row">
               <p className="pr-pagination-info">
-                Menampilkan {PAGE_SIZE} dari 41 mahasiswa terdaftar
+                Menampilkan {PAGE_SIZE} dari {students.length} mahasiswa terdaftar
               </p>
               <div className="pr-pagination">
                 <button

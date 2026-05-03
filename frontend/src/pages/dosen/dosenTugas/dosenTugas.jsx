@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./dosenTugas.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 import {
   extractTextFromFile,
   generateQuizFromText,
@@ -18,68 +19,7 @@ const MATKUL_LIST = [
   "Metodologi Penelitian",
 ];
 
-const INITIAL_TASKS = [
-  {
-    id: 1,
-    title: "Analisis Arsitektur Cloud",
-    matkul: "Sistem Operasi",
-    desc: "Lakukan analisis mendalam tentang arsitektur cloud computing modern.",
-    type: "Kelompok",
-    deadline: "2024-12-20",
-    createdAt: "2024-11-01",
-    submitted: 32,
-    total: 41,
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    title: "Final Project: UI Design",
-    matkul: "Metodologi Penelitian",
-    desc: "Rancang antarmuka pengguna untuk aplikasi mobile berdasarkan riset pengguna.",
-    type: "Individu",
-    deadline: "2024-12-15",
-    createdAt: "2024-10-15",
-    submitted: 40,
-    total: 41,
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    title: "Case Study: E-Commerce Data",
-    matkul: "Basis Data Terdistribusi",
-    desc: "Studi kasus pengelolaan data e-commerce pada sistem terdistribusi.",
-    type: "Kelompok",
-    deadline: "2024-11-30",
-    createdAt: "2024-10-01",
-    submitted: 41,
-    total: 41,
-    status: "Selesai",
-  },
-  {
-    id: 4,
-    title: "Resume Pertemuan 9",
-    matkul: "Sistem Operasi",
-    desc: "Buat resume dari materi pertemuan 9 tentang manajemen memori.",
-    type: "Individu",
-    deadline: "2024-12-28",
-    createdAt: "2024-12-01",
-    submitted: 18,
-    total: 41,
-    status: "Aktif",
-  },
-  {
-    id: 5,
-    title: "Kuis Algoritma Lanjut",
-    matkul: "Metodologi Penelitian",
-    desc: "Kuis pilihan ganda. Dibuat dari file word.",
-    type: "Kuis",
-    deadline: "2024-12-25",
-    createdAt: "2024-12-10",
-    submitted: 30,
-    total: 41,
-    status: "Aktif",
-  },
-];
+const INITIAL_TASKS = [];
 
 function daysLeft(deadline) {
   const diff = Math.ceil(
@@ -117,30 +57,62 @@ export default function DosenTugas({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleCreate = (e) => {
+  const fetchTasks = async () => {
+    try {
+      const res = await apiClient.get('/api/dosen/tugas');
+      if (res && res.data) {
+        const formatted = res.data.map(t => ({
+          id: t.idTugas,
+          title: t.judul,
+          matkul: t.mataKuliah?.namaMataKuliah || "Mata Kuliah",
+          matkulId: t.idMataKuliah,
+          desc: t.deskripsi,
+          type: t.tipeTugas || "Individu",
+          deadline: t.deadlineTugas ? t.deadlineTugas.split('T')[0] : "",
+          createdAt: t.tanggalDibuat ? t.tanggalDibuat.split('T')[0] : "",
+          submitted: t.pengumpulanTugas?.length || 0,
+          total: 41,
+          status: "Aktif"
+        }));
+        setTasks(formatted);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.title.trim() || !form.deadline) {
       showToast("Judul dan deadline wajib diisi.", "error");
       return;
     }
-    const newTask = {
-      id: Date.now(),
-      ...form,
-      createdAt: new Date().toISOString().slice(0, 10),
-      submitted: 0,
-      status: "Aktif",
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    setForm({
-      title: "",
-      matkul: MATKUL_LIST[0],
-      desc: "",
-      type: "Kelompok",
-      deadline: "",
-      total: 41,
-    });
-    setView("list");
-    showToast("Tugas berhasil dibuat!");
+    try {
+      await apiClient.post('/api/dosen/tugas', {
+        judul: form.title,
+        idMataKuliah: MATKUL_LIST.indexOf(form.matkul) + 1, // dummy mapped id
+        deskripsi: form.desc,
+        tipeTugas: form.type,
+        deadlineTugas: new Date(form.deadline).toISOString(),
+      });
+      setForm({
+        title: "",
+        matkul: MATKUL_LIST[0],
+        desc: "",
+        type: "Kelompok",
+        deadline: "",
+        total: 41,
+      });
+      setView("list");
+      showToast("Tugas berhasil dibuat!");
+      fetchTasks();
+    } catch (error) {
+      showToast("Gagal membuat tugas", "error");
+    }
   };
 
   const handleEdit = (task) => {
@@ -166,10 +138,16 @@ export default function DosenTugas({ onNavigate, onLogout }) {
   };
 
   const confirmDelete = (id) => setDeleteId(id);
-  const handleDelete = () => {
-    setTasks((prev) => prev.filter((t) => t.id !== deleteId));
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await apiClient.delete(`/api/dosen/tugas/${deleteId}`);
+      showToast("Tugas dihapus.");
+      fetchTasks();
+    } catch (error) {
+      showToast("Gagal menghapus", "error");
+    }
     setDeleteId(null);
-    showToast("Tugas dihapus.");
   };
 
   const handleGradeTask = (task) => {

@@ -1,17 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../../../shared.css";
 import "./dosenMateri.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
 const MATKUL_LIST = [
-  { id: "IF001", name: "Sistem Operasi" },
-  { id: "IF002", name: "Basis Data Terdistribusi" },
-  { id: "IF003", name: "Metodologi Penelitian" },
+  { id: 1, name: "Basis Data" },
+  { id: 2, name: "Pemrograman Web" },
+  { id: 3, name: "Metodologi Penelitian" },
 ];
 
 const TIPE_LIST = [
@@ -47,77 +48,7 @@ function tipeColor(tipe) {
   return colors[tipe] || "#64748b";
 }
 
-const INITIAL_MATERI = [
-  {
-    id: 1,
-    judul: "Slide Pertemuan 1 - Pengantar Sistem Operasi",
-    tipe: "Presentasi",
-    matkul: "IF001",
-    matakuliah: "Sistem Operasi",
-    deskripsi:
-      "Materi pengantar mengenai konsep dasar sistem operasi, sejarah, dan jenisnya.",
-    ukuran: "4.2 MB",
-    tanggal: "2024-01-08",
-    diunduh: 38,
-    canDownload: true,
-    file: null,
-  },
-  {
-    id: 2,
-    judul: "Video Tutorial - Manajemen Proses",
-    tipe: "Video",
-    matkul: "IF001",
-    matakuliah: "Sistem Operasi",
-    deskripsi: "Tutorial video tentang cara kerja manajemen proses pada Linux.",
-    url: "https://youtube.com/watch?v=example",
-    tanggal: "2024-01-15",
-    diunduh: 31,
-    canDownload: false,
-    file: null,
-  },
-  {
-    id: 3,
-    judul: "Modul Praktikum Basis Data Terdistribusi",
-    tipe: "PDF",
-    matkul: "IF002",
-    matakuliah: "Basis Data Terdistribusi",
-    deskripsi:
-      "Panduan lengkap praktikum basis data terdistribusi dengan PostgreSQL.",
-    ukuran: "12.8 MB",
-    tanggal: "2024-01-20",
-    diunduh: 42,
-    canDownload: true,
-    file: null,
-  },
-  {
-    id: 4,
-    judul: "Template Laporan Penelitian",
-    tipe: "Dokumen",
-    matkul: "IF003",
-    matakuliah: "Metodologi Penelitian",
-    deskripsi:
-      "Template Word untuk laporan penelitian sesuai format jurnal nasional.",
-    ukuran: "1.1 MB",
-    tanggal: "2024-02-01",
-    diunduh: 41,
-    canDownload: true,
-    file: null,
-  },
-  {
-    id: 5,
-    judul: "Referensi Jurnal Internasional",
-    tipe: "Link",
-    matkul: "IF003",
-    matakuliah: "Metodologi Penelitian",
-    deskripsi:
-      "Kumpulan link jurnal-jurnal internasional bereputasi untuk referensi penelitian.",
-    url: "https://scholar.google.com",
-    tanggal: "2024-02-05",
-    diunduh: 20,
-    canDownload: false,
-    file: null,
-  },
-];
+const INITIAL_MATERI = [];
 
 export default function DosenMateri({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
@@ -134,7 +65,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
   const [form, setForm] = useState({
     judul: "",
     tipe: "PDF",
-    matkul: "IF001",
+    matkul: 1,
     deskripsi: "",
     url: "",
     file: null,
@@ -145,6 +76,35 @@ export default function DosenMateri({ onNavigate, onLogout }) {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
+
+  const fetchMateri = async () => {
+    try {
+      const res = await apiClient.get('/api/modul-ajar');
+      const data = res.data || res;
+      if (Array.isArray(data)) {
+        setMateri(data.map(m => ({
+          id: m.idModulAjar,
+          judul: m.judul,
+          tipe: m.tipe_modul,
+          matkul: m.idMataKuliah,
+          matakuliah: m.mataKuliah?.namaMataKuliah || "Mata Kuliah",
+          deskripsi: m.deskripsi,
+          url: m.url,
+          ukuran: m.ukuran,
+          tanggal: new Date(m.tanggal).toISOString().slice(0, 10),
+          diunduh: m.diunduh || 0,
+          canDownload: m.canDownload,
+          file: null
+        })));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMateri();
+  }, []);
 
   const matakuliahName = (id) =>
     MATKUL_LIST.find((m) => m.id === id)?.name || id;
@@ -159,7 +119,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
     setForm({
       judul: "",
       tipe: "PDF",
-      matkul: "IF001",
+      matkul: 1,
       deskripsi: "",
       url: "",
       file: null,
@@ -183,7 +143,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
     setView("edit");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.judul.trim()) {
       showToast("Judul materi wajib diisi.", "error");
@@ -194,61 +154,58 @@ export default function DosenMateri({ onNavigate, onLogout }) {
       return;
     }
 
-    const mk = matakuliahName(form.matkul);
-    if (view === "create") {
-      const newItem = {
-        id: Date.now(),
-        judul: form.judul,
-        tipe: form.tipe,
-        matkul: form.matkul,
-        matakuliah: mk,
-        deskripsi: form.deskripsi,
-        url: form.url,
-        ukuran: form.file
-          ? `${(form.file.size / 1024 / 1024).toFixed(1)} MB`
-          : null,
-        tanggal: new Date().toISOString().slice(0, 10),
-        diunduh: 0,
-        canDownload: form.canDownload,
-        file: null,
-      };
-      setMateri((prev) => [newItem, ...prev]);
-      showToast("Materi berhasil ditambahkan!");
-    } else {
-      setMateri((prev) =>
-        prev.map((m) =>
-          m.id === editId
-            ? {
-                ...m,
-                judul: form.judul,
-                tipe: form.tipe,
-                matkul: form.matkul,
-                matakuliah: mk,
-                deskripsi: form.deskripsi,
-                url: form.url,
-                canDownload: form.canDownload,
-              }
-            : m,
-        ),
-      );
-      showToast("Materi berhasil diperbarui!");
+    try {
+      const payload = new FormData();
+      payload.append("judul", form.judul);
+      payload.append("tipe_modul", form.tipe);
+      payload.append("idMataKuliah", form.matkul);
+      payload.append("deskripsi", form.deskripsi);
+      payload.append("url", form.url);
+      payload.append("canDownload", form.canDownload);
+      if (form.file) {
+        payload.append("file", form.file);
+      }
+
+      if (view === "create") {
+        await apiClient.post("/api/modul-ajar", payload);
+        showToast("Materi berhasil ditambahkan!");
+      } else {
+        // use URL encoded JSON for PUT instead of FormData if backend doesn't handle multer in PUT
+        await apiClient.put(`/api/modul-ajar/${editId}`, {
+          judul: form.judul,
+          tipe_modul: form.tipe,
+          idMataKuliah: form.matkul,
+          deskripsi: form.deskripsi,
+          url: form.url,
+          canDownload: form.canDownload,
+        });
+        showToast("Materi berhasil diperbarui!");
+      }
+      fetchMateri();
+      setView("list");
+    } catch (error) {
+      showToast(error.message || "Gagal menyimpan materi", "error");
     }
-    setView("list");
   };
 
-  const handleDelete = () => {
-    setMateri((prev) => prev.filter((m) => m.id !== deleteId));
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await apiClient.delete(`/api/modul-ajar/${deleteId}`);
+      showToast("Materi dihapus.");
+      fetchMateri();
+    } catch (error) {
+      showToast("Gagal menghapus", "error");
+    }
     setDeleteId(null);
-    showToast("Materi dihapus.");
   };
 
-  const handleDownload = (item) => {
+  const handleDownload = async (item) => {
     showToast(`Mengunduh: ${item.judul}`);
-    setMateri((prev) =>
-      prev.map((m) =>
-        m.id === item.id ? { ...m, diunduh: m.diunduh + 1 } : m,
-      ),
-    );
+    try {
+      await apiClient.post(`/api/modul-ajar/${item.id}/download`);
+      fetchMateri();
+    } catch (error) {}
   };
 
   const needsUrl = form.tipe === "Link" || form.tipe === "Video";

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "../../mahasiswa/profile/profile.css";
 import "./dosenProfile.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
@@ -14,11 +15,20 @@ export default function DosenProfile({ onNavigate, onLogout }) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const storedUserStr = localStorage.getItem("user");
+  const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
+
   const [formData, setFormData] = useState({
-    email: "mochfirmansyah@lemass.ac.id",
-    telepon: "081265432100",
-    bidang: "Rekayasa Perangkat Lunak & Basis Data",
-    officeRoom: "Gedung A, Lt.3, R.302",
+    email: storedUser.email || "",
+    telepon: storedUser.telepon || "",
+    bidang: "",
+    officeRoom: "",
+  });
+  const [profileData, setProfileData] = useState({
+    nama: storedUser.nama || "Dosen",
+    nidn: storedUser.nomorInduk || "-",
   });
   const [pwForm, setPwForm] = useState({ old: "", newPw: "", confirm: "" });
 
@@ -27,12 +37,50 @@ export default function DosenProfile({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleSave = () => {
-    setEditMode(false);
-    showToast("success", "Data profil berhasil diperbarui.");
+  // Fetch profile from backend on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await apiClient.get('/api/dosen/profile/profile');
+        if (res && res.data) {
+          const d = res.data;
+          setProfileData({
+            nama: d.nama || storedUser.nama || "Dosen",
+            nidn: d.nidn || storedUser.nomorInduk || "-",
+          });
+          setFormData({
+            email: d.email || storedUser.email || "",
+            telepon: d.telepon || storedUser.telepon || "",
+            bidang: d.bidang || "",
+            officeRoom: d.officeRoom || "",
+          });
+        }
+      } catch (error) {
+        console.error("Gagal memuat profil:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await apiClient.put('/api/dosen/profile/profile', formData);
+      // Update localStorage too
+      const updatedUser = { ...storedUser, email: formData.email, telepon: formData.telepon };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setEditMode(false);
+      showToast("success", "Data profil berhasil diperbarui.");
+    } catch (error) {
+      showToast("error", error.message || "Gagal memperbarui profil.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handlePwSubmit = (e) => {
+  const handlePwSubmit = async (e) => {
     e.preventDefault();
     if (!pwForm.old || !pwForm.newPw || !pwForm.confirm) {
       showToast("error", "Semua kolom wajib diisi.");
@@ -42,9 +90,17 @@ export default function DosenProfile({ onNavigate, onLogout }) {
       showToast("error", "Kata sandi baru tidak cocok.");
       return;
     }
-    setShowPasswordModal(false);
-    setPwForm({ old: "", newPw: "", confirm: "" });
-    showToast("success", "Kata sandi berhasil diubah.");
+    try {
+      await apiClient.post('/api/dosen/profile/profile/change-password', {
+        old: pwForm.old,
+        newPw: pwForm.newPw,
+      });
+      setShowPasswordModal(false);
+      setPwForm({ old: "", newPw: "", confirm: "" });
+      showToast("success", "Kata sandi berhasil diubah.");
+    } catch (error) {
+      showToast("error", error.message || "Gagal mengubah kata sandi.");
+    }
   };
 
   return (
@@ -140,10 +196,10 @@ export default function DosenProfile({ onNavigate, onLogout }) {
               </button>
             </div>
             <div className="prf-identity-info">
-              <h1 className="prf-name">Dr. Moch Firmansyah, M.Kom.</h1>
+              <h1 className="prf-name">{profileData.nama}</h1>
               <div className="prf-identity-meta">
                 <span className="prf-nim-badge dprf-nidn-badge">
-                  NIDN: 0123456789
+                  NIDN: {profileData.nidn}
                 </span>
                 <span className="prf-verified">
                   <span
@@ -183,11 +239,12 @@ export default function DosenProfile({ onNavigate, onLogout }) {
                     <button
                       className="prf-btn-cancel-sm"
                       onClick={() => setEditMode(false)}
+                      disabled={isSaving}
                     >
                       Batal
                     </button>
-                    <button className="prf-btn-save-sm" onClick={handleSave}>
-                      Simpan
+                    <button className="prf-btn-save-sm" onClick={handleSave} disabled={isSaving}>
+                      {isSaving ? "Menyimpan..." : "Simpan"}
                     </button>
                   </div>
                 ) : (

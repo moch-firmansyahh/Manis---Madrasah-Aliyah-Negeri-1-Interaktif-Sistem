@@ -4,26 +4,20 @@ import "./dosenPresensi.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
 const QR_TTL = 15 * 60;
 
-const INITIAL_STUDENTS = [
-  { id: 1, initials: "AA", color: "#8991fe", name: "Aditya Arisandy",  nim: "2021081001", status: "Hadir" },
-  { id: 2, initials: "BP", color: "#1e293b", name: "Bella Puspita",    nim: "2021081042", status: "Sakit" },
-  { id: 3, initials: "DA", color: "#c47f17", name: "Dimas Anggara",    nim: "2021081056", status: "Izin" },
-  { id: 4, photo: "https://i.pravatar.cc/40?img=5", name: "Eka Wahyuni", nim: "2021081098", status: "Hadir" },
-  { id: 5, initials: "FR", color: "#2f9696", name: "Fajar Ramadhan",   nim: "2021081073", status: "Hadir" },
-  { id: 6, initials: "GS", color: "#4b53bc", name: "Gina Sari",        nim: "2021081089", status: "Alpa" },
-];
+const INITIAL_STUDENTS = [];
 
 const STATUS_OPTS = ["Hadir", "Sakit", "Izin", "Alpa"];
 const MATKUL_LIST = [
-  { id: "IF001", name: "Sistem Operasi",           room: "Lab 302 - Gedung B", time: "08:00 - 10:30" },
-  { id: "IF002", name: "Basis Data Terdistribusi", room: "Ruang A204",          time: "10:30 - 12:00" },
-  { id: "IF003", name: "Metodologi Penelitian",    room: "Ruang Teater 1",      time: "13:30 - 15:00" },
+  { id: 1, name: "Basis Data",           room: "Lab 302 - Gedung B", time: "08:00 - 10:30" },
+  { id: 2, name: "Pemrograman Web", room: "Ruang A204",          time: "10:30 - 12:00" },
+  { id: 3, name: "Metodologi Penelitian",    room: "Ruang Teater 1",      time: "13:30 - 15:00" },
 ];
 
 function statusColor(s) {
@@ -57,6 +51,22 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  const fetchStudents = async () => {
+    try {
+      const res = await apiClient.get(`/api/presensi/mata-kuliah/${selectedMatkul.id}`);
+      if (res && res.data) {
+        setStudents(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+      setStudents([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [selectedMatkul]);
 
   useEffect(() => {
     if (!sessionActive || timeLeft <= 0) return;
@@ -321,7 +331,7 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
               </table>
             </div>
             <div className="dp-pagination-row">
-              <p className="dp-pagination-info">Menampilkan {students.length} dari 41 mahasiswa</p>
+              <p className="dp-pagination-info">Menampilkan {students.length} mahasiswa terdaftar</p>
               <div className="dp-pagination">
                 {[1,2,3].map((n) => (
                   <button key={n} className={`dp-page-btn ${page === n ? "dp-page-btn--active" : ""}`} onClick={() => setPage(n)}>{n}</button>

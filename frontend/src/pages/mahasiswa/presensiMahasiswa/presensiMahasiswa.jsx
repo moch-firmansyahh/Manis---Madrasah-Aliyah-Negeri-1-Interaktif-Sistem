@@ -4,21 +4,9 @@ import "./presensiMahasiswa.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
-const AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
-
-const UPCOMING = [
-  { code: "IF002", name: "Analisis Desain Interaksi",  time: "08:00 - 10:30", room: "Lab Multimedia C", dosen: "Budi Santoso, M.Kom." },
-  { code: "IF015", name: "Pemrograman Berorientasi Objek", time: "13:00 - 15:30", room: "GKU-102", dosen: "Dr. Satria Wijaya" },
-];
-
-const HISTORY = [
-  { date: "Senin, 7 Apr",  code: "IF002", name: "Analisis Desain Interaksi",      status: "Hadir",  time: "07:58" },
-  { date: "Selasa, 8 Apr", code: "IF015", name: "Pemrograman Berorientasi Objek", status: "Hadir",  time: "13:02" },
-  { date: "Rabu, 9 Apr",   code: "IF009", name: "Basis Data Lanjut",               status: "Izin",   time: "—" },
-  { date: "Kamis, 10 Apr", code: "IF002", name: "Analisis Desain Interaksi",      status: "Hadir",  time: "07:55" },
-];
+const HISTORY = [];
 
 function StatusBadge({ status }) {
   const map = {
@@ -39,13 +27,57 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   // scan states: idle | scanning | success | error
   const [scanState, setScanState]   = useState("idle");
-  const [selectedClass, setSelectedClass] = useState(0); // index into UPCOMING
-  const [toast, setToast]           = useState(null);   // { type, msg }
+  const [selectedClass, setSelectedClass] = useState(0); 
+  const [toast, setToast]           = useState(null);   
   const [scanCode, setScanCode]     = useState("");
+  const [upcoming, setUpcoming]     = useState([]);
+  const [history, setHistory]       = useState([]);
   const scanTimeoutRef              = useRef(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get('/api/mata-kuliah');
+        const formatted = res.map((c) => ({
+          id: c.idMataKuliah,
+          code: `MK${c.idMataKuliah.toString().padStart(3, '0')}`,
+          name: c.namaMataKuliah,
+          time: "08:00 - 10:30",
+          room: "Ruang Kelas",
+          dosen: "Dosen Pengampu"
+        }));
+        setUpcoming(formatted);
+      } catch (error) {
+        console.error("Failed to load courses");
+      }
+    };
+    fetchCourses();
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => () => clearTimeout(scanTimeoutRef.current), []);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (upcoming.length > 0 && upcoming[selectedClass]) {
+        try {
+          const res = await apiClient.get(`/api/presensi/mata-kuliah/${upcoming[selectedClass].id}`);
+          // Format respons untuk UI
+          const formattedHist = res.data.map(h => ({
+            date: new Date(h.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }),
+            code: upcoming[selectedClass].code,
+            name: upcoming[selectedClass].name,
+            status: h.status.charAt(0).toUpperCase() + h.status.slice(1).toLowerCase(),
+            time: "08:00"
+          }));
+          setHistory(formattedHist);
+        } catch (error) {
+          setHistory([]);
+        }
+      }
+    };
+    fetchHistory();
+  }, [selectedClass, upcoming]);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
@@ -54,10 +86,22 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
 
   const startScan = () => {
     setScanState("scanning");
-    // Simulate scan detection after 2.4s
-    scanTimeoutRef.current = setTimeout(() => {
-      setScanState("success");
-      showToast("success", `Absen berhasil! ${UPCOMING[selectedClass].name}`);
+    scanTimeoutRef.current = setTimeout(async () => {
+      try {
+        if (!upcoming[selectedClass]) throw new Error("Pilih kelas terlebih dahulu");
+        // Simulate a token we read from camera
+        const simToken = `LeMaS-${Date.now()}`;
+        await apiClient.post("/api/presensi/scan", {
+          idMataKuliah: upcoming[selectedClass].id,
+          token: simToken
+        });
+        setScanState("success");
+        showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
+      } catch (error) {
+        setScanState("error");
+        showToast("error", error.message || "Gagal melakukan presensi");
+        setTimeout(() => setScanState("idle"), 2000);
+      }
     }, 2400);
   };
 
@@ -65,15 +109,21 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
     setScanCode(e.target.value);
   };
 
-  const handleManualSubmit = (e) => {
+  const handleManualSubmit = async (e) => {
     e.preventDefault();
-    if (!scanCode.trim()) return;
-    if (scanCode.trim().startsWith("LeMaS-")) {
+    if (!scanCode.trim() || !upcoming[selectedClass]) return;
+    
+    setScanState("scanning");
+    try {
+      await apiClient.post("/api/presensi/scan", {
+        idMataKuliah: upcoming[selectedClass].id,
+        token: scanCode.trim()
+      });
       setScanState("success");
-      showToast("success", `Absen berhasil! ${UPCOMING[selectedClass].name}`);
-    } else {
+      showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
+    } catch (error) {
       setScanState("error");
-      showToast("error", "Kode QR tidak valid. Silakan coba lagi.");
+      showToast("error", error.message || "Kode QR tidak valid. Silakan coba lagi.");
       setTimeout(() => setScanState("idle"), 2000);
     }
     setScanCode("");
@@ -119,7 +169,7 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
               <div className="pmh-class-selector">
                 <p className="pmh-class-selector-label">Pilih Kelas yang Sedang Berlangsung</p>
                 <div className="pmh-class-tabs">
-                  {UPCOMING.map((c, i) => (
+                  {upcoming.length > 0 ? upcoming.map((c, i) => (
                     <button
                       key={i}
                       className={`pmh-class-tab ${selectedClass === i ? "pmh-class-tab--active" : ""}`}
@@ -129,7 +179,9 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                       <span className="pmh-class-tab-name">{c.name}</span>
                       <span className="pmh-class-tab-time">{c.time}</span>
                     </button>
-                  ))}
+                  )) : (
+                    <p style={{ color: "var(--slate-500)" }}>Tidak ada kelas aktif</p>
+                  )}
                 </div>
               </div>
 
@@ -186,7 +238,7 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                       </div>
                       <div className="pmh-success-info">
                         <p className="pmh-success-title">Absen Berhasil!</p>
-                        <p className="pmh-success-sub">{UPCOMING[selectedClass].name}</p>
+                        <p className="pmh-success-sub">{upcoming[selectedClass]?.name}</p>
                         <p className="pmh-success-time">
                           {new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
                         </p>
@@ -240,19 +292,19 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                     LIVE
                   </span>
                 </div>
-                <h3 className="pmh-session-name">{UPCOMING[selectedClass].name}</h3>
+                <h3 className="pmh-session-name">{upcoming[selectedClass]?.name || "Memuat..."}</h3>
                 <div className="pmh-session-details">
                   <div className="pmh-detail-row">
                     <span className="material-symbols-outlined">schedule</span>
-                    <span>{UPCOMING[selectedClass].time} WIB</span>
+                    <span>{upcoming[selectedClass]?.time || "-"} WIB</span>
                   </div>
                   <div className="pmh-detail-row">
                     <span className="material-symbols-outlined">location_on</span>
-                    <span>{UPCOMING[selectedClass].room}</span>
+                    <span>{upcoming[selectedClass]?.room || "-"}</span>
                   </div>
                   <div className="pmh-detail-row">
                     <span className="material-symbols-outlined">person</span>
-                    <span>{UPCOMING[selectedClass].dosen}</span>
+                    <span>{upcoming[selectedClass]?.dosen || "-"}</span>
                   </div>
                 </div>
               </div>
@@ -305,7 +357,7 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
               <div className="pmh-history-card">
                 <h4 className="pmh-history-title">Riwayat Kehadiran</h4>
                 <div className="pmh-history-list">
-                  {HISTORY.map((h, i) => (
+                  {history.length > 0 ? history.map((h, i) => (
                     <div key={i} className="pmh-history-item">
                       <div className="pmh-history-left">
                         <p className="pmh-history-course">{h.code} — {h.name}</p>
@@ -313,7 +365,9 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                       </div>
                       <StatusBadge status={h.status} />
                     </div>
-                  ))}
+                  )) : (
+                    <p style={{ color: "var(--slate-500)", textAlign: "center", padding: "1rem" }}>Belum ada riwayat kehadiran.</p>
+                  )}
                 </div>
               </div>
             </div>

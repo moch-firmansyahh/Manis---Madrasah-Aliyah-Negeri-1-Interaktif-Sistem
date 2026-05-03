@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./dosenKelompok.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
@@ -19,41 +20,7 @@ const ALL_STUDENTS = [
   { id: "S8", name: "Indah Permata", nim: "2021081115", color: "#0891b2" },
 ];
 
-const INITIAL_GROUPS = [
-  {
-    id: 1,
-    name: "Kelompok Alpha",
-    color: "#4b53bc",
-    task: "Analisis Arsitektur Cloud",
-    members: ["S1", "S2", "S3"],
-    progress: 80,
-    status: "On-Track",
-    submitted: true,
-    nilai: { S1: "85", S2: "88", S3: "87" },
-  },
-  {
-    id: 2,
-    name: "Kelompok Beta",
-    color: "#2f9696",
-    task: "Case Study: E-Commerce Data",
-    members: ["S4", "S5"],
-    progress: 45,
-    status: "Behind",
-    submitted: false,
-    nilai: { S4: "", S5: "" },
-  },
-  {
-    id: 3,
-    name: "Kelompok Gamma",
-    color: "#c47f17",
-    task: "Resume Pertemuan 9",
-    members: ["S6", "S7", "S8"],
-    progress: 100,
-    status: "Completed",
-    submitted: true,
-    nilai: { S6: "90", S7: "92", S8: "89" },
-  },
-];
+const INITIAL_GROUPS = [];
 
 function initials(name) {
   return name
@@ -100,6 +67,41 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const fetchGroups = async () => {
+    try {
+      const res = await apiClient.get('/api/kelompok/1'); // default idMataKuliah = 1
+      if (res && res.data) {
+        const formatted = res.data.map(g => {
+          const membersList = g.anggota ? g.anggota.map(a => a.mahasiswa.nomorInduk) : [];
+          const nilaiDict = {};
+          if (g.anggota) {
+            g.anggota.forEach(a => {
+              nilaiDict[a.mahasiswa.nomorInduk] = a.nilai || "";
+            });
+          }
+          return {
+            id: g.idKelompok,
+            name: g.namaKelompok,
+            color: "#4b53bc", // default color
+            task: g.tugas?.judul || "–",
+            members: membersList,
+            progress: 0,
+            status: "Not Started",
+            submitted: false,
+            nilai: nilaiDict
+          };
+        });
+        setGroups(formatted);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
   const openNilai = (group) => {
     setGradeInputs({ ...group.nilai });
     setNilaiModal(group);
@@ -115,73 +117,54 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
     showToast("Nilai berhasil disimpan!");
   };
 
-  const removeMember = (groupId, studentId) => {
-    setGroups((prev) =>
-      prev.map((g) => {
-        if (g.id !== groupId) return g;
-        const members = g.members.filter((m) => m !== studentId);
-        const { [studentId]: _, ...nilai } = g.nilai;
-        return { ...g, members, nilai };
-      }),
-    );
-    showToast("Anggota dikeluarkan.");
+  const removeMember = async (groupId, studentId) => {
+    try {
+      await apiClient.delete(`/api/kelompok/${groupId}/members/${studentId}`);
+      showToast("Anggota dikeluarkan.");
+      fetchGroups();
+    } catch (error) {
+      showToast("Gagal mengeluarkan", "error");
+    }
   };
 
-  const addMember = (groupId, studentId) => {
-    setGroups((prev) =>
-      prev.map((g) => {
-        if (g.id !== groupId) return g;
-        if (g.members.includes(studentId)) {
-          showToast("Mahasiswa sudah ada di kelompok.", "error");
-          return g;
-        }
-        return {
-          ...g,
-          members: [...g.members, studentId],
-          nilai: { ...g.nilai, [studentId]: "" },
-        };
-      }),
-    );
-    setAddMemberModal(null);
-    showToast("Anggota berhasil ditambahkan!");
+  const addMember = async (groupId, studentId) => {
+    try {
+      await apiClient.post(`/api/kelompok/${groupId}/members`, {
+        nomorInduk: studentId
+      });
+      showToast("Anggota berhasil ditambahkan!");
+      fetchGroups();
+      setAddMemberModal(null);
+    } catch (error) {
+      showToast("Gagal menambahkan", "error");
+    }
   };
 
-  const createGroup = () => {
+  const createGroup = async () => {
     if (!newGroupName.trim()) {
       showToast("Nama kelompok wajib diisi.", "error");
       return;
     }
-    const colors = [
-      "#4b53bc",
-      "#2f9696",
-      "#c47f17",
-      "#dc2626",
-      "#7c3aed",
-      "#0891b2",
-    ];
-    const newGroup = {
-      id: Date.now(),
-      name: newGroupName.trim(),
-      color: colors[groups.length % colors.length],
-      task: "–",
-      members: [],
-      progress: 0,
-      status: "Not Started",
-      submitted: false,
-      nilai: {},
-    };
-    setGroups((prev) => [...prev, newGroup]);
-    setNewGroupName("");
-    setCreateModal(false);
-    showToast("Kelompok berhasil dibuat!");
+    try {
+      await apiClient.post('/api/kelompok', {
+        namaKelompok: newGroupName.trim(),
+        idMataKuliah: 1 // default
+      });
+      setNewGroupName("");
+      setCreateModal(false);
+      showToast("Kelompok berhasil dibuat!");
+      fetchGroups();
+    } catch (error) {
+      showToast("Gagal membuat kelompok", "error");
+    }
   };
 
   const availableStudents = (groupId) => {
     const group = groups.find((g) => g.id === groupId);
     const inAnyGroup = groups.flatMap((g) => g.members);
     return ALL_STUDENTS.filter(
-      (s) => !inAnyGroup.includes(s.id) || group?.members.includes(s.id),
-    ).filter((s) => !group?.members.includes(s.id));
+      (s) => !inAnyGroup.includes(s.nim) || group?.members.includes(s.nim),
+    ).filter((s) => !group?.members.includes(s.nim));
   };
 
   return (
@@ -217,8 +200,8 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
             </div>
             <div className="dk-modal-body">
               {nilaiModal.members.map((sid) => {
-                const student = ALL_STUDENTS.find((s) => s.id === sid);
-                if (!student) return null;
+                let student = ALL_STUDENTS.find((s) => s.nim === sid);
+                if (!student) student = { nim: sid, name: "Mahasiswa", color: "#64748b" }; // fallback
                 return (
                   <div key={sid} className="dk-grade-row">
                     <div className="dk-grade-student">
@@ -317,7 +300,7 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                     </div>
                     <button
                       className="dk-btn-add-member"
-                      onClick={() => addMember(addMemberModal, s.id)}
+                      onClick={() => addMember(addMemberModal, s.nim)}
                     >
                       <span className="material-symbols-outlined">add</span>
                       Tambah
@@ -535,8 +518,8 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                     </div>
                     <div className="dk-members-list">
                       {group.members.map((sid) => {
-                        const student = ALL_STUDENTS.find((s) => s.id === sid);
-                        if (!student) return null;
+                        let student = ALL_STUDENTS.find((s) => s.nim === sid);
+                        if (!student) student = { nim: sid, name: "Mahasiswa", color: "#64748b" }; // fallback
                         const nilai = group.nilai[sid];
                         return (
                           <div key={sid} className="dk-member-row">

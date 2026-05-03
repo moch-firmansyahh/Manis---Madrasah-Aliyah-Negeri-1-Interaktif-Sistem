@@ -347,3 +347,13 @@
 .footer-links a:hover {
   color: var(--secondary);
 }
+
+/* Hide native Edge/Chrome password reveal icon to prevent double icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input[type="text"]::-ms-reveal,
+input[type="text"]::-ms-clear {
+  display: none;
+}

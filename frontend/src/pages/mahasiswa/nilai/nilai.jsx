@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./nilai.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
-const SEMESTERS = [
+const INITIAL_SEMESTERS = [
   {
     label: "Semester 1",
     year: "2022/2023 Ganjil",
@@ -320,21 +321,111 @@ function getIPKKumulatif(semesters) {
   return totalSks > 0 ? (totalBobot / totalSks).toFixed(2) : "—";
 }
 
+function calculateGrade(tugas, kuis) {
+  // Simplifikasi grading untuk integrasi, misal tugas 50% kuis 50%
+  const total = (Number(tugas || 0) * 0.5) + (Number(kuis || 0) * 0.5);
+  if (total >= 85) return "A";
+  if (total >= 80) return "A-";
+  if (total >= 75) return "B+";
+  if (total >= 70) return "B";
+  if (total >= 65) return "B-";
+  if (total >= 60) return "C";
+  if (total >= 50) return "D";
+  return "E";
+}
+
+function convertGradeToPoint(grade) {
+  const map = { "A": 4, "A-": 3.75, "B+": 3.5, "B": 3.0, "B-": 2.75, "C": 2.0, "D": 1.0, "E": 0 };
+  return map[grade] || 0;
+}
+
 export default function Nilai({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [activeSem, setActiveSem] = useState(3); // default to semester 4 (active)
+  const [semesters, setSemesters] = useState([]);
+  const [activeSem, setActiveSem] = useState(0); 
   const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTranskrip = async () => {
+      try {
+        const res = await apiClient.get('/api/nilai/transkrip/mahasiswa');
+        if (res && res.data) {
+          const keys = Object.keys(res.data).sort((a,b) => (a === 'null' ? 99 : Number(a)) - (b === 'null' ? 99 : Number(b)));
+          const formattedSems = keys.map(k => {
+            let totalSks = 0;
+            let totalPoint = 0;
+            
+            const matkul = res.data[k].map(m => {
+              const tugas = m.nilaiTugas ? parseFloat(m.nilaiTugas) : null;
+              const kuis = m.nilaiKuis ? parseFloat(m.nilaiKuis) : null;
+              const finalScore = m.nilaiAkhir ? parseFloat(m.nilaiAkhir) : null;
+              const grade = finalScore ? calculateGrade(tugas, kuis) : null;
+              
+              const sks = 3; // hardcode sks for now as it's not in db
+              totalSks += sks;
+              if (grade) {
+                totalPoint += convertGradeToPoint(grade) * sks;
+              }
+
+              return {
+                kode: `MK${m.idMataKuliah}`,
+                nama: m.mataKuliah?.namaMataKuliah || "Mata Kuliah",
+                sks: sks,
+                tugas: tugas,
+                uts: kuis, // mapping kuis to uts in UI
+                uas: finalScore,
+                nilai: grade
+              };
+            });
+
+            const ipk = totalSks > 0 && totalPoint > 0 ? totalPoint / totalSks : null;
+
+            return {
+              label: k === 'null' ? 'Semester Aktif' : `Semester ${k}`,
+              year: 'Tahun Akademik',
+              ipk: ipk,
+              sks: totalSks,
+              matkul: matkul
+            };
+          });
+          
+          if (formattedSems.length > 0) {
+            setSemesters(formattedSems);
+            setActiveSem(formattedSems.length - 1); // Set to last semester active
+          } else {
+            setSemesters(INITIAL_SEMESTERS);
+            setActiveSem(3);
+          }
+        }
+      } catch (error) {
+        setSemesters(INITIAL_SEMESTERS);
+        setActiveSem(3);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTranskrip();
+  }, []);
+
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  const sem = SEMESTERS[activeSem];
-  const ipkKumulatif = getIPKKumulatif(SEMESTERS);
-  const totalSksSelesai = SEMESTERS.filter((s) => s.ipk !== null).reduce(
+  const sem = semesters[activeSem] || { matkul: [], label: "", year: "", sks: 0, ipk: null };
+  const ipkKumulatif = semesters.length > 0 ? getIPKKumulatif(semesters) : "—";
+  const totalSksSelesai = semesters.length > 0 ? semesters.filter((s) => s.ipk !== null).reduce(
     (acc, s) => acc + s.sks,
     0,
-  );
+  ) : 0;
+
+  const storedUserStr = localStorage.getItem("user");
+  const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
+
+  if (loading) {
+    return <div className="page-shell"><main className="page-main"><div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>Memuat transkrip...</div></main></div>;
+  }
 
   return (
     <div
@@ -394,7 +485,7 @@ export default function Nilai({ onNavigate, onLogout }) {
             <div>
               <h1 className="nlai-title">Transkrip Nilai</h1>
               <p className="nlai-subtitle">
-                Rekap nilai akademik Moch Firmansyah — NIM 20240901002
+                Rekap nilai akademik {storedUser.nama || "Mahasiswa"} — NIM {storedUser.nomorInduk || "NIM"}
               </p>
             </div>
             <button
@@ -433,7 +524,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 calendar_today
               </span>
               <div>
-                <p className="nlai-sum-val">{SEMESTERS.length}</p>
+                <p className="nlai-sum-val">{semesters.length}</p>
                 <p className="nlai-sum-lbl">Semester Ditempuh</p>
               </div>
             </div>
@@ -450,7 +541,7 @@ export default function Nilai({ onNavigate, onLogout }) {
 
           {/* Semester Tabs */}
           <div className="nlai-sem-tabs">
-            {SEMESTERS.map((s, i) => (
+            {semesters.map((s, i) => (
               <button
                 key={i}
                 className={`nlai-sem-tab ${activeSem === i ? "nlai-sem-tab--active" : ""}`}
@@ -583,7 +674,7 @@ export default function Nilai({ onNavigate, onLogout }) {
           <div className="nlai-chart-card">
             <h3 className="nlai-chart-title">Perkembangan IP Per Semester</h3>
             <div className="nlai-chart-bars">
-              {SEMESTERS.filter((s) => s.ipk !== null).map((s, i) => {
+              {semesters.filter((s) => s.ipk !== null).map((s, i) => {
                 const pct = (s.ipk / 4.0) * 100;
                 return (
                   <div key={i} className="nlai-chart-col">

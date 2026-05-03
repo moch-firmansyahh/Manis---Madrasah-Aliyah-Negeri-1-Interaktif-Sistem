@@ -27,7 +27,14 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
 
   const isDosen = role === "Dosen";
   const avatarUrl = isDosen ? AVATAR_DOSEN : AVATAR_MAHASISWA;
-  const name = isDosen ? "Halo, Pak Firman" : "Halo, Firman";
+
+  // Read logged-in user data from localStorage
+  const storedUserStr = localStorage.getItem("user");
+  const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
+  const userName = storedUser.nama || (isDosen ? "Dosen" : "Mahasiswa");
+  const firstName = userName.split(" ")[0];
+
+  const name = isDosen ? `Halo, ${firstName}` : `Halo, ${firstName}`;
   const subtitle = isDosen ? "Dosen Tetap" : "Mahasiswa";
   const placeholder = isDosen ? "Cari materi atau mahasiswa..." : "Cari materi atau tugas...";
   const notifications = isDosen ? dosenNotifications : mhsNotifications;

@@ -1,9 +1,47 @@
 import { useState } from "react";
+import { apiClient } from "../../../utils/apiClient";
 import "./login.css";
 
 function Login({ onLogin }) {
   const [role, setRole] = useState("Mahasiswa");
   const [showPassword, setShowPassword] = useState(false);
+  const [nomorInduk, setNomorInduk] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setIsLoading(true);
+
+    try {
+      // Gunakan apiClient untuk konsistensi dengan rest of codebase
+      const data = await apiClient.post("/api/auth/login", {
+        nomorInduk: nomorInduk,
+        password: password,
+        role: role,
+      });
+
+      // 1. Simpan token JWT ke localStorage untuk sesi
+      localStorage.setItem("token", data.data.token);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
+
+      // 2. Beritahu App component bahwa login berhasil
+      if (onLogin) {
+        // Backend mengembalikan role dalam huruf kapital (misal "MAHASISWA" atau "DOSEN")
+        // Namun App.jsx mengharapkan format "Mahasiswa" atau "Dosen" (huruf awal kapital)
+        const rawRole = data.data.user.role || role;
+        const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+        
+        onLogin(formattedRole);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <main className="login-main">
@@ -44,13 +82,13 @@ function Login({ onLogin }) {
 
           <form
             className="login-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (onLogin) {
-                onLogin(role);
-              }
-            }}
+            onSubmit={handleLoginSubmit}
           >
+            {errorMsg && (
+              <div style={{ color: "red", marginBottom: "1rem", fontSize: "14px", textAlign: "center", backgroundColor: "#ffebee", padding: "8px", borderRadius: "4px" }}>
+                {errorMsg}
+              </div>
+            )}
             {/* Input Field: Nomor Induk */}
             <div className="form-group">
               <label htmlFor="id_number">Nomor Induk</label>
@@ -63,6 +101,9 @@ function Login({ onLogin }) {
                   id="id_number"
                   placeholder="Contoh: 2106001234"
                   type="text"
+                  value={nomorInduk}
+                  onChange={(e) => setNomorInduk(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -84,6 +125,9 @@ function Login({ onLogin }) {
                   id="password"
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   onClick={() => setShowPassword(!showPassword)}
@@ -104,9 +148,9 @@ function Login({ onLogin }) {
             </div>
 
             {/* Primary Button */}
-            <button className="submit-button" type="submit">
-              <span>Masuk</span>
-              <span className="material-symbols-outlined">arrow_forward</span>
+            <button className="submit-button" type="submit" disabled={isLoading}>
+              <span>{isLoading ? "Memproses..." : "Masuk"}</span>
+              {!isLoading && <span className="material-symbols-outlined">arrow_forward</span>}
             </button>
           </form>
         </div>

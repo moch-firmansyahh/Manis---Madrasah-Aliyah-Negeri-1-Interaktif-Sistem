@@ -1,77 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../../../shared.css";
 import "../../mahasiswa/forumDiskusi/forumDiskusi.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const INITIAL_THREADS = [
-  {
-    id: 1,
-    authorName: "Dr. Firman Maulana",
-    authorRole: "DOSEN PENGAMPU",
-    authorAvatar: AVATAR,
-    authorColor: null,
-    authorInitials: null,
-    time: "10 menit yang lalu",
-    content:
-      "Ada pertanyaan soal materi hari ini? Kita sudah membahas tentang <strong>Manajemen Memori</strong> pada sistem operasi modern. Silakan diskusikan hal yang paling menantang bagi Anda.",
-    likes: 8,
-    liked: false,
-    replies: [
-      {
-        id: 11,
-        authorName: "Aditya Arisandy",
-        authorAvatar: "https://i.pravatar.cc/40?img=33",
-        authorColor: null,
-        authorInitials: null,
-        time: "5 MENIT YANG LALU",
-        content:
-          "Izin bertanya Pak, apakah paging selalu lebih efisien daripada segmentasi?",
-        likes: 0,
-        liked: false,
-      },
-    ],
-    replyCount: 1,
-  },
-  {
-    id: 2,
-    authorName: "Bella Puspita",
-    authorRole: null,
-    authorAvatar: null,
-    authorColor: "#2f9696",
-    authorInitials: "BP",
-    time: "2 jam yang lalu",
-    title: "Diskusi: Algoritma Replacement",
-    content:
-      "Apakah ada perbedaan signifikan antara LRU dan Clock algorithm dalam implementasi nyata?",
-    likes: 4,
-    liked: false,
-    replies: [],
-    replyCount: 7,
-    collapsed: true,
-  },
-  {
-    id: 3,
-    authorName: "Fajar Ramadhan",
-    authorRole: null,
-    authorAvatar: "https://i.pravatar.cc/48?img=60",
-    authorColor: null,
-    authorInitials: null,
-    time: "1 hari yang lalu",
-    title: "Diskusi: Deadlock Prevention",
-    content:
-      "Strategi mana yang menurutnya paling efektif untuk mencegah deadlock: prevention, avoidance, atau detection?",
-    likes: 6,
-    liked: false,
-    replies: [],
-    replyCount: 14,
-    collapsed: true,
-  },
-];
+const INITIAL_THREADS = [];
 
 function Avatar({ src, initials, color, size = 40 }) {
   if (src) {
@@ -112,25 +50,69 @@ function Avatar({ src, initials, color, size = 40 }) {
   );
 }
 
-export default function DosenForum({ onNavigate, onLogout }) {
+export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [view, setView] = useState("forum");
-  const [threads, setThreads] = useState(INITIAL_THREADS);
+  const [threads, setThreads] = useState([]);
   const [toast, setToast] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
-  const [expandedIds, setExpandedIds] = useState(new Set([1]));
+  const [expandedIds, setExpandedIds] = useState(new Set());
   const [formTitle, setFormTitle] = useState("");
   const [formBody, setFormBody] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 4000);
   };
+
+  const fetchThreads = async () => {
+    try {
+      setLoading(true);
+      const res = await apiClient.get(`/api/dosen/forum/mata-kuliah/${idMataKuliah}`);
+      const data = res.data || res;
+      if (Array.isArray(data)) {
+        const formatted = data.map(t => ({
+          id: t.id,
+          authorName: t.authorName || "User",
+          authorRole: t.authorRole === "DOSEN" ? "DOSEN PENGAMPU" : null,
+          authorInitials: t.authorName ? t.authorName.substring(0, 2).toUpperCase() : "U",
+          authorColor: "#4b53bc",
+          time: t.time ? new Date(t.time).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }) : "",
+          title: t.title || "",
+          content: t.content || "",
+          likes: t.likes || 0,
+          liked: t.liked || false,
+          replies: (t.replies || t.comments || []).map(c => ({
+            id: c.id,
+            authorName: c.authorName || "User",
+            authorInitials: c.authorName ? c.authorName.substring(0, 2).toUpperCase() : "U",
+            authorColor: "#64748b",
+            time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
+            content: c.content || "",
+            likes: 0,
+            liked: false,
+          })),
+          replyCount: t.replyCount || (t.replies || t.comments || []).length,
+          collapsed: (t.replies || t.comments || []).length > 0
+        }));
+        setThreads(formatted);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchThreads();
+  }, [idMataKuliah]);
 
   const wrapText = (before, after = before) => {
     const ta = textareaRef.current;
@@ -148,35 +130,29 @@ export default function DosenForum({ onNavigate, onLogout }) {
     }, 0);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e && e.preventDefault();
     if (!formTitle.trim() || !formBody.trim()) {
       showToast("error", "Judul dan isi diskusi tidak boleh kosong.");
       return;
     }
-    const newThread = {
-      id: Date.now(),
-      authorName: "Dr. Moch Firmansyah",
-      authorRole: "DOSEN PENGAMPU",
-      authorAvatar: AVATAR,
-      authorColor: null,
-      authorInitials: null,
-      time: "Baru saja",
-      title: formTitle.trim(),
-      content: formBody.trim(),
-      likes: 0,
-      liked: false,
-      replies: [],
-      replyCount: 0,
-      collapsed: false,
-    };
-    setThreads((prev) => [newThread, ...prev]);
-    setExpandedIds((prev) => new Set([...prev, newThread.id]));
-    setFormTitle("");
-    setFormBody("");
-    setAttachedFile(null);
-    setView("forum");
-    showToast("success", "Diskusi berhasil dibuat!");
+    
+    try {
+      await apiClient.post("/api/dosen/forum/", {
+        idMataKuliah: parseInt(idMataKuliah),
+        judul: formTitle.trim(),
+        isiForum: formBody.trim()
+      });
+      
+      setFormTitle("");
+      setFormBody("");
+      setAttachedFile(null);
+      setView("forum");
+      showToast("success", "Diskusi berhasil dibuat!");
+      fetchThreads(); // reload threads
+    } catch (error) {
+      showToast("error", error.message || "Gagal membuat diskusi");
+    }
   };
 
   const toggleLike = (threadId, replyId) => {
@@ -206,33 +182,19 @@ export default function DosenForum({ onNavigate, onLogout }) {
     );
   };
 
-  const submitReply = (threadId) => {
+  const submitReply = async (threadId) => {
     if (!replyText.trim()) return;
-    const newReply = {
-      id: Date.now(),
-      authorName: "Dr. Firman Maulana",
-      authorAvatar: AVATAR,
-      authorColor: null,
-      authorInitials: null,
-      time: "BARU SAJA",
-      content: replyText.trim(),
-      likes: 0,
-      liked: false,
-    };
-    setThreads((prev) =>
-      prev.map((t) =>
-        t.id === threadId
-          ? {
-              ...t,
-              replies: [...t.replies, newReply],
-              replyCount: t.replyCount + 1,
-            }
-          : t,
-      ),
-    );
-    setReplyingTo(null);
-    setReplyText("");
-    showToast("success", "Balasan berhasil dikirim!");
+    try {
+      await apiClient.post(`/api/dosen/forum/${threadId}/reply`, {
+        isiKomentar: replyText.trim()
+      });
+      setReplyingTo(null);
+      setReplyText("");
+      showToast("success", "Balasan berhasil dikirim!");
+      fetchThreads(); // Reload threads to show the new reply
+    } catch (error) {
+      showToast("error", error.message || "Gagal mengirim balasan");
+    }
   };
 
   const toggleExpand = (id) => {
@@ -323,9 +285,18 @@ export default function DosenForum({ onNavigate, onLogout }) {
                 </button>
               </div>
 
-              <div className="fd-thread-list">
-                {threads.map((thread) => {
-                  const isExpanded = expandedIds.has(thread.id);
+              {loading ? (
+                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat diskusi...</div>
+              ) : threads.length === 0 ? (
+                <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>forum</span>
+                  <h3>Belum Ada Diskusi</h3>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada yang memulai diskusi di mata kuliah ini.</p>
+                </div>
+              ) : (
+                <div className="fd-thread-list">
+                  {threads.map((thread) => {
+                    const isExpanded = expandedIds.has(thread.id);
                   return (
                     <div key={thread.id} className="fd-thread-card">
                       <div className="fd-thread-header">
@@ -509,6 +480,7 @@ export default function DosenForum({ onNavigate, onLogout }) {
                   );
                 })}
               </div>
+              )}
             </>
           )}
 

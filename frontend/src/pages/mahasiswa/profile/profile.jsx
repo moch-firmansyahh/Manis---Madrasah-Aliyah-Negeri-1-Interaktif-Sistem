@@ -4,6 +4,7 @@ import "./profile.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
@@ -13,9 +14,14 @@ export default function Profile({ onNavigate, onLogout }) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const storedUserStr = localStorage.getItem("user");
+  const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
+
   const [formData, setFormData] = useState({
-    email: "firman.ajah@gimana.com",
-    telepon: "081234567890",
+    email: storedUser.email || "firman.ajah@gimana.com",
+    telepon: storedUser.telepon || "081234567890",
   });
   const [pwForm, setPwForm] = useState({ old: "", newPw: "", confirm: "" });
 
@@ -24,12 +30,26 @@ export default function Profile({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleSave = () => {
-    setEditMode(false);
-    showToast("success", "Data profil berhasil diperbarui.");
+  const handleSave = async () => {
+    if (!storedUser.nomorInduk) return;
+    setIsSaving(true);
+    try {
+      await apiClient.patch(`/api/users/${storedUser.nomorInduk}`, formData);
+      
+      // Update local storage
+      const updatedUser = { ...storedUser, ...formData };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      setEditMode(false);
+      showToast("success", "Data profil berhasil diperbarui.");
+    } catch (error) {
+      showToast("error", "Gagal memperbarui profil.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handlePwSubmit = (e) => {
+  const handlePwSubmit = async (e) => {
     e.preventDefault();
     if (!pwForm.old || !pwForm.newPw || !pwForm.confirm) {
       showToast("error", "Semua kolom wajib diisi.");
@@ -39,9 +59,15 @@ export default function Profile({ onNavigate, onLogout }) {
       showToast("error", "Kata sandi baru tidak cocok.");
       return;
     }
-    setShowPasswordModal(false);
-    setPwForm({ old: "", newPw: "", confirm: "" });
-    showToast("success", "Kata sandi berhasil diubah.");
+    
+    try {
+      await apiClient.patch(`/api/users/${storedUser.nomorInduk}`, { password: pwForm.newPw });
+      setShowPasswordModal(false);
+      setPwForm({ old: "", newPw: "", confirm: "" });
+      showToast("success", "Kata sandi berhasil diubah.");
+    } catch (error) {
+      showToast("error", "Gagal mengubah kata sandi.");
+    }
   };
 
   return (
@@ -126,9 +152,9 @@ export default function Profile({ onNavigate, onLogout }) {
               </button>
             </div>
             <div className="prf-identity-info">
-              <h1 className="prf-name">Moch Firmansyah</h1>
+              <h1 className="prf-name">{storedUser.nama || "Moch Firmansyah"}</h1>
               <div className="prf-identity-meta">
-                <span className="prf-nim-badge">NIM: 20240901002</span>
+                <span className="prf-nim-badge">NIM: {storedUser.nomorInduk || "20240901002"}</span>
                 <span className="prf-verified">
                   <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#059669" }}>verified</span>
                   Akun Terverifikasi
@@ -150,8 +176,10 @@ export default function Profile({ onNavigate, onLogout }) {
                 </div>
                 {editMode ? (
                   <div className="prf-edit-actions">
-                    <button className="prf-btn-cancel-sm" onClick={() => setEditMode(false)}>Batal</button>
-                    <button className="prf-btn-save-sm" onClick={handleSave}>Simpan</button>
+                    <button className="prf-btn-cancel-sm" onClick={() => setEditMode(false)} disabled={isSaving}>Batal</button>
+                    <button className="prf-btn-save-sm" onClick={handleSave} disabled={isSaving}>
+                      {isSaving ? "Menyimpan..." : "Simpan"}
+                    </button>
                   </div>
                 ) : (
                   <button className="prf-sunting-btn" onClick={() => setEditMode(true)}>

@@ -1,24 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./daftarMataKuliah.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
-
-const courses = [
-  { id: "algoritma", name: "Algoritma Pemrograman",    category: "INFORMATIKA",      icon: "code",       desc: "Pelajari dasar-dasar logika pemrograman, struktur kendali, dan implementasi efisien menggunakan bahasa C++.",                                                               progress: 75 },
-  { id: "basisData", name: "Sistem Basis Data",        category: "BASIS DATA",        icon: "table_rows", desc: "Pemahaman mendalam tentang relasi data, normalisasi, SQL tingkat lanjut, dan manajemen database enterprise.",                                                              progress: 40 },
-  { id: "agama",     name: "Agama",                    category: "HUMANIORA",         icon: "menu_book",  desc: "Eksplorasi nilai-nilai moral, spiritualitas, dan peran agama dalam membangun karakter profesional yang beretika.",                                                          progress: 90 },
-  { id: "pancasila", name: "Pancasila",                category: "KEWARGANEGARAAN",   icon: "balance",    desc: "Studi mendalam filsafat negara, sejarah perjuangan bangsa, dan implementasi nilai Pancasila dalam kehidupan bernegara.",                                                  progress: 60 },
-  { id: "pbo",       name: "Pemrograman Berorientasi Objek", category: "INFORMATIKA", icon: "code_blocks",desc: "Konsep OOP: class, object, inheritance, polymorphism, dan encapsulation menggunakan Java dan Python.",                                                                    progress: 50 },
-  { id: "desain",    name: "Analisis Desain Interaksi",category: "INFORMATIKA",        icon: "design_services", desc: "Human-Computer Interaction, Fitts' Law, prinsip Gestalt, dan prototyping antarmuka yang intuitif.",                                                                progress: 30 },
-];
-
-const AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
+import { apiClient } from "../../../utils/apiClient";
 
 export default function DaftarMataKuliah({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await apiClient.get("/api/mata-kuliah");
+        const formattedData = data.map(course => ({
+          id: course.idMataKuliah,
+          name: course.namaMataKuliah,
+          category: "Mata Kuliah",
+          icon: "menu_book",
+          desc: `${course.statistik?.modulPdf || 0} modul PDF • ${course.statistik?.videoAjar || 0} video • ${course.statistik?.tugas || 0} tugas • ${course.statistik?.kuis || 0} kuis`,
+          progress: 0,
+          statistik: course.statistik || { modulPdf: 0, videoAjar: 0, tugas: 0, kuis: 0 },
+        }));
+        setCourses(formattedData);
+      } catch (error) {
+        console.error("Gagal memuat mata kuliah", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+        <main className="page-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          Memuat daftar mata kuliah...
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
@@ -53,7 +77,7 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
         {/* Course Grid */}
         <div className="dm-grid-wrap">
           <div className="dm-course-grid">
-            {courses.map((c) => (
+            {courses.length > 0 ? courses.map((c) => (
               <div key={c.id} className="dm-course-card">
                 <div className="dm-card-top">
                   <div className="dm-course-icon">
@@ -72,12 +96,16 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
                 </div>
                 <button
                   className="dm-lihat-btn"
-                  onClick={() => onNavigate && onNavigate("mataKuliah")}
+                  onClick={() => onNavigate && onNavigate({ page: "mataKuliah", idMataKuliah: c.id })}
                 >
-                  Lihat Materi →
+                  Lihat Detail Mata Kuliah →
                 </button>
               </div>
-            ))}
+            )) : (
+              <div style={{ padding: "2rem", textAlign: "center", gridColumn: "1 / -1", color: "var(--slate-500)" }}>
+                Belum ada mata kuliah yang tersedia.
+              </div>
+            )}
           </div>
         </div>
       </main>

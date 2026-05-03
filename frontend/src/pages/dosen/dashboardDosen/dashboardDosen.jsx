@@ -1,28 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./dashboardDosen.css";
 import SidebarDosen from "../../../SidebarDosen";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR_DOSEN =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const JADWAL = [
-  { time: "08:00", color: "var(--color-secondary)", subject: "Sistem Operasi",        room: "Ruang Lab 302 - Gedung B",    matkul: "IF001" },
-  { time: "13:30", color: "var(--color-teal)",      subject: "Metodologi Penelitian", room: "Ruang Teater 1 - Gedung Utama", matkul: "IF003" },
-];
-
-const PENDING_ROWS = [
-  { code: "K1", name: "Kelompok Alpha - TI01", type: "4 Anggota",  task: "Analisis Arsitektur Cloud",   course: "Pemrograman Lanjut",          date: "12 Okt 2023", timeStatus: "Terlambat 2 Jam", late: true,  av: "av-blue" },
-  { code: "AS", name: "Aditya Saputra",         type: "Individu",   task: "Final Project: UI Design",    course: "Interaksi Manusia & Komputer", date: "14 Okt 2023", timeStatus: "Tepat Waktu",     late: false, av: "av-teal" },
-  { code: "K3", name: "Kelompok Gamma - SI02",  type: "5 Anggota",  task: "Case Study: E-Commerce Data", course: "Basis Data Terdistribusi",     date: "15 Okt 2023", timeStatus: "Tepat Waktu",     late: false, av: "av-blue" },
-];
-
 export default function DashboardDosen({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [toast, setToast]           = useState(null);
+  const [toast, setToast] = useState(null);
   const [detailMatkul, setDetailMatkul] = useState(null);
+
+  const [dashboardData, setDashboardData] = useState({
+    lecturerName: "Dosen",
+    stats: {
+      totalMahasiswa: 0,
+      tugasPending: 0,
+      rataPresensi: "0%"
+    },
+    pendingTasks: [],
+    jadwal: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await apiClient.get('/api/dosen/dashboard');
+        if (res && res.data) {
+          setDashboardData(res.data);
+        } else if (res) {
+          setDashboardData(res);
+        }
+      } catch (error) {
+        console.error("Dashboard error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -38,8 +58,8 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
         <div style={{
           position: "fixed", top: "5rem", right: "1.5rem", zIndex: 999,
           background: toast.type === "error" ? "#fff1f2" : "#ecfdf5",
-          color:      toast.type === "error" ? "#dc2626"  : "#059669",
-          border:     toast.type === "error" ? "1px solid #fecaca" : "1px solid #a7f3d0",
+          color: toast.type === "error" ? "#dc2626" : "#059669",
+          border: toast.type === "error" ? "1px solid #fecaca" : "1px solid #a7f3d0",
           padding: "0.75rem 1.25rem", borderRadius: "0.75rem", fontWeight: 600,
           fontSize: "0.875rem", boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
           display: "flex", alignItems: "center", gap: "0.5rem"
@@ -100,7 +120,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
           <div className="dd-page-header">
             <div>
               <h2 className="dd-title">Dashbord Dosen</h2>
-              <p className="dd-subtitle">Selamat pagi, Pak Firman. Berikut ringkasan kurasi akademik Anda hari ini.</p>
+              <p className="dd-subtitle">Selamat pagi, Pak / Bu {dashboardData.lecturerName}. Berikut ringkasan kurasi akademik Anda hari ini.</p>
             </div>
             <div className="dd-action-row">
               <button className="dd-btn dd-btn--blue" onClick={() => nav("dosenTugas")}>
@@ -125,10 +145,10 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 <div className="dd-stat-icon dd-icon--blue">
                   <span className="material-symbols-outlined">group</span>
                 </div>
-                <span className="dd-badge dd-badge--green">+12% Bulan ini</span>
+                <span className="dd-badge dd-badge--green">Bulan ini</span>
               </div>
               <p className="dd-stat-label">Total Mahasiswa Aktif</p>
-              <p className="dd-stat-value">1,248</p>
+              <p className="dd-stat-value">{dashboardData.stats.totalMahasiswa}</p>
             </div>
 
             <div className="dd-stat-card" style={{ cursor: "pointer" }} onClick={() => nav("dosenKelompok")}>
@@ -139,7 +159,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 <span className="dd-badge dd-badge--orange">Butuh Perhatian</span>
               </div>
               <p className="dd-stat-label">Tugas Belum Dinilai</p>
-              <p className="dd-stat-value">42</p>
+              <p className="dd-stat-value">{dashboardData.stats.tugasPending}</p>
             </div>
 
             <div className="dd-stat-card" style={{ cursor: "pointer" }} onClick={() => nav("dosenPresensi")}>
@@ -150,19 +170,19 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 <span className="dd-badge dd-badge--teal">Sangat Baik</span>
               </div>
               <p className="dd-stat-label">Rata-rata Presensi</p>
-              <p className="dd-stat-value">94.2%</p>
+              <p className="dd-stat-value">{dashboardData.stats.rataPresensi}</p>
             </div>
           </div>
 
           {/* Quick Nav Tiles */}
           <div className="dd-quick-nav">
             {[
-              { icon: "assignment",    label: "Manajemen Tugas",   page: "dosenTugas",     color: "var(--color-secondary)" },
-              { icon: "groups",        label: "Kelompok & Nilai",  page: "dosenKelompok",  color: "#2f9696" },
-              { icon: "menu_book",     label: "Manajemen Materi",  page: "dosenMateri",    color: "#c47f17" },
-              { icon: "how_to_reg",    label: "Presensi & QR",     page: "dosenPresensi",  color: "#7c3aed" },
-              { icon: "forum",         label: "Forum Diskusi",      page: "dosenForum",     color: "#0891b2" },
-              { icon: "account_circle",label: "Profil Dosen",       page: "dosenProfile",   color: "#059669" },
+              { icon: "assignment", label: "Manajemen Tugas", page: "dosenTugas", color: "var(--color-secondary)" },
+              { icon: "groups", label: "Kelompok & Nilai", page: "dosenKelompok", color: "#2f9696" },
+              { icon: "menu_book", label: "Manajemen Materi", page: "dosenMateri", color: "#c47f17" },
+              { icon: "how_to_reg", label: "Presensi & QR", page: "dosenPresensi", color: "#7c3aed" },
+              { icon: "forum", label: "Forum Diskusi", page: "dosenForum", color: "#0891b2" },
+              { icon: "account_circle", label: "Profil Dosen", page: "dosenProfile", color: "#059669" },
             ].map((tile) => (
               <button key={tile.page} className="dd-quick-tile" onClick={() => nav(tile.page)}>
                 <div className="dd-quick-icon" style={{ background: `${tile.color}18`, color: tile.color }}>
@@ -195,7 +215,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {PENDING_ROWS.map((row, i) => (
+                  {dashboardData.pendingTasks.length > 0 ? dashboardData.pendingTasks.map((row, i) => (
                     <tr key={i} style={{ cursor: "pointer" }} onClick={() => nav("dosenKelompok")}>
                       <td>
                         <div className="dd-student-cell">
@@ -221,7 +241,11 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", padding: "2rem" }}>Tidak ada tugas yang menunggu penilaian.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -236,7 +260,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 <span>Senin, 16 Okt 2023</span>
               </div>
               <div className="dd-sched-list">
-                {JADWAL.map((s, i) => (
+                {dashboardData.jadwal.length > 0 ? dashboardData.jadwal.map((s, i) => (
                   <div key={i} className="dd-sched-item dd-sched-item--clickable" onClick={() => setDetailMatkul(s)}>
                     <div className="dd-time-box" style={{ backgroundColor: s.color }}>
                       <span className="dd-time-val">{s.time}</span>
@@ -250,7 +274,9 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                       <span className="material-symbols-outlined">chevron_right</span>
                     </button>
                   </div>
-                ))}
+                )) : (
+                  <div style={{ padding: "1rem", color: "#64748b" }}>Tidak ada jadwal mengajar hari ini.</div>
+                )}
               </div>
             </div>
 

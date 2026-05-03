@@ -1,25 +1,16 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "../../../shared.css";
 import "./daftarTugas.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
-
-const AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
-
-const ALL_TASKS = [
-  { id: 1, course: "PBO",                deadlineLabel: "Besok, 23:59",  deadlineUrgent: true,  name: "Tugas PBO - Praktikum 7",           progress: 50,  status: "sedang_berjalan", action: "lanjutkan", isQuiz: false },
-  { id: 2, course: "BASIS DATA",         deadlineLabel: "3 Hari Lagi",   deadlineUrgent: false, name: "Laporan Basis Data - Modul 4",        progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: false },
-  { id: 3, course: "ALGORITMA",          deadlineLabel: "Telah Selesai", deadlineUrgent: false, name: "Kuis Pemrograman Dasar",              progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: true },
-  { id: 4, course: "ARSITEKTUR KOMPUTER",deadlineLabel: "5 Hari Lagi",   deadlineUrgent: false, name: "Analisis Pipeline Prosesor",          progress: 25,  status: "sedang_berjalan", action: "lanjutkan", isQuiz: false },
-  { id: 5, course: "DESAIN INTERAKSI",   deadlineLabel: "7 Hari Lagi",   deadlineUrgent: false, name: "Prototipe Antarmuka Mobile (Figma)",  progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: false },
-];
+import { apiClient } from "../../../utils/apiClient";
 
 const FILTERS = [
   { key: "semua",            label: "Semua" },
   { key: "belum_dikerjakan", label: "Belum Dikerjakan" },
   { key: "sedang_berjalan",  label: "Sedang Berjalan" },
+  { key: "terlambat", label: "Terlambat" },
   { key: "selesai",          label: "Selesai" },
 ];
 
@@ -29,36 +20,74 @@ function getBarColor(status, progress) {
   return "#c47f17";
 }
 
-export default function DaftarTugas({ onNavigate, onLogout }) {
+function formatDeadline(deadlineTugas) {
+  if (!deadlineTugas) return { label: "Tanpa deadline", urgent: false };
+  const deadline = new Date(deadlineTugas);
+  const now = new Date();
+  const diffMs = deadline - now;
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMs < 0) return { label: "Melewati deadline", urgent: true };
+  if (diffDays === 0) return { label: "Hari ini", urgent: true };
+  if (diffDays === 1) return { label: "Besok", urgent: true };
+  return { label: `${diffDays} hari lagi`, urgent: false };
+}
+
+export default function DaftarTugas({ onNavigate, onLogout, idMataKuliah }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [activeFilter, setActiveFilter] = useState("semua");
-  const [toast, setToast] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = activeFilter === "semua"
-    ? ALL_TASKS
-    : ALL_TASKS.filter((t) => t.status === activeFilter);
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const query = idMataKuliah ? `?idMataKuliah=${idMataKuliah}` : "";
+        const response = await apiClient.get(`/api/tugas${query}`);
+        const payload = response?.data || [];
+        const normalized = payload.map((task) => {
+          const deadline = formatDeadline(task.deadlineTugas);
+          return {
+            id: task.id,
+            idMataKuliah: task.idMataKuliah,
+            course: task.mataKuliah,
+            name: task.judul,
+            detailTugas: task.detailTugas,
+            deadlineLabel: deadline.label,
+            deadlineUrgent: deadline.urgent,
+            progress: task.progress ?? 0,
+            status: task.status,
+            isQuiz: false,
+          };
+        });
+        setTasks(normalized);
+      } catch (error) {
+        console.error("Gagal memuat daftar tugas", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
+    fetchTasks();
+  }, [idMataKuliah]);
+
+  const filtered = useMemo(() => {
+    if (activeFilter === "semua") return tasks;
+    return tasks.filter((task) => task.status === activeFilter);
+  }, [tasks, activeFilter]);
+
+  if (loading) {
+    return (
+      <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+        <main className="page-main" style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          Memuat daftar tugas...
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: "fixed", top: "5rem", right: "1.5rem", zIndex: 999,
-          background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0",
-          padding: "0.75rem 1.25rem", borderRadius: "0.75rem", fontWeight: 600,
-          fontSize: "0.875rem", boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-          display: "flex", alignItems: "center", gap: "0.5rem"
-        }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>check_circle</span>
-          {toast}
-        </div>
-      )}
-
       {/* ─── Sidebar ─── */}
       <Sidebar
         onNavigate={onNavigate}
@@ -92,7 +121,7 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
                 {f.label}
                 {f.key !== "semua" && (
                   <span className="dt-filter-count">
-                    {ALL_TASKS.filter((t) => t.status === f.key).length}
+                    {tasks.filter((t) => t.status === f.key).length}
                   </span>
                 )}
               </button>
@@ -121,21 +150,22 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
                       </span>
                     </div>
                     {/* Action button */}
-                    {task.action === "lanjutkan" ? (
-                      <button
-                        className="dt-btn dt-btn--primary"
-                        onClick={() => onNavigate && onNavigate(task.isQuiz ? "kuis" : "mataKuliah")}
-                      >
-                        Lanjutkan
-                      </button>
-                    ) : (
-                      <button
-                        className="dt-btn dt-btn--outline"
-                        onClick={() => showToast(`Membuka detail: ${task.name}`)}
-                      >
-                        Lihat Detail
-                      </button>
-                    )}
+                    <button
+                      className="dt-btn dt-btn--primary"
+                      onClick={() =>
+                        onNavigate &&
+                        onNavigate({
+                          page: "pengumpulanTugas",
+                          idTugas: task.id,
+                          idMataKuliah: task.idMataKuliah,
+                          judul: task.name,
+                          mataKuliah: task.course,
+                          detailTugas: task.detailTugas,
+                        })
+                      }
+                    >
+                      {task.status === "selesai" ? "Lihat Pengumpulan" : "Kumpulkan Tugas"}
+                    </button>
                   </div>
 
                   {/* Task name */}
@@ -164,20 +194,20 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
             <div className="dt-fokus-card">
               <h3 className="dt-fokus-title">Fokus Pembelajaran Minggu Ini</h3>
               <p className="dt-fokus-desc">
-                Anda telah menyelesaikan 60% dari target tugas pekan ini. Tetap semangat, sisa 2 tugas lagi!
+                Ringkasan ini diambil dari status tugas pada database Anda saat ini.
               </p>
               <div className="dt-fokus-stats">
                 <div className="dt-fokus-stat dt-fokus-stat--blue">
-                  <p className="dt-fokus-num">08</p>
-                  <p className="dt-fokus-lbl">JAM BELAJAR</p>
+                  <p className="dt-fokus-num">{tasks.length}</p>
+                  <p className="dt-fokus-lbl">TOTAL TUGAS</p>
                 </div>
                 <div className="dt-fokus-stat dt-fokus-stat--amber">
-                  <p className="dt-fokus-num">12</p>
+                  <p className="dt-fokus-num">{tasks.filter((t) => t.status === "selesai").length}</p>
                   <p className="dt-fokus-lbl">TUGAS SELESAI</p>
                 </div>
                 <div className="dt-fokus-stat dt-fokus-stat--teal">
-                  <p className="dt-fokus-num">85</p>
-                  <p className="dt-fokus-lbl">SKOR RATA-RATA</p>
+                  <p className="dt-fokus-num">{tasks.filter((t) => t.status === "terlambat").length}</p>
+                  <p className="dt-fokus-lbl">TERLAMBAT</p>
                 </div>
               </div>
             </div>
@@ -186,14 +216,14 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
             <div className="dt-cta-card">
               <h3 className="dt-cta-title">Mulai Tugas Baru?</h3>
               <p className="dt-cta-desc">
-                Unduh panduan pengerjaan tugas akhir semester untuk persiapan lebih awal.
+                Buka detail mata kuliah untuk melihat modul, kuis, dan daftar tugas terbaru dari dosen.
               </p>
               <button
                 className="dt-cta-btn"
-                onClick={() => showToast("File panduan sedang diunduh...")}
+                onClick={() => onNavigate && onNavigate("daftarMataKuliah")}
               >
-                <span className="material-symbols-outlined">download</span>
-                Unduh Panduan (.PDF)
+                <span className="material-symbols-outlined">menu_book</span>
+                Buka Mata Kuliah
               </button>
             </div>
           </div>

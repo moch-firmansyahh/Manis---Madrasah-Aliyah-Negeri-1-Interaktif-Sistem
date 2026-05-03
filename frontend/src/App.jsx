@@ -5,6 +5,7 @@ import DashboardDosen from "./pages/dosen/dashboardDosen/dashboardDosen";
 import DaftarMataKuliah from "./pages/mahasiswa/daftarMataKuliah/daftarMataKuliah";
 import MataKuliah from "./pages/mahasiswa/mataKuliah/mataKuliah";
 import DaftarTugas from "./pages/mahasiswa/daftarTugas/daftarTugas";
+import PengumpulanTugas from "./pages/mahasiswa/pengumpulanTugas/pengumpulanTugas";
 import Kuis from "./pages/mahasiswa/kuis/kuis";
 import Presensi from "./pages/mahasiswa/presensi/presensi";
 import PresensiMahasiswa from "./pages/mahasiswa/presensiMahasiswa/presensiMahasiswa";
@@ -23,49 +24,57 @@ import DosenMateri from "./pages/dosen/dosenMateri/dosenMateri";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("");
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState({ page: "dashboard" });
 
   const handleLogin = (role) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    setCurrentPage(role === "Dosen" ? "dosenDashboard" : "dashboard");
+    setCurrentPage({ page: role === "Dosen" ? "dosenDashboard" : "dashboard" });
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole("");
-    setCurrentPage("dashboard");
+    setCurrentPage({ page: "dashboard" });
   };
 
-  const navigateTo = (page) => setCurrentPage(page);
+  const navigateTo = (target) => {
+    if (typeof target === "string") {
+      setCurrentPage({ page: target });
+    } else {
+      setCurrentPage(target); // { page: "mataKuliah", id: 1 }
+    }
+  };
 
   if (isLoggedIn) {
-    const sharedProps = { onNavigate: navigateTo, onLogout: handleLogout };
+    const sharedProps = { onNavigate: navigateTo, onLogout: handleLogout, ...currentPage };
+    const pageName = currentPage.page;
 
     // ── MAHASISWA pages ──
-    if (currentPage === "daftarMataKuliah")
+    if (pageName === "daftarMataKuliah")
       return <DaftarMataKuliah {...sharedProps} />;
-    if (currentPage === "mataKuliah") return <MataKuliah {...sharedProps} />;
-    if (currentPage === "daftarTugas") return <DaftarTugas {...sharedProps} />;
-    if (currentPage === "kuis") return <Kuis {...sharedProps} />;
-    if (currentPage === "presensi") return <Presensi {...sharedProps} />;
-    if (currentPage === "presensiMahasiswa")
+    if (pageName === "mataKuliah") return <MataKuliah {...sharedProps} />;
+    if (pageName === "daftarTugas") return <DaftarTugas {...sharedProps} />;
+    if (pageName === "pengumpulanTugas") return <PengumpulanTugas {...sharedProps} />;
+    if (pageName === "kuis") return <Kuis {...sharedProps} />;
+    if (pageName === "presensi") return <Presensi {...sharedProps} />;
+    if (pageName === "presensiMahasiswa")
       return <PresensiMahasiswa {...sharedProps} />;
-    if (currentPage === "forumDiskusi")
+    if (pageName === "forumDiskusi")
       return <ForumDiskusi {...sharedProps} />;
-    if (currentPage === "profile") return <Profile {...sharedProps} />;
-    if (currentPage === "nilai") return <Nilai {...sharedProps} />;
+    if (pageName === "profile") return <Profile {...sharedProps} />;
+    if (pageName === "nilai") return <Nilai {...sharedProps} />;
 
     // ── DOSEN-specific pages ──
-    if (currentPage === "dosenPresensi")
+    if (pageName === "dosenPresensi")
       return <DosenPresensi {...sharedProps} />;
-    if (currentPage === "dosenTugas") return <DosenTugas {...sharedProps} />;
-    if (currentPage === "dosenKelompok")
+    if (pageName === "dosenTugas") return <DosenTugas {...sharedProps} />;
+    if (pageName === "dosenKelompok")
       return <DosenKelompok {...sharedProps} />;
-    if (currentPage === "dosenForum") return <DosenForum {...sharedProps} />;
-    if (currentPage === "dosenProfile")
+    if (pageName === "dosenForum") return <DosenForum {...sharedProps} />;
+    if (pageName === "dosenProfile")
       return <DosenProfile {...sharedProps} />;
-    if (currentPage === "dosenMateri") return <DosenMateri {...sharedProps} />;
+    if (pageName === "dosenMateri") return <DosenMateri {...sharedProps} />;
 
     // Default dashboard per role
     if (userRole === "Mahasiswa") {

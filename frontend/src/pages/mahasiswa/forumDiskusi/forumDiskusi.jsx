@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../../../shared.css";
 import "./forumDiskusi.css";
 import Sidebar from "../../../Sidebar";
@@ -106,74 +106,145 @@ function Avatar({ src, initials, color, size = 40 }) {
   );
 }
 
-export default function ForumDiskusi({ onNavigate, onLogout }) {
+import { apiClient } from "../../../utils/apiClient";
+
+export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [view, setView]             = useState("forum"); // "forum" | "create"
-  const [threads, setThreads]       = useState(INITIAL_THREADS);
-  const [toast, setToast]           = useState(null);
+  const [view, setView] = useState("forum"); // "forum" | "create"
+  const [threads, setThreads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);   // thread id
-  const [replyText, setReplyText]   = useState("");
+  const [replyText, setReplyText] = useState("");
   const [expandedIds, setExpandedIds] = useState(new Set([1]));
 
   // Create form state
-  const [formTitle, setFormTitle]   = useState("");
-  const [formBody, setFormBody]     = useState("");
-  const [dragOver, setDragOver]     = useState(false);
+  const [formTitle, setFormTitle] = useState("");
+  const [formBody, setFormBody] = useState("");
+  const [dragOver, setDragOver] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
-  const fileInputRef                = useRef(null);
-  const textareaRef                 = useRef(null);
+  const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 4000);
   };
 
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
+        const data = res.data || res;
+        if (Array.isArray(data) && data.length > 0) {
+          const formatted = data.map(t => ({
+            id: t.id,
+            authorName: t.authorName || "User",
+            authorRole: t.authorRole || null,
+            authorAvatar: null,
+            authorColor: "#2f9696",
+            authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
+            time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
+            title: t.title || "",
+            content: t.content || "",
+            likes: 0,
+            liked: false,
+            replies: (t.comments || []).map(c => ({
+              id: c.id,
+              authorName: c.authorName || "User",
+              authorInitials: (c.authorName || "U").substring(0, 2).toUpperCase(),
+              authorColor: "#64748b",
+              time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
+              content: c.content || "",
+              likes: 0,
+              liked: false,
+            })),
+            replyCount: (t.comments || []).length,
+            collapsed: (t.comments || []).length > 0
+          }));
+          setThreads(formatted);
+        } else {
+          setThreads(INITIAL_THREADS); // fallback if empty
+        }
+      } catch (error) {
+        setThreads(INITIAL_THREADS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchThreads();
+  }, [idMataKuliah]);
+
   // ── Toolbar actions (simulate rich-text with markdown-like wrap) ──
   const wrapText = (before, after = before) => {
     const ta = textareaRef.current;
     if (!ta) return;
     const start = ta.selectionStart;
-    const end   = ta.selectionEnd;
-    const sel   = formBody.slice(start, end);
-    const next  = formBody.slice(0, start) + before + sel + after + formBody.slice(end);
+    const end = ta.selectionEnd;
+    const sel = formBody.slice(start, end);
+    const next = formBody.slice(0, start) + before + sel + after + formBody.slice(end);
     setFormBody(next);
     setTimeout(() => {
       ta.selectionStart = start + before.length;
-      ta.selectionEnd   = end   + before.length;
+      ta.selectionEnd = end + before.length;
       ta.focus();
     }, 0);
   };
 
   // ── Submit new discussion ──
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e && e.preventDefault();
     if (!formTitle.trim() || !formBody.trim()) {
       showToast("error", "Judul dan isi diskusi tidak boleh kosong.");
       return;
     }
-    const newThread = {
-      id: Date.now(),
-      authorName: "Firman",
-      authorRole: null,
-      authorAvatar: AVATAR,
-      authorColor: null,
-      authorInitials: null,
-      time: "Baru saja",
-      title: formTitle.trim(),
-      content: formBody.trim(),
-      likes: 0,
-      liked: false,
-      replies: [],
-      replyCount: 0,
-      collapsed: false,
-    };
-    setThreads((prev) => [newThread, ...prev]);
-    setExpandedIds((prev) => new Set([...prev, newThread.id]));
+
+    try {
+      await apiClient.post("/api/forum/create", {
+        idMataKuliah,
+        judul: formTitle.trim(),
+        isiForum: formBody.trim()
+      });
+      showToast("success", "Diskusi berhasil dibuat!");
+      // Refetch
+      const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
+      const data = res.data || res;
+      if (Array.isArray(data)) {
+        const formatted = data.map(t => ({
+          id: t.id,
+          authorName: t.authorName || "User",
+          authorRole: t.authorRole || null,
+          authorAvatar: null,
+          authorColor: "#2f9696",
+          authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
+          time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
+          title: t.title || "",
+          content: t.content || "",
+          likes: 0,
+          liked: false,
+          replies: (t.comments || []).map(c => ({
+            id: c.id,
+            authorName: c.authorName || "User",
+            authorInitials: (c.authorName || "U").substring(0, 2).toUpperCase(),
+            authorColor: "#64748b",
+            time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
+            content: c.content || "",
+            likes: 0,
+            liked: false,
+          })),
+          replyCount: (t.comments || []).length,
+          collapsed: (t.comments || []).length > 0
+        }));
+        setThreads(formatted);
+      }
+    } catch (error) {
+      showToast("error", "Gagal membuat diskusi");
+    }
+
     setFormTitle("");
     setFormBody("");
     setAttachedFile(null);
     setView("forum");
-    showToast("success", "Diskusi berhasil dibuat!");
   };
 
   // ── Like ──
@@ -199,29 +270,51 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
   };
 
   // ── Submit reply ──
-  const submitReply = (threadId) => {
+  const submitReply = async (threadId) => {
     if (!replyText.trim()) return;
-    const newReply = {
-      id: Date.now(),
-      authorName: "Firman",
-      authorAvatar: AVATAR,
-      authorColor: null,
-      authorInitials: null,
-      time: "BARU SAJA",
-      content: replyText.trim(),
-      likes: 0,
-      liked: false,
-    };
-    setThreads((prev) =>
-      prev.map((t) =>
-        t.id === threadId
-          ? { ...t, replies: [...t.replies, newReply], replyCount: t.replyCount + 1 }
-          : t
-      )
-    );
-    setReplyingTo(null);
-    setReplyText("");
-    showToast("success", "Balasan berhasil dikirim!");
+    try {
+      await apiClient.post(`/api/forum/${threadId}/reply`, {
+        isiKomentar: replyText.trim()
+      });
+      // Refetch threads to show the new reply
+      const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
+      const data = res.data || res;
+      if (Array.isArray(data)) {
+        const formatted = data.map(t => ({
+          id: t.id,
+          authorName: t.authorName || "User",
+          authorRole: t.authorRole || null,
+          authorAvatar: null,
+          authorColor: "#2f9696",
+          authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
+          time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
+          title: t.title || "",
+          content: t.content || "",
+          likes: 0,
+          liked: false,
+          replies: (t.comments || []).map(c => ({
+            id: c.id,
+            authorName: c.authorName || "User",
+            authorInitials: (c.authorName || "U").substring(0, 2).toUpperCase(),
+            authorColor: "#64748b",
+            time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
+            content: c.content || "",
+            likes: 0,
+            liked: false,
+          })),
+          replyCount: (t.comments || []).length,
+          collapsed: (t.comments || []).length > 0
+        }));
+        setThreads(formatted);
+        // Auto-expand the thread we just replied to
+        setExpandedIds(prev => new Set([...prev, threadId]));
+      }
+      setReplyingTo(null);
+      setReplyText("");
+      showToast("success", "Balasan berhasil dikirim!");
+    } catch (error) {
+      showToast("error", error.message || "Gagal mengirim balasan");
+    }
   };
 
   const toggleExpand = (id) => {
@@ -262,259 +355,265 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
         <Navbar role="Mahasiswa" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
 
         <div className="page-content">
-          {/* ════════════════════ FORUM LIST VIEW ════════════════════ */}
-          {view === "forum" && (
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>Memuat forum...</div>
+          ) : (
             <>
-              {/* Top bar */}
-              <div className="fd-topbar">
-                <div>
-                  <nav className="fd-breadcrumb">
-                    <span>MATA KULIAH</span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                    <span>DESAIN INTERAKSI</span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                    <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
-                  </nav>
-                  <h2 className="fd-page-title">Forum Diskusi Kelas</h2>
-                  <p className="fd-page-sub">
-                    Ruang kolaborasi untuk mendalami materi Desain Interaksi pekan ini.<br />
-                    Silakan berbagi pandangan atau bertanya langsung kepada pengampu.
-                  </p>
-                </div>
-                <button className="fd-new-btn" onClick={() => setView("create")}>
-                  <span className="material-symbols-outlined">add</span>
-                  Mulai Diskusi Baru
-                </button>
-              </div>
+              {/* ════════════════════ FORUM LIST VIEW ════════════════════ */}
+              {view === "forum" && (
+                <>
+                  {/* Top bar */}
+                  <div className="fd-topbar">
+                    <div>
+                      <nav className="fd-breadcrumb">
+                        <span>MATA KULIAH</span>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <span>DESAIN INTERAKSI</span>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
+                      </nav>
+                      <h2 className="fd-page-title">Forum Diskusi Kelas</h2>
+                      <p className="fd-page-sub">
+                        Ruang kolaborasi untuk mendalami materi Desain Interaksi pekan ini.<br />
+                        Silakan berbagi pandangan atau bertanya langsung kepada pengampu.
+                      </p>
+                    </div>
+                    <button className="fd-new-btn" onClick={() => setView("create")}>
+                      <span className="material-symbols-outlined">add</span>
+                      Mulai Diskusi Baru
+                    </button>
+                  </div>
 
-              {/* Thread list */}
-              <div className="fd-thread-list">
-                {threads.map((thread) => {
-                  const isExpanded = expandedIds.has(thread.id);
-                  return (
-                    <div key={thread.id} className="fd-thread-card">
-                      {/* Thread header */}
-                      <div className="fd-thread-header">
-                        <div className="fd-thread-author-row">
-                          <div className="fd-thread-author-info">
-                            <Avatar src={thread.authorAvatar} initials={thread.authorInitials} color={thread.authorColor} size={48} />
-                            <div>
-                              <p className="fd-author-name">
-                                {thread.authorName}
-                                {thread.authorRole && (
-                                  <span className="fd-role-badge">{thread.authorRole}</span>
-                                )}
-                              </p>
-                              {thread.title && <p className="fd-thread-subtitle">{thread.title}</p>}
+                  {/* Thread list */}
+                  <div className="fd-thread-list">
+                    {threads.map((thread) => {
+                      const isExpanded = expandedIds.has(thread.id);
+                      return (
+                        <div key={thread.id} className="fd-thread-card">
+                          {/* Thread header */}
+                          <div className="fd-thread-header">
+                            <div className="fd-thread-author-row">
+                              <div className="fd-thread-author-info">
+                                <Avatar src={thread.authorAvatar} initials={thread.authorInitials} color={thread.authorColor} size={48} />
+                                <div>
+                                  <p className="fd-author-name">
+                                    {thread.authorName}
+                                    {thread.authorRole && (
+                                      <span className="fd-role-badge">{thread.authorRole}</span>
+                                    )}
+                                  </p>
+                                  {thread.title && <p className="fd-thread-subtitle">{thread.title}</p>}
+                                </div>
+                              </div>
+                              <span className="fd-time">{thread.time}</span>
+                            </div>
+                            <div
+                              className="fd-thread-body"
+                              dangerouslySetInnerHTML={{ __html: thread.content }}
+                            />
+                            <div className="fd-thread-actions">
+                              <button
+                                className={`fd-action-btn ${thread.liked ? "fd-action-btn--liked" : ""}`}
+                                onClick={() => toggleLike(thread.id)}
+                              >
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: thread.liked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                                {thread.likes} Suka
+                              </button>
+                              <button className="fd-action-btn" onClick={() => { setReplyingTo(replyingTo === thread.id ? null : thread.id); setReplyText(""); }}>
+                                <span className="material-symbols-outlined">reply</span>
+                                Balas Komentar
+                              </button>
+                              {thread.replyCount > 0 && thread.collapsed && (
+                                <button className="fd-expand-btn" onClick={() => toggleExpand(thread.id)}>
+                                  <span className="material-symbols-outlined">{isExpanded ? "expand_less" : "expand_more"}</span>
+                                  {thread.replyCount} komentar
+                                </button>
+                              )}
                             </div>
                           </div>
-                          <span className="fd-time">{thread.time}</span>
-                        </div>
-                        <div
-                          className="fd-thread-body"
-                          dangerouslySetInnerHTML={{ __html: thread.content }}
-                        />
-                        <div className="fd-thread-actions">
-                          <button
-                            className={`fd-action-btn ${thread.liked ? "fd-action-btn--liked" : ""}`}
-                            onClick={() => toggleLike(thread.id)}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: thread.liked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
-                            {thread.likes} Suka
-                          </button>
-                          <button className="fd-action-btn" onClick={() => { setReplyingTo(replyingTo === thread.id ? null : thread.id); setReplyText(""); }}>
-                            <span className="material-symbols-outlined">reply</span>
-                            Balas Komentar
-                          </button>
-                          {thread.replyCount > 0 && thread.collapsed && (
-                            <button className="fd-expand-btn" onClick={() => toggleExpand(thread.id)}>
-                              <span className="material-symbols-outlined">{isExpanded ? "expand_less" : "expand_more"}</span>
-                              {thread.replyCount} komentar
+
+                          {/* Replies */}
+                          {isExpanded && thread.replies.length > 0 && (
+                            <div className="fd-replies">
+                              {thread.replies.map((reply) => (
+                                <div key={reply.id} className="fd-reply">
+                                  <Avatar src={reply.authorAvatar} initials={reply.authorInitials} color={reply.authorColor} size={36} />
+                                  <div className="fd-reply-body">
+                                    <div className="fd-reply-header">
+                                      <span className="fd-reply-name">{reply.authorName}</span>
+                                      <span className="fd-reply-time">{reply.time}</span>
+                                    </div>
+                                    <p className="fd-reply-text" dangerouslySetInnerHTML={{ __html: reply.content }} />
+                                    <button
+                                      className={`fd-reply-action ${reply.liked ? "fd-action-btn--liked" : ""}`}
+                                      onClick={() => toggleLike(thread.id, reply.id)}
+                                    >
+                                      <span className="material-symbols-outlined" style={{ fontSize: "0.875rem", fontVariationSettings: reply.liked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                                      Balas Komentar
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Collapsed indicator */}
+                          {thread.collapsed && !isExpanded && (
+                            <button className="fd-collapsed-pill" onClick={() => toggleExpand(thread.id)}>
+                              <span className="material-symbols-outlined">comment</span>
+                              {thread.replyCount} komentar · Tampilkan semua
                             </button>
+                          )}
+
+                          {/* Reply input */}
+                          {replyingTo === thread.id && (
+                            <div className="fd-reply-input-wrap">
+                              <Avatar src={AVATAR} initials="F" color="#4b53bc" size={34} />
+                              <div className="fd-reply-input-area">
+                                <textarea
+                                  className="fd-reply-textarea"
+                                  placeholder="Tulis balasan Anda..."
+                                  rows={3}
+                                  value={replyText}
+                                  onChange={(e) => setReplyText(e.target.value)}
+                                />
+                                <div className="fd-reply-input-actions">
+                                  <button className="fd-reply-cancel" onClick={() => { setReplyingTo(null); setReplyText(""); }}>Batal</button>
+                                  <button className="fd-reply-submit" onClick={() => submitReply(thread.id)}>
+                                    <span className="material-symbols-outlined">send</span>
+                                    Kirim Balasan
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {/* ════════════════════ CREATE VIEW ════════════════════ */}
+              {view === "create" && (
+                <>
+                  <div className="fd-topbar">
+                    <div>
+                      <nav className="fd-breadcrumb">
+                        <span>Mata Kuliah</span>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <span>Desain Interaksi</span>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <button className="fd-breadcrumb-link" onClick={() => setView("forum")}>Forum Diskusi</button>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <span className="fd-breadcrumb--active">Buat Baru</span>
+                      </nav>
+                      <h2 className="fd-create-title">Buat Diskusi Baru</h2>
+                      <p className="fd-create-sub">Bagikan pemikiran Anda atau tanyakan sesuatu kepada rekan mahasiswa dan dosen.</p>
+                    </div>
+                  </div>
+
+                  <div className="fd-create-card">
+                    <form onSubmit={handleSubmit}>
+                      {/* Title field */}
+                      <div className="fd-field">
+                        <label className="fd-label">Judul Diskusi</label>
+                        <input
+                          className="fd-input"
+                          type="text"
+                          placeholder="Ketikkan judul diskusi yang deskriptif..."
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Body field */}
+                      <div className="fd-field">
+                        <label className="fd-label">Isi Pertanyaan atau Diskusi</label>
+                        <div className="fd-editor-wrap">
+                          {/* Toolbar */}
+                          <div className="fd-toolbar">
+                            <button type="button" className="fd-tool-btn" title="Bold" onClick={() => wrapText("**")}>
+                              <span className="material-symbols-outlined">format_bold</span>
+                            </button>
+                            <button type="button" className="fd-tool-btn" title="Italic" onClick={() => wrapText("_")}>
+                              <span className="material-symbols-outlined">format_italic</span>
+                            </button>
+                            <button type="button" className="fd-tool-btn" title="List" onClick={() => setFormBody((b) => b + "\n- ")}>
+                              <span className="material-symbols-outlined">format_list_bulleted</span>
+                            </button>
+                            <button type="button" className="fd-tool-btn" title="Link" onClick={() => wrapText("[", "](url)")}>
+                              <span className="material-symbols-outlined">link</span>
+                            </button>
+                            <button type="button" className="fd-tool-btn" title="Image" onClick={() => wrapText("![alt](", ")")}>
+                              <span className="material-symbols-outlined">image</span>
+                            </button>
+                          </div>
+                          <textarea
+                            ref={textareaRef}
+                            className="fd-textarea"
+                            placeholder="Jelaskan detail diskusi Anda di sini..."
+                            rows={9}
+                            value={formBody}
+                            onChange={(e) => setFormBody(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* File upload */}
+                      <div className="fd-field">
+                        <label className="fd-label">Lampirkan File (Opsional)</label>
+                        <div
+                          className={`fd-dropzone ${dragOver ? "fd-dropzone--over" : ""}`}
+                          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                          onDragLeave={() => setDragOver(false)}
+                          onDrop={handleFileDrop}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            style={{ display: "none" }}
+                            onChange={(e) => setAttachedFile(e.target.files[0] || null)}
+                          />
+                          {attachedFile ? (
+                            <div className="fd-attached">
+                              <span className="material-symbols-outlined" style={{ color: "var(--color-secondary)" }}>attach_file</span>
+                              <span className="fd-attached-name">{attachedFile.name}</span>
+                              <button
+                                type="button"
+                                className="fd-attached-remove"
+                                onClick={(e) => { e.stopPropagation(); setAttachedFile(null); }}
+                              >
+                                <span className="material-symbols-outlined">close</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="material-symbols-outlined fd-upload-icon">cloud_upload</span>
+                              <p className="fd-upload-text">
+                                Tarik file ke sini atau{" "}
+                                <span className="fd-upload-link">pilih file</span>
+                              </p>
+                              <p className="fd-upload-hint">PDF, PNG, JPG (Maks. 5MB)</p>
+                            </>
                           )}
                         </div>
                       </div>
 
-                      {/* Replies */}
-                      {isExpanded && thread.replies.length > 0 && (
-                        <div className="fd-replies">
-                          {thread.replies.map((reply) => (
-                            <div key={reply.id} className="fd-reply">
-                              <Avatar src={reply.authorAvatar} initials={reply.authorInitials} color={reply.authorColor} size={36} />
-                              <div className="fd-reply-body">
-                                <div className="fd-reply-header">
-                                  <span className="fd-reply-name">{reply.authorName}</span>
-                                  <span className="fd-reply-time">{reply.time}</span>
-                                </div>
-                                <p className="fd-reply-text" dangerouslySetInnerHTML={{ __html: reply.content }} />
-                                <button
-                                  className={`fd-reply-action ${reply.liked ? "fd-action-btn--liked" : ""}`}
-                                  onClick={() => toggleLike(thread.id, reply.id)}
-                                >
-                                  <span className="material-symbols-outlined" style={{ fontSize: "0.875rem", fontVariationSettings: reply.liked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
-                                  Balas Komentar
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Collapsed indicator */}
-                      {thread.collapsed && !isExpanded && (
-                        <button className="fd-collapsed-pill" onClick={() => toggleExpand(thread.id)}>
-                          <span className="material-symbols-outlined">comment</span>
-                          {thread.replyCount} komentar · Tampilkan semua
-                        </button>
-                      )}
-
-                      {/* Reply input */}
-                      {replyingTo === thread.id && (
-                        <div className="fd-reply-input-wrap">
-                          <Avatar src={AVATAR} initials="F" color="#4b53bc" size={34} />
-                          <div className="fd-reply-input-area">
-                            <textarea
-                              className="fd-reply-textarea"
-                              placeholder="Tulis balasan Anda..."
-                              rows={3}
-                              value={replyText}
-                              onChange={(e) => setReplyText(e.target.value)}
-                            />
-                            <div className="fd-reply-input-actions">
-                              <button className="fd-reply-cancel" onClick={() => { setReplyingTo(null); setReplyText(""); }}>Batal</button>
-                              <button className="fd-reply-submit" onClick={() => submitReply(thread.id)}>
-                                <span className="material-symbols-outlined">send</span>
-                                Kirim Balasan
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {/* ════════════════════ CREATE VIEW ════════════════════ */}
-          {view === "create" && (
-            <>
-              <div className="fd-topbar">
-                <div>
-                  <nav className="fd-breadcrumb">
-                    <span>Mata Kuliah</span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                    <span>Desain Interaksi</span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                    <button className="fd-breadcrumb-link" onClick={() => setView("forum")}>Forum Diskusi</button>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                    <span className="fd-breadcrumb--active">Buat Baru</span>
-                  </nav>
-                  <h2 className="fd-create-title">Buat Diskusi Baru</h2>
-                  <p className="fd-create-sub">Bagikan pemikiran Anda atau tanyakan sesuatu kepada rekan mahasiswa dan dosen.</p>
-                </div>
-              </div>
-
-              <div className="fd-create-card">
-                <form onSubmit={handleSubmit}>
-                  {/* Title field */}
-                  <div className="fd-field">
-                    <label className="fd-label">Judul Diskusi</label>
-                    <input
-                      className="fd-input"
-                      type="text"
-                      placeholder="Ketikkan judul diskusi yang deskriptif..."
-                      value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Body field */}
-                  <div className="fd-field">
-                    <label className="fd-label">Isi Pertanyaan atau Diskusi</label>
-                    <div className="fd-editor-wrap">
-                      {/* Toolbar */}
-                      <div className="fd-toolbar">
-                        <button type="button" className="fd-tool-btn" title="Bold" onClick={() => wrapText("**")}>
-                          <span className="material-symbols-outlined">format_bold</span>
-                        </button>
-                        <button type="button" className="fd-tool-btn" title="Italic" onClick={() => wrapText("_")}>
-                          <span className="material-symbols-outlined">format_italic</span>
-                        </button>
-                        <button type="button" className="fd-tool-btn" title="List" onClick={() => setFormBody((b) => b + "\n- ")}>
-                          <span className="material-symbols-outlined">format_list_bulleted</span>
-                        </button>
-                        <button type="button" className="fd-tool-btn" title="Link" onClick={() => wrapText("[", "](url)")}>
-                          <span className="material-symbols-outlined">link</span>
-                        </button>
-                        <button type="button" className="fd-tool-btn" title="Image" onClick={() => wrapText("![alt](", ")")}>
-                          <span className="material-symbols-outlined">image</span>
+                      {/* Buttons */}
+                      <div className="fd-form-actions">
+                        <button type="button" className="fd-btn-cancel" onClick={() => setView("forum")}>Batal</button>
+                        <button type="submit" className="fd-btn-submit">
+                          <span className="material-symbols-outlined">send</span>
+                          Kirim Diskusi
                         </button>
                       </div>
-                      <textarea
-                        ref={textareaRef}
-                        className="fd-textarea"
-                        placeholder="Jelaskan detail diskusi Anda di sini..."
-                        rows={9}
-                        value={formBody}
-                        onChange={(e) => setFormBody(e.target.value)}
-                      />
-                    </div>
+                    </form>
                   </div>
-
-                  {/* File upload */}
-                  <div className="fd-field">
-                    <label className="fd-label">Lampirkan File (Opsional)</label>
-                    <div
-                      className={`fd-dropzone ${dragOver ? "fd-dropzone--over" : ""}`}
-                      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                      onDragLeave={() => setDragOver(false)}
-                      onDrop={handleFileDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,.png,.jpg,.jpeg"
-                        style={{ display: "none" }}
-                        onChange={(e) => setAttachedFile(e.target.files[0] || null)}
-                      />
-                      {attachedFile ? (
-                        <div className="fd-attached">
-                          <span className="material-symbols-outlined" style={{ color: "var(--color-secondary)" }}>attach_file</span>
-                          <span className="fd-attached-name">{attachedFile.name}</span>
-                          <button
-                            type="button"
-                            className="fd-attached-remove"
-                            onClick={(e) => { e.stopPropagation(); setAttachedFile(null); }}
-                          >
-                            <span className="material-symbols-outlined">close</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <span className="material-symbols-outlined fd-upload-icon">cloud_upload</span>
-                          <p className="fd-upload-text">
-                            Tarik file ke sini atau{" "}
-                            <span className="fd-upload-link">pilih file</span>
-                          </p>
-                          <p className="fd-upload-hint">PDF, PNG, JPG (Maks. 5MB)</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="fd-form-actions">
-                    <button type="button" className="fd-btn-cancel" onClick={() => setView("forum")}>Batal</button>
-                    <button type="submit" className="fd-btn-submit">
-                      <span className="material-symbols-outlined">send</span>
-                      Kirim Diskusi
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </>
+              )}
             </>
           )}
         </div>
