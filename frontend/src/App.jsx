@@ -6,16 +6,17 @@ import DaftarMataKuliah from "./pages/mahasiswa/daftarMataKuliah/daftarMataKulia
 import MataKuliah from "./pages/mahasiswa/mataKuliah/mataKuliah";
 import DaftarTugas from "./pages/mahasiswa/daftarTugas/daftarTugas";
 import Kuis from "./pages/mahasiswa/kuis/kuis";
-import Presensi from "./pages/mahasiswa/presensi/presensi";
 import PresensiMahasiswa from "./pages/mahasiswa/presensiMahasiswa/presensiMahasiswa";
 import ForumDiskusi from "./pages/mahasiswa/forumDiskusi/forumDiskusi";
 import Profile from "./pages/mahasiswa/profile/profile";
 import Nilai from "./pages/mahasiswa/nilai/nilai";
+import PengumpulanTugas from "./pages/mahasiswa/pengumpulanTugas/pengumpulanTugas";
 
 // Dosen-specific pages
 import DosenPresensi from "./pages/dosen/dosenPresensi/dosenPresensi";
 import DosenTugas from "./pages/dosen/dosenTugas/dosenTugas";
 import DosenKelompok from "./pages/dosen/dosenKelompok/dosenKelompok";
+import DosenNilaiIndividu from "./pages/dosen/dosenNilaiIndividu/dosenNilaiIndividu";
 import DosenForum from "./pages/dosen/dosenForum/dosenForum";
 import DosenProfile from "./pages/dosen/dosenProfile/dosenProfile";
 import DosenMateri from "./pages/dosen/dosenMateri/dosenMateri";
@@ -46,7 +47,11 @@ function App() {
   };
 
   if (isLoggedIn) {
-    const sharedProps = { onNavigate: navigateTo, onLogout: handleLogout, ...currentPage };
+    const sharedProps = {
+      onNavigate: navigateTo,
+      onLogout: handleLogout,
+      ...currentPage,
+    };
     const pageName = currentPage.page;
 
     // ── MAHASISWA pages ──
@@ -55,23 +60,21 @@ function App() {
     if (pageName === "mataKuliah") return <MataKuliah {...sharedProps} />;
     if (pageName === "daftarTugas") return <DaftarTugas {...sharedProps} />;
     if (pageName === "kuis") return <Kuis {...sharedProps} />;
-    if (pageName === "presensi") return <Presensi {...sharedProps} />;
     if (pageName === "presensiMahasiswa")
       return <PresensiMahasiswa {...sharedProps} />;
-    if (pageName === "forumDiskusi")
-      return <ForumDiskusi {...sharedProps} />;
+    if (pageName === "forumDiskusi") return <ForumDiskusi {...sharedProps} />;
     if (pageName === "profile") return <Profile {...sharedProps} />;
     if (pageName === "nilai") return <Nilai {...sharedProps} />;
+    if (pageName === "pengumpulanTugas")
+      return <PengumpulanTugas {...sharedProps} taskId={currentPage.taskId} />;
 
     // ── DOSEN-specific pages ──
-    if (pageName === "dosenPresensi")
-      return <DosenPresensi {...sharedProps} />;
+    if (pageName === "dosenPresensi") return <DosenPresensi {...sharedProps} />;
     if (pageName === "dosenTugas") return <DosenTugas {...sharedProps} />;
-    if (pageName === "dosenKelompok")
-      return <DosenKelompok {...sharedProps} />;
+    if (pageName === "dosenKelompok") return <DosenKelompok {...sharedProps} />;
+    if (pageName === "dosenNilaiIndividu") return <DosenNilaiIndividu {...sharedProps} />;
     if (pageName === "dosenForum") return <DosenForum {...sharedProps} />;
-    if (pageName === "dosenProfile")
-      return <DosenProfile {...sharedProps} />;
+    if (pageName === "dosenProfile") return <DosenProfile {...sharedProps} />;
     if (pageName === "dosenMateri") return <DosenMateri {...sharedProps} />;
 
     // Default dashboard per role

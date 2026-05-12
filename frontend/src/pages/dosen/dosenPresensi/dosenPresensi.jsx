@@ -14,11 +14,6 @@ const QR_TTL = 15 * 60;
 const INITIAL_STUDENTS = [];
 
 const STATUS_OPTS = ["Hadir", "Sakit", "Izin", "Alpa"];
-const MATKUL_LIST = [
-  { id: 1, name: "Basis Data",           room: "Lab 302 - Gedung B", time: "08:00 - 10:30" },
-  { id: 2, name: "Pemrograman Web", room: "Ruang A204",          time: "10:30 - 12:00" },
-  { id: 3, name: "Metodologi Penelitian",    room: "Ruang Teater 1",      time: "13:30 - 15:00" },
-];
 
 function statusColor(s) {
   return ({ Hadir: "#2f9696", Sakit: "#4b53bc", Izin: "#c47f17", Alpa: "#dc2626" }[s] ?? "#64748b");
@@ -35,6 +30,8 @@ function fmtTime(sec) {
   return `${m}:${s}`;
 }
 
+const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
 export default function DosenPresensi({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [toast, setToast]     = useState(null);
@@ -42,9 +39,15 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
   const [timeLeft, setTimeLeft] = useState(QR_TTL);
   const [qrLoaded, setQrLoaded] = useState(false);
   const [students, setStudents] = useState(INITIAL_STUDENTS);
-  const [selectedMatkul, setSelectedMatkul] = useState(MATKUL_LIST[0]);
+  const [mataKuliahList, setMataKuliahList] = useState([]);
+  const [selectedMatkul, setSelectedMatkul] = useState({ id: null, name: "Memuat...", room: "-", time: "-", jadwal: "" });
   const [sessionActive, setSessionActive]   = useState(true);
   const [showMatkul, setShowMatkul]         = useState(false);
+  const [showJadwal, setShowJadwal]         = useState(false);
+  const [selectedDays, setSelectedDays]     = useState([]);
+  const [selectedDateFilter, setSelectedDateFilter] = useState("semua");
+  const [tempDate, setTempDate]             = useState("");
+  const [availableDates, setAvailableDates] = useState([]);
   const [page, setPage] = useState(1);
 
   const showToast = (msg, type = "success") => {
@@ -52,21 +55,94 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
+    if (!selectedMatkul?.id) return;
     try {
-      const res = await apiClient.get(`/api/presensi/mata-kuliah/${selectedMatkul.id}`);
-      if (res && res.data) {
-        setStudents(res.data);
-      }
+      // Add cache-busting query param
+      const res = await apiClient.get(`/api/dosen/presensi/matkul/${selectedMatkul.id}/daftar-hadir?_t=${Date.now()}`);
+      const data = res.data || res || [];
+      const allStudents = Array.isArray(data) ? data : [];
+      setStudents(allStudents);
+      
+      // Extract unique dates for filter - handle both string and Date formats
+      const dates = [...new Set(allStudents.map(s => {
+        if (!s.tanggalPertemuan) return null;
+        // Fix timezone issue by matching local date string if possible
+        if (typeof s.tanggalPertemuan === 'string' && s.tanggalPertemuan.includes('T')) {
+           return s.tanggalPertemuan.split('T')[0];
+        }
+        const d = new Date(s.tanggalPertemuan);
+        return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+      }))].filter(Boolean).sort().reverse();
+      setAvailableDates(dates);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching students:", error);
       setStudents([]);
+      setAvailableDates([]);
     }
-  };
+  }, [selectedMatkul?.id]);
 
   useEffect(() => {
-    fetchStudents();
-  }, [selectedMatkul]);
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get('/api/mata-kuliah');
+        const data = Array.isArray(res) ? res : (res.data || []);
+        const formatted = data.map(c => ({
+          id: c.idMataKuliah,
+          name: c.namaMataKuliah,
+          room: c.ruang || "Ruang Kelas",
+          time: c.jadwal || "08:00 - 10:30",
+          jadwal: c.jadwal || ""
+        }));
+        setMataKuliahList(formatted);
+        if (formatted.length > 0 && !selectedMatkul?.id) {
+          setSelectedMatkul(formatted[0]);
+          setSelectedDays(formatted[0].jadwal ? formatted[0].jadwal.split(',') : []);
+        }
+      } catch (error) {
+        console.error("Failed to load courses");
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  // Update selectedDays when selectedMatkul changes
+  useEffect(() => {
+    if (selectedMatkul?.jadwal) {
+      setSelectedDays(selectedMatkul.jadwal.split(','));
+    } else {
+      setSelectedDays([]);
+    }
+  }, [selectedMatkul?.id]);
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showJadwal && !e.target.closest('.dp-jadwal-popup') && !e.target.closest('.dp-btn-outline')) {
+        setShowJadwal(false);
+      }
+      if (showMatkul && !e.target.closest('.dp-matkul-selector') && !e.target.closest('.dp-matkul-dropdown')) {
+        setShowMatkul(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showJadwal, showMatkul]);
+
+  useEffect(() => {
+    if (selectedMatkul?.id) {
+      fetchStudents();
+    }
+  }, [selectedMatkul?.id, fetchStudents]);
+
+  // Auto-refresh daftar hadir setiap 1 detik saat sesi aktif
+  useEffect(() => {
+    if (!selectedMatkul?.id) return;
+    const interval = setInterval(() => {
+      fetchStudents();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [selectedMatkul?.id]);
 
   useEffect(() => {
     if (!sessionActive || timeLeft <= 0) return;
@@ -85,8 +161,14 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
     showToast("QR Code diperbarui!");
   }, []);
 
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = async (id, newStatus) => {
     setStudents((prev) => prev.map((s) => s.id === id ? { ...s, status: newStatus } : s));
+    try {
+      await apiClient.put(`/api/dosen/presensi/${id}/status`, { status: newStatus });
+      showToast("Status diperbarui");
+    } catch (error) {
+      showToast("Gagal memperbarui status", "error");
+    }
   };
 
   const statCount = (status) => students.filter((s) => s.status === status).length;
@@ -119,14 +201,14 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
               <h2 className="dp-page-title">Manajemen Presensi</h2>
               <p className="dp-page-sub">Hasilkan QR Code presensi dan pantau kehadiran mahasiswa secara real-time.</p>
             </div>
-            <div className="dp-top-actions">
+            <div className="dp-top-actions" style={{ position: 'relative' }}>
               <div className="dp-matkul-selector" onClick={() => setShowMatkul(!showMatkul)}>
                 <span className="material-symbols-outlined">menu_book</span>
                 <span>{selectedMatkul.name}</span>
                 <span className="material-symbols-outlined">expand_more</span>
                 {showMatkul && (
                   <div className="dp-matkul-dropdown">
-                    {MATKUL_LIST.map((mk) => (
+                    {mataKuliahList.map((mk) => (
                       <button key={mk.id} className={`dp-matkul-opt ${selectedMatkul.id === mk.id ? "active" : ""}`}
                         onClick={(e) => { e.stopPropagation(); setSelectedMatkul(mk); setShowMatkul(false); handleRefresh(); }}>
                         <strong>{mk.name}</strong>
@@ -136,6 +218,52 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                   </div>
                 )}
               </div>
+              <button className="dp-btn-outline" onClick={() => setShowJadwal(!showJadwal)}>
+                <span className="material-symbols-outlined">calendar_month</span>
+                Pilih Tanggal
+              </button>
+              {showJadwal && (
+                <div className="dp-jadwal-popup" onClick={(e) => e.stopPropagation()}>
+                  <div className="dp-jadwal-header">
+                    <span>Pilih Tanggal Presensi</span>
+                    <button onClick={() => setShowJadwal(false)}>×</button>
+                  </div>
+                  <input 
+                    type="date" 
+                    className="dp-date-input"
+                    value={tempDate}
+                    onChange={(e) => setTempDate(e.target.value)}
+                  />
+                  <button
+                    className="dp-btn-save-jadwal"
+                    onClick={async () => {
+                      if (tempDate) {
+                        setSelectedDateFilter(tempDate);
+                        setShowJadwal(false);
+                        setSessionActive(true);
+                        try {
+                          await apiClient.post(`/api/dosen/presensi/matkul/${selectedMatkul.id}/generate`, { tanggal: tempDate });
+                          showToast(`Sesi dibuat untuk tanggal ${new Date(tempDate).toLocaleDateString('id-ID')}`);
+                          setTimeout(() => fetchStudents(), 500);
+                        } catch (err) {
+                          if (err.message.includes('sudah ada')) {
+                            showToast(`Menampilkan data tanggal ${new Date(tempDate).toLocaleDateString('id-ID')}`);
+                            setTimeout(() => fetchStudents(), 500);
+                          } else {
+                            showToast(err.message || "Gagal membuat sesi", "error");
+                          }
+                        }
+                      } else {
+                        setSelectedDateFilter("semua");
+                        setShowJadwal(false);
+                        showToast("Pilih tanggal atau tampilkan semua");
+                      }
+                    }}
+                  >
+                    Simpan
+                  </button>
+                </div>
+              )}
               <button className="dp-btn-outline" onClick={() => showToast("Laporan diunduh!")}>
                 <span className="material-symbols-outlined">download</span>
                 Unduh Laporan
@@ -146,7 +274,26 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                   Tutup Sesi
                 </button>
               ) : (
-                <button className="dp-btn-primary" onClick={() => { setSessionActive(true); handleRefresh(); }}>
+                <button className="dp-btn-primary" onClick={async () => {
+                  if (!selectedMatkul?.id) {
+                    showToast("Pilih mata kuliah terlebih dahulu", "error");
+                    return;
+                  }
+                  try {
+                    await apiClient.post(`/api/dosen/presensi/matkul/${selectedMatkul.id}/generate`);
+                    setSessionActive(true);
+                    handleRefresh();
+                    showToast("Sesi presensi berhasil dibuat!");
+                  } catch (error) {
+                    if (error.message.includes('sudah ada')) {
+                      setSessionActive(true);
+                      handleRefresh();
+                      showToast("Sesi hari ini sudah ada");
+                    } else {
+                      showToast(error.message || "Gagal membuat sesi", "error");
+                    }
+                  }
+                }}>
                   <span className="material-symbols-outlined">play_circle</span>
                   Buka Sesi
                 </button>
@@ -184,8 +331,8 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                 )}
               </div>
               <div className="dp-qr-token">
-                <span className="dp-token-label">Token</span>
-                <code className="dp-token-value">{token.split("-").slice(0, 2).join("-")}</code>
+                <span className="dp-token-label">Token (untuk input manual)</span>
+                <code className="dp-token-value">{token}</code>
               </div>
               <div className="dp-qr-footer">
                 <div className="dp-ttl-info">
@@ -244,6 +391,15 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                       </p>
                     </div>
                   </div>
+                  <div className="dp-detail-item">
+                    <span className="material-symbols-outlined">calendar_month</span>
+                    <div>
+                      <p className="dp-detail-label">Jadwal Mingguan</p>
+                      <p className="dp-detail-value">
+                        {selectedMatkul.jadwal || "-"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -270,15 +426,24 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
             <div className="dp-table-header">
               <div>
                 <h3>Daftar Hadir Mahasiswa</h3>
-                <p>{students.length} mahasiswa terdaftar</p>
+                <p>{students.filter(s => selectedDateFilter === "semua" || (s.tanggalPertemuan && new Date(s.tanggalPertemuan).toISOString().split('T')[0] === selectedDateFilter)).length} mahasiswa</p>
               </div>
               <div className="dp-table-actions">
-                <button className="dp-icon-btn" onClick={() => showToast("Filter diterapkan!")}>
-                  <span className="material-symbols-outlined">filter_list</span>
+                <button className="dp-icon-btn" onClick={() => { fetchStudents(); showToast("Data diperbarui!"); }}>
+                  <span className="material-symbols-outlined">refresh</span>
                 </button>
-                <button className="dp-icon-btn" onClick={() => showToast("Disortir!")}>
-                  <span className="material-symbols-outlined">sort</span>
-                </button>
+                <select 
+                  className="dp-date-filter"
+                  value={selectedDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                >
+                  <option value="semua">Semua Tanggal</option>
+                  {availableDates.map(date => (
+                    <option key={date} value={date}>
+                      {new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="dp-table-wrap">
@@ -287,12 +452,26 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                   <tr>
                     <th>NAMA MAHASISWA</th>
                     <th>NIM</th>
+                    <th>WAKTU PRESENSI</th>
                     <th>STATUS KEHADIRAN</th>
                     <th>AKSI</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((s) => (
+                  {students
+                    .filter(s => {
+                      if (selectedDateFilter === "semua") return true;
+                      let sDate = null;
+                      if (s.tanggalPertemuan) {
+                        if (typeof s.tanggalPertemuan === 'string' && s.tanggalPertemuan.includes('T')) {
+                          sDate = s.tanggalPertemuan.split('T')[0];
+                        } else {
+                          sDate = new Date(s.tanggalPertemuan).toISOString().split('T')[0];
+                        }
+                      }
+                      return sDate === selectedDateFilter;
+                    })
+                    .map((s) => (
                     <tr key={s.id}>
                       <td>
                         <div className="dp-student-cell">
@@ -305,6 +484,9 @@ export default function DosenPresensi({ onNavigate, onLogout }) {
                         </div>
                       </td>
                       <td className="dp-nim">{s.nim}</td>
+                      <td className="dp-time">
+                        {s.waktuPresensi ? new Date(s.waktuPresensi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
                       <td>
                         <div className="dp-status-wrap">
                           <select

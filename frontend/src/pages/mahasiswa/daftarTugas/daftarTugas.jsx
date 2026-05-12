@@ -1,20 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../shared.css";
 import "./daftarTugas.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
-
-const ALL_TASKS = [
-  { id: 1, course: "PBO",                deadlineLabel: "Besok, 23:59",  deadlineUrgent: true,  name: "Tugas PBO - Praktikum 7",           progress: 50,  status: "sedang_berjalan", action: "lanjutkan", isQuiz: false },
-  { id: 2, course: "BASIS DATA",         deadlineLabel: "3 Hari Lagi",   deadlineUrgent: false, name: "Laporan Basis Data - Modul 4",        progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: false },
-  { id: 3, course: "ALGORITMA",          deadlineLabel: "Telah Selesai", deadlineUrgent: false, name: "Kuis Pemrograman Dasar",              progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: true },
-  { id: 4, course: "ARSITEKTUR KOMPUTER",deadlineLabel: "5 Hari Lagi",   deadlineUrgent: false, name: "Analisis Pipeline Prosesor",          progress: 25,  status: "sedang_berjalan", action: "lanjutkan", isQuiz: false },
-  { id: 5, course: "DESAIN INTERAKSI",   deadlineLabel: "7 Hari Lagi",   deadlineUrgent: false, name: "Prototipe Antarmuka Mobile (Figma)",  progress: 0,   status: "belum_dikerjakan", action: "lanjutkan", isQuiz: false },
-];
 
 const FILTERS = [
   { key: "semua",            label: "Semua" },
@@ -29,19 +22,96 @@ function getBarColor(status, progress) {
   return "#c47f17";
 }
 
+function formatDeadlineLabel(deadlineTugas, sudahKumpul) {
+  if (!deadlineTugas) return "Tanpa deadline";
+  const d = new Date(deadlineTugas);
+  const now = new Date();
+  const diffMs = d - now;
+  const diffH = Math.ceil(diffMs / (1000 * 60 * 60));
+  if (sudahKumpul) return "Telah Dikumpulkan";
+  if (diffH <= 0) return "Deadline telah lewat";
+  if (diffH <= 24) return `${diffH} Jam Lagi`;
+  const diffD = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  return `${diffD} Hari Lagi`;
+}
+
 export default function DaftarTugas({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [activeFilter, setActiveFilter] = useState("semua");
   const [toast, setToast] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const filtered = activeFilter === "semua"
-    ? ALL_TASKS
-    : ALL_TASKS.filter((t) => t.status === activeFilter);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const nim = user.nomorInduk || "";
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const res = await apiClient.get('/api/tugas');
+      const raw = Array.isArray(res) ? res : (res.data || []);
+      const enriched = raw.map(t => {
+        const deadline = t.deadlineTugas ? new Date(t.deadlineTugas) : null;
+        const now = new Date();
+        const sudahKumpul = t.sudahKumpul === true;
+        let status = "belum_dikerjakan";
+        let progress = 0;
+        if (sudahKumpul) {
+          status = "selesai";
+          progress = 100;
+        } else if (deadline && deadline < now) {
+          status = "sedang_berjalan";
+          progress = 50;
+        }
+          return {
+            id: t.id,
+            idMataKuliah: t.idMataKuliah,
+            course: t.mataKuliah || "Mata Kuliah",
+            deadlineLabel: formatDeadlineLabel(t.deadlineTugas, sudahKumpul),
+            deadlineUrgent: deadline ? (deadline - now < 24 * 60 * 60 * 1000 && !sudahKumpul) : false,
+            name: t.judul,
+            progress,
+            status,
+            action: "lanjutkan",
+            isQuiz: false,
+          };
+      });
+      setTasks(enriched);
+    } catch (error) {
+      console.error(error);
+      showToast("Gagal memuat daftar tugas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get('/api/mata-kuliah');
+        setCourses(Array.isArray(res) ? res : (res.data || []));
+      } catch (err) {
+        console.error("Gagal memuat mata kuliah", err);
+      }
+    };
+    fetchCourses();
+    fetchTasks();
+  }, []);
+
+  const filteredByStatus = activeFilter === "semua"
+    ? tasks
+    : tasks.filter((t) => t.status === activeFilter);
+  
+  const filtered = selectedCourse === "all"
+    ? filteredByStatus
+    : filteredByStatus.filter(t => t.idMataKuliah === parseInt(selectedCourse));
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
@@ -82,26 +152,49 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
           </div>
 
           {/* Filter Tabs */}
-          <div className="dt-filter-tabs">
-            {FILTERS.map((f) => (
-              <button
-                key={f.key}
-                className={`dt-filter-btn ${activeFilter === f.key ? "dt-filter-btn--active" : ""}`}
-                onClick={() => setActiveFilter(f.key)}
+          <div className="dt-filter-section" style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", justifyContent: "space-between" }}>
+            <div className="dt-filter-tabs" style={{ marginBottom: 0 }}>
+              {FILTERS.map((f) => (
+                <button
+                  key={f.key}
+                  className={`dt-filter-btn ${activeFilter === f.key ? "dt-filter-btn--active" : ""}`}
+                  onClick={() => setActiveFilter(f.key)}
+                >
+                  {f.label}
+                  {f.key !== "semua" && (
+                    <span className="dt-filter-count">
+                      {tasks.filter((t) => t.status === f.key).length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            
+            {/* Course Filter Dropdown */}
+            <div className="dt-course-filter" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span className="material-symbols-outlined" style={{ color: "var(--slate-500)", fontSize: "1.2rem" }}>filter_list</span>
+              <select 
+                className="prf-input" 
+                style={{ padding: "0.5rem 1rem", minWidth: "200px" }}
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
               >
-                {f.label}
-                {f.key !== "semua" && (
-                  <span className="dt-filter-count">
-                    {ALL_TASKS.filter((t) => t.status === f.key).length}
-                  </span>
-                )}
-              </button>
-            ))}
+                <option value="all">Semua Mata Kuliah</option>
+                {courses.map(c => (
+                  <option key={c.idMataKuliah} value={c.idMataKuliah}>{c.namaMataKuliah}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Task List */}
           <div className="dt-task-list">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="dt-empty">
+                <span className="material-symbols-outlined">hourglass_empty</span>
+                <p>Memuat tugas...</p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="dt-empty">
                 <span className="material-symbols-outlined">task_alt</span>
                 <p>Tidak ada tugas dalam kategori ini.</p>
@@ -121,21 +214,12 @@ export default function DaftarTugas({ onNavigate, onLogout }) {
                       </span>
                     </div>
                     {/* Action button */}
-                    {task.action === "lanjutkan" ? (
-                      <button
-                        className="dt-btn dt-btn--primary"
-                        onClick={() => onNavigate && onNavigate(task.isQuiz ? "kuis" : "mataKuliah")}
-                      >
-                        Lanjutkan
-                      </button>
-                    ) : (
-                      <button
-                        className="dt-btn dt-btn--outline"
-                        onClick={() => showToast(`Membuka detail: ${task.name}`)}
-                      >
-                        Lihat Detail
-                      </button>
-                    )}
+                    <button
+                      className="dt-btn dt-btn--primary"
+                      onClick={() => onNavigate && onNavigate({ page: "pengumpulanTugas", taskId: task.id })}
+                    >
+                      Lihat Detail
+                    </button>
                   </div>
 
                   {/* Task name */}

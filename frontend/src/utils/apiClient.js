@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+// When VITE_API_URL is set, use it directly. Otherwise use relative path (proxy handles it).
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("token");

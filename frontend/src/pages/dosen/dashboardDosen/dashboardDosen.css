@@ -21,7 +21,7 @@
 
 .dd-subtitle { color: var(--slate-600); font-weight: 500; }
 
-.dd-action-row { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+.dd-action-row { display: flex; flex-wrap: wrap; gap: 0.625rem; justify-content: flex-end; }
 
 .dd-btn {
   display: flex;

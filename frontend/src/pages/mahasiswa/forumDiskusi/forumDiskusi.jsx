@@ -4,86 +4,11 @@ import "./forumDiskusi.css";
 import Sidebar from "../../../Sidebar";
 import { useSidebar } from "../../../useSidebar";
 import Navbar from "../../../Navbar";
+import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
-const INITIAL_THREADS = [
-  {
-    id: 1,
-    authorName: "Dr. Aris Setiawan",
-    authorRole: "DOSEN PENGAMPU",
-    authorAvatar: "https://i.pravatar.cc/48?img=12",
-    authorColor: null,
-    authorInitials: null,
-    time: "15 menit yang lalu",
-    content:
-      'Ada pertanyaan soal materi hari ini? Kita sudah membahas tentang <strong>Fitts\' Law</strong> dan penerapannya pada desain antarmuka mobile. Silakan tuliskan poin yang paling menantang bagi Anda.',
-    likes: 12,
-    liked: false,
-    replies: [
-      {
-        id: 11,
-        authorName: "Fajar Ramadhan",
-        authorAvatar: "https://i.pravatar.cc/40?img=33",
-        authorColor: null,
-        authorInitials: null,
-        time: "8 MENIT YANG LALU",
-        content:
-          "Izin bertanya Pak, bagaimana penerapan Fitts' Law pada desain perangkat yang menggunakan <em>haptic feedback</em> berlibih? Apakah ada penyesuaian ukuran target secara dinamis?",
-        likes: 0,
-        liked: false,
-      },
-      {
-        id: 12,
-        authorName: "Siti Nurhaliza",
-        authorAvatar: null,
-        authorColor: "#2f9696",
-        authorInitials: "SN",
-        time: "BARU SAJA",
-        content:
-          "Sangat menarik materi tadi Pak. Menurut saya, yang paling menantang adalah menyeimbangkan antara <em>distance to target</em> dengan estetika visual yang minimalis di layar smartphone kecil.",
-        likes: 0,
-        liked: false,
-      },
-    ],
-    replyCount: 2,
-  },
-  {
-    id: 2,
-    authorName: "Andi Wijaya",
-    authorRole: null,
-    authorAvatar: null,
-    authorColor: "#c47f17",
-    authorInitials: "AW",
-    time: "3 jam yang lalu",
-    title: "Diskusi: Prinsip Gestalt",
-    content:
-      "Apakah pengelompokan elemen berdasarkan warna (Prinsip Similarity) selalu lebih efektif dibandingkan kedekatan posisi?",
-    likes: 5,
-    liked: false,
-    replies: [],
-    replyCount: 24,
-    collapsed: true,
-  },
-  {
-    id: 3,
-    authorName: "Rizky Pratama",
-    authorRole: null,
-    authorAvatar: "https://i.pravatar.cc/48?img=60",
-    authorColor: null,
-    authorInitials: null,
-    time: "1 hari yang lalu",
-    title: "Diskusi: Hick's Law dalam Menu Navigasi",
-    content:
-      "Bagaimana kita menentukan jumlah optimal item menu agar sesuai dengan Hick's Law tanpa mengorbankan fitur penting aplikasi?",
-    likes: 8,
-    liked: false,
-    replies: [],
-    replyCount: 11,
-    collapsed: true,
-  },
-];
 
 function Avatar({ src, initials, color, size = 40 }) {
   if (src) {
@@ -106,17 +31,20 @@ function Avatar({ src, initials, color, size = 40 }) {
   );
 }
 
-import { apiClient } from "../../../utils/apiClient";
+const COURSE_COLORS = ["#4b53bc", "#2f9696", "#c47f17", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#be185d"];
 
-export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 }) {
+export default function ForumDiskusi({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [view, setView] = useState("forum"); // "forum" | "create"
+  const [view, setView] = useState("courses"); // "courses" | "forum" | "create"
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
-  const [replyingTo, setReplyingTo] = useState(null);   // thread id
+  const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [expandedIds, setExpandedIds] = useState(new Set([1]));
+  const [mataKuliahList, setMataKuliahList] = useState([]);
+  const [selectedMatkul, setSelectedMatkul] = useState(null);
+  const [loadingCourses, setLoadingCourses] = useState(true);
 
   // Create form state
   const [formTitle, setFormTitle] = useState("");
@@ -126,29 +54,58 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
+  // Fetch mata kuliah list
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get('/api/mata-kuliah');
+        const data = Array.isArray(res) ? res : (res.data || []);
+        setMataKuliahList(data);
+      } catch (error) {
+        console.error("Failed to load courses", error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const handleSelectCourse = (matkul) => {
+    setSelectedMatkul(matkul);
+    setView("forum");
+  };
+
+  const handleBackToCourses = () => {
+    setView("courses");
+    setSelectedMatkul(null);
+    setThreads([]);
+  };
+
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 4000);
   };
 
-  useEffect(() => {
-    const fetchThreads = async () => {
-      try {
-        const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
-        const data = res.data || res;
-        if (Array.isArray(data) && data.length > 0) {
+  const fetchForumThreads = async (matkulId) => {
+    const id = matkulId || (selectedMatkul && selectedMatkul.idMataKuliah);
+    if (!id) return;
+    try {
+      setLoading(true);
+      const res = await apiClient.get(`/api/forum/mata-kuliah/${id}`);
+      const data = res.data || res;
+      if (Array.isArray(data) && data.length > 0) {
           const formatted = data.map(t => ({
             id: t.id,
             authorName: t.authorName || "User",
             authorRole: t.authorRole || null,
             authorAvatar: null,
-            authorColor: "#2f9696",
+            authorColor: t.authorRole === "DOSEN" ? "#4b53bc" : "#2f9696",
             authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
-            time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
+            time: t.time ? new Date(t.time).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }) : "",
             title: t.title || "",
             content: t.content || "",
-            likes: 0,
-            liked: false,
+            likes: t.likesCount || 0,
+            liked: t.isLiked || false,
             replies: (t.comments || []).map(c => ({
               id: c.id,
               authorName: c.authorName || "User",
@@ -163,17 +120,19 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
             collapsed: (t.comments || []).length > 0
           }));
           setThreads(formatted);
-        } else {
-          setThreads(INITIAL_THREADS); // fallback if empty
-        }
-      } catch (error) {
-        setThreads(INITIAL_THREADS);
-      } finally {
-        setLoading(false);
+      } else {
+        setThreads([]);
       }
-    };
-    fetchThreads();
-  }, [idMataKuliah]);
+    } catch (error) {
+      setThreads([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedMatkul) fetchForumThreads(selectedMatkul.idMataKuliah);
+  }, [selectedMatkul]);
 
   // ── Toolbar actions (simulate rich-text with markdown-like wrap) ──
   const wrapText = (before, after = before) => {
@@ -200,55 +159,25 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
     }
 
     try {
-      await apiClient.post("/api/forum/create", {
-        idMataKuliah,
+      await apiClient.post("/api/forum/thread", {
+        idMataKuliah: selectedMatkul.idMataKuliah,
         judul: formTitle.trim(),
         isiForum: formBody.trim()
       });
       showToast("success", "Diskusi berhasil dibuat!");
-      // Refetch
-      const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
-      const data = res.data || res;
-      if (Array.isArray(data)) {
-        const formatted = data.map(t => ({
-          id: t.id,
-          authorName: t.authorName || "User",
-          authorRole: t.authorRole || null,
-          authorAvatar: null,
-          authorColor: "#2f9696",
-          authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
-          time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
-          title: t.title || "",
-          content: t.content || "",
-          likes: 0,
-          liked: false,
-          replies: (t.comments || []).map(c => ({
-            id: c.id,
-            authorName: c.authorName || "User",
-            authorInitials: (c.authorName || "U").substring(0, 2).toUpperCase(),
-            authorColor: "#64748b",
-            time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
-            content: c.content || "",
-            likes: 0,
-            liked: false,
-          })),
-          replyCount: (t.comments || []).length,
-          collapsed: (t.comments || []).length > 0
-        }));
-        setThreads(formatted);
-      }
+      setFormTitle("");
+      setFormBody("");
+      setAttachedFile(null);
+      setView("forum");
+      fetchForumThreads();
     } catch (error) {
-      showToast("error", "Gagal membuat diskusi");
+      showToast("error", error.message || "Gagal membuat diskusi");
     }
-
-    setFormTitle("");
-    setFormBody("");
-    setAttachedFile(null);
-    setView("forum");
   };
 
   // ── Like ──
-  const toggleLike = (threadId, replyId) => {
+  const toggleLike = async (threadId, replyId) => {
+    // Optimistic update
     setThreads((prev) =>
       prev.map((t) => {
         if (t.id === threadId && !replyId) {
@@ -267,51 +196,30 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
         return t;
       })
     );
+    // Persist to backend
+    try {
+      await apiClient.post('/api/forum/like', { idForum: threadId });
+    } catch (error) {
+      console.error('Like error:', error);
+      // Revert on error by refetching
+      fetchForumThreads();
+    }
   };
 
   // ── Submit reply ──
   const submitReply = async (threadId) => {
     if (!replyText.trim()) return;
     try {
-      await apiClient.post(`/api/forum/${threadId}/reply`, {
+      await apiClient.post('/api/forum/comment', {
+        idForum: threadId,
         isiKomentar: replyText.trim()
       });
-      // Refetch threads to show the new reply
-      const res = await apiClient.get(`/api/forum/mata-kuliah/${idMataKuliah}`);
-      const data = res.data || res;
-      if (Array.isArray(data)) {
-        const formatted = data.map(t => ({
-          id: t.id,
-          authorName: t.authorName || "User",
-          authorRole: t.authorRole || null,
-          authorAvatar: null,
-          authorColor: "#2f9696",
-          authorInitials: (t.authorName || "U").substring(0, 2).toUpperCase(),
-          time: t.time ? new Date(t.time).toLocaleDateString("id-ID") : "",
-          title: t.title || "",
-          content: t.content || "",
-          likes: 0,
-          liked: false,
-          replies: (t.comments || []).map(c => ({
-            id: c.id,
-            authorName: c.authorName || "User",
-            authorInitials: (c.authorName || "U").substring(0, 2).toUpperCase(),
-            authorColor: "#64748b",
-            time: c.time ? new Date(c.time).toLocaleDateString("id-ID") : "",
-            content: c.content || "",
-            likes: 0,
-            liked: false,
-          })),
-          replyCount: (t.comments || []).length,
-          collapsed: (t.comments || []).length > 0
-        }));
-        setThreads(formatted);
-        // Auto-expand the thread we just replied to
-        setExpandedIds(prev => new Set([...prev, threadId]));
-      }
       setReplyingTo(null);
       setReplyText("");
       showToast("success", "Balasan berhasil dikirim!");
+      // Refetch threads to show the new reply
+      await fetchForumThreads();
+      setExpandedIds(prev => new Set([...prev, threadId]));
     } catch (error) {
       showToast("error", error.message || "Gagal mengirim balasan");
     }
@@ -352,40 +260,100 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
       <SidebarView />
 
       <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar role="Mahasiswa" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
+        <Navbar role="Mahasiswa" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
 
         <div className="page-content">
-          {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>Memuat forum...</div>
-          ) : (
+          {/* ════════════════════ COURSE LIST VIEW ════════════════════ */}
+          {view === "courses" && (
             <>
-              {/* ════════════════════ FORUM LIST VIEW ════════════════════ */}
-              {view === "forum" && (
-                <>
-                  {/* Top bar */}
-                  <div className="fd-topbar">
-                    <div>
-                      <nav className="fd-breadcrumb">
-                        <span>MATA KULIAH</span>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                        <span>DESAIN INTERAKSI</span>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                        <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
-                      </nav>
-                      <h2 className="fd-page-title">Forum Diskusi Kelas</h2>
-                      <p className="fd-page-sub">
-                        Ruang kolaborasi untuk mendalami materi Desain Interaksi pekan ini.<br />
-                        Silakan berbagi pandangan atau bertanya langsung kepada pengampu.
-                      </p>
-                    </div>
-                    <button className="fd-new-btn" onClick={() => setView("create")}>
-                      <span className="material-symbols-outlined">add</span>
-                      Mulai Diskusi Baru
-                    </button>
-                  </div>
+              <div className="fd-topbar">
+                <div>
+                  <nav className="fd-breadcrumb">
+                    <span>LMS</span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
+                  </nav>
+                  <h2 className="fd-page-title">Forum Diskusi</h2>
+                  <p className="fd-page-sub">
+                    Pilih mata kuliah untuk melihat forum diskusi kelas.
+                  </p>
+                </div>
+              </div>
 
-                  {/* Thread list */}
-                  <div className="fd-thread-list">
+              {loadingCourses ? (
+                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat daftar mata kuliah...</div>
+              ) : mataKuliahList.length === 0 ? (
+                <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>school</span>
+                  <h3>Tidak Ada Mata Kuliah</h3>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada mata kuliah yang tersedia.</p>
+                </div>
+              ) : (
+                <div className="fd-course-grid">
+                  {mataKuliahList.map((mk, i) => (
+                    <div
+                      key={mk.idMataKuliah}
+                      className="fd-course-card"
+                      onClick={() => handleSelectCourse(mk)}
+                    >
+                      <div className="fd-course-accent" style={{ backgroundColor: COURSE_COLORS[i % COURSE_COLORS.length] }}></div>
+                      <div className="fd-course-body">
+                        <div className="fd-course-icon" style={{ background: `${COURSE_COLORS[i % COURSE_COLORS.length]}15`, color: COURSE_COLORS[i % COURSE_COLORS.length] }}>
+                          <span className="material-symbols-outlined">forum</span>
+                        </div>
+                        <h3 className="fd-course-name">{mk.namaMataKuliah}</h3>
+                        <p className="fd-course-code">Kode: MK{String(mk.idMataKuliah).padStart(3, '0')}</p>
+                        <div className="fd-course-footer">
+                          <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>arrow_forward</span>
+                          <span>Lihat Forum</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ════════════════════ FORUM LIST VIEW ════════════════════ */}
+          {view === "forum" && (
+            <>
+              {/* Top bar */}
+              <div className="fd-topbar">
+                <div>
+                  <nav className="fd-breadcrumb">
+                    <button className="fd-breadcrumb-link" onClick={handleBackToCourses}>FORUM DISKUSI</button>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="fd-breadcrumb--active">{selectedMatkul?.namaMataKuliah || "MATA KULIAH"}</span>
+                  </nav>
+                  <h2 className="fd-page-title">Forum Diskusi — {selectedMatkul?.namaMataKuliah}</h2>
+                  <p className="fd-page-sub">
+                    Ruang kolaborasi untuk mendalami materi kuliah.<br />
+                    Silakan berbagi pandangan atau bertanya langsung kepada pengampu.
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: "0.625rem", flexShrink: 0 }}>
+                  <button className="fd-new-btn" style={{ backgroundColor: "var(--color-secondary)" }} onClick={handleBackToCourses}>
+                    <span className="material-symbols-outlined">arrow_back</span>
+                    Kembali
+                  </button>
+                  <button className="fd-new-btn" onClick={() => setView("create")}>
+                    <span className="material-symbols-outlined">add</span>
+                    Mulai Diskusi Baru
+                  </button>
+                </div>
+              </div>
+
+              {loading ? (
+                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat diskusi...</div>
+              ) : threads.length === 0 ? (
+                <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>forum</span>
+                  <h3>Belum Ada Diskusi</h3>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada yang memulai diskusi di mata kuliah ini.</p>
+                </div>
+              ) : (
+              <div className="fd-thread-list">
                     {threads.map((thread) => {
                       const isExpanded = expandedIds.has(thread.id);
                       return (
@@ -409,7 +377,7 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
                             </div>
                             <div
                               className="fd-thread-body"
-                              dangerouslySetInnerHTML={{ __html: thread.content }}
+                              dangerouslySetInnerHTML={{ __html: thread.content || "" }}
                             />
                             <div className="fd-thread-actions">
                               <button
@@ -443,7 +411,7 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
                                       <span className="fd-reply-name">{reply.authorName}</span>
                                       <span className="fd-reply-time">{reply.time}</span>
                                     </div>
-                                    <p className="fd-reply-text" dangerouslySetInnerHTML={{ __html: reply.content }} />
+                                    <p className="fd-reply-text" dangerouslySetInnerHTML={{ __html: reply.content || "" }} />
                                     <button
                                       className={`fd-reply-action ${reply.liked ? "fd-action-btn--liked" : ""}`}
                                       onClick={() => toggleLike(thread.id, reply.id)}
@@ -490,24 +458,23 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
                         </div>
                       );
                     })}
-                  </div>
-                </>
+              </div>
               )}
+            </>
+          )}
 
-              {/* ════════════════════ CREATE VIEW ════════════════════ */}
-              {view === "create" && (
-                <>
-                  <div className="fd-topbar">
-                    <div>
-                      <nav className="fd-breadcrumb">
-                        <span>Mata Kuliah</span>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                        <span>Desain Interaksi</span>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                        <button className="fd-breadcrumb-link" onClick={() => setView("forum")}>Forum Diskusi</button>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                        <span className="fd-breadcrumb--active">Buat Baru</span>
-                      </nav>
+          {/* ════════════════════ CREATE VIEW ════════════════════ */}
+          {view === "create" && (
+            <>
+              <div className="fd-topbar">
+                <div>
+                  <nav className="fd-breadcrumb">
+                    <button className="fd-breadcrumb-link" onClick={handleBackToCourses}>Forum Diskusi</button>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <button className="fd-breadcrumb-link" onClick={() => setView("forum")}>{selectedMatkul?.namaMataKuliah || "Mata Kuliah"}</button>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="fd-breadcrumb--active">Buat Baru</span>
+                  </nav>
                       <h2 className="fd-create-title">Buat Diskusi Baru</h2>
                       <p className="fd-create-sub">Bagikan pemikiran Anda atau tanyakan sesuatu kepada rekan mahasiswa dan dosen.</p>
                     </div>
@@ -611,9 +578,7 @@ export default function ForumDiskusi({ onNavigate, onLogout, idMataKuliah = 1 })
                         </button>
                       </div>
                     </form>
-                  </div>
-                </>
-              )}
+              </div>
             </>
           )}
         </div>

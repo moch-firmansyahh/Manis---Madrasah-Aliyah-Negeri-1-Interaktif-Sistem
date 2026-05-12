@@ -9,10 +9,13 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR_DOSEN =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 export default function DashboardDosen({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [toast, setToast] = useState(null);
   const [detailMatkul, setDetailMatkul] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(AVATAR_DOSEN);
 
   const [dashboardData, setDashboardData] = useState({
     lecturerName: "Dosen",
@@ -29,6 +32,10 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        if (storedUser.fotoUrl) {
+          setAvatarUrl(`${API_BASE}${storedUser.fotoUrl}`);
+        }
         const res = await apiClient.get('/api/dosen/dashboard');
         if (res && res.data) {
           setDashboardData(res.data);
@@ -151,14 +158,25 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
               <p className="dd-stat-value">{dashboardData.stats.totalMahasiswa}</p>
             </div>
 
-            <div className="dd-stat-card" style={{ cursor: "pointer" }} onClick={() => nav("dosenKelompok")}>
+            <div className="dd-stat-card" style={{ cursor: "pointer" }} onClick={() => nav("dosenNilaiIndividu")}>
               <div className="dd-stat-top">
                 <div className="dd-stat-icon dd-icon--orange">
-                  <span className="material-symbols-outlined">pending_actions</span>
+                  <span className="material-symbols-outlined">person</span>
                 </div>
                 <span className="dd-badge dd-badge--orange">Butuh Perhatian</span>
               </div>
-              <p className="dd-stat-label">Tugas Belum Dinilai</p>
+              <p className="dd-stat-label">Tugas Individu Pending</p>
+              <p className="dd-stat-value">{dashboardData.stats.tugasPending}</p>
+            </div>
+
+            <div className="dd-stat-card" style={{ cursor: "pointer" }} onClick={() => nav("dosenKelompok")}>
+              <div className="dd-stat-top">
+                <div className="dd-stat-icon dd-icon--purple">
+                  <span className="material-symbols-outlined">groups</span>
+                </div>
+                <span className="dd-badge dd-badge--purple">Butuh Perhatian</span>
+              </div>
+              <p className="dd-stat-label">Tugas Kelompok Pending</p>
               <p className="dd-stat-value">{dashboardData.stats.tugasPending}</p>
             </div>
 
@@ -178,7 +196,8 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
           <div className="dd-quick-nav">
             {[
               { icon: "assignment", label: "Manajemen Tugas", page: "dosenTugas", color: "var(--color-secondary)" },
-              { icon: "groups", label: "Kelompok & Nilai", page: "dosenKelompok", color: "#2f9696" },
+              { icon: "groups", label: "Nilai Kelompok", page: "dosenKelompok", color: "#2f9696" },
+              { icon: "assignment_ind", label: "Nilai Individu", page: "dosenNilaiIndividu", color: "#c47f17" },
               { icon: "menu_book", label: "Manajemen Materi", page: "dosenMateri", color: "#c47f17" },
               { icon: "how_to_reg", label: "Presensi & QR", page: "dosenPresensi", color: "#7c3aed" },
               { icon: "forum", label: "Forum Diskusi", page: "dosenForum", color: "#0891b2" },
@@ -201,7 +220,8 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 <h3 className="dd-table-title">Tugas Menunggu Penilaian</h3>
                 <p className="dd-table-sub">Prioritas penilaian berdasarkan tenggat waktu pengumpulan.</p>
               </div>
-              <button className="dd-table-link" onClick={() => nav("dosenKelompok")}>Lihat Semua →</button>
+              <button className="dd-table-link" onClick={() => nav("dosenNilaiIndividu")}>Lihat Tugas Individu →</button>
+                <button className="dd-table-link" onClick={() => nav("dosenKelompok")} style={{ marginLeft: '1rem' }}>Lihat Tugas Kelompok →</button>
             </div>
             <div className="dd-table-wrapper">
               <table className="dd-table">
@@ -216,7 +236,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                 </thead>
                 <tbody>
                   {dashboardData.pendingTasks.length > 0 ? dashboardData.pendingTasks.map((row, i) => (
-                    <tr key={i} style={{ cursor: "pointer" }} onClick={() => nav("dosenKelompok")}>
+                    <tr key={i} style={{ cursor: "pointer" }} onClick={() => nav(row.navigationPage || "dosenKelompok")}>
                       <td>
                         <div className="dd-student-cell">
                           <div className={`dd-avatar ${row.av}`}>{row.code}</div>
@@ -236,7 +256,7 @@ export default function DashboardDosen({ onNavigate, onLogout }) {
                       </td>
                       <td><span className="dd-status-badge">Submitted</span></td>
                       <td style={{ textAlign: "right" }}>
-                        <button className="dd-grade-btn" onClick={(e) => { e.stopPropagation(); nav("dosenKelompok"); }}>
+                        <button className="dd-grade-btn" onClick={(e) => { e.stopPropagation(); nav(row.navigationPage || "dosenKelompok"); }}>
                           Beri Nilai
                         </button>
                       </td>

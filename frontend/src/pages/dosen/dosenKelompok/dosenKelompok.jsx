@@ -9,20 +9,10 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const ALL_STUDENTS = [
-  { id: "S1", name: "Aditya Arisandy", nim: "2021081001", color: "#8991fe" },
-  { id: "S2", name: "Bella Puspita", nim: "2021081042", color: "#2f9696" },
-  { id: "S3", name: "Dimas Anggara", nim: "2021081056", color: "#c47f17" },
-  { id: "S4", name: "Eka Wahyuni", nim: "2021081098", color: "#4b53bc" },
-  { id: "S5", name: "Fajar Ramadhan", nim: "2021081073", color: "#059669" },
-  { id: "S6", name: "Gina Sari", nim: "2021081089", color: "#dc2626" },
-  { id: "S7", name: "Hendra Susanto", nim: "2021081102", color: "#7c3aed" },
-  { id: "S8", name: "Indah Permata", nim: "2021081115", color: "#0891b2" },
-];
-
-const INITIAL_GROUPS = [];
+const MEMBER_COLORS = ["#4b53bc", "#2f9696", "#c47f17", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#be185d", "#8991fe"];
 
 function initials(name) {
+  if (!name) return "?";
   return name
     .split(" ")
     .slice(0, 2)
@@ -53,68 +43,85 @@ function statusBg(status) {
 
 export default function DosenKelompok({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [groups, setGroups] = useState(INITIAL_GROUPS);
+  const [groups, setGroups] = useState([]);
   const [toast, setToast] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [nilaiModal, setNilaiModal] = useState(null); // group
+  const [nilaiModal, setNilaiModal] = useState(null);
   const [gradeInputs, setGradeInputs] = useState({});
   const [addMemberModal, setAddMemberModal] = useState(null);
   const [createModal, setCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [allStudents, setAllStudents] = useState([]);
+  const [mataKuliahList, setMataKuliahList] = useState([]);
+  const [selectedMkId, setSelectedMkId] = useState("");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
+  const normalizeGroup = (g) => {
+    const members = (g.members || []).map(m =>
+      typeof m === 'string' ? { nim: m, name: m, nomorInduk: m } : m
+    );
+    return { ...g, members, nilai: g.nilai || {} };
+  };
+
   const fetchGroups = async () => {
     try {
-      const res = await apiClient.get('/api/kelompok/1'); // default idMataKuliah = 1
-      if (res && res.data) {
-        const formatted = res.data.map(g => {
-          const membersList = g.anggota ? g.anggota.map(a => a.mahasiswa.nomorInduk) : [];
-          const nilaiDict = {};
-          if (g.anggota) {
-            g.anggota.forEach(a => {
-              nilaiDict[a.mahasiswa.nomorInduk] = a.nilai || "";
-            });
-          }
-          return {
-            id: g.idKelompok,
-            name: g.namaKelompok,
-            color: "#4b53bc", // default color
-            task: g.tugas?.judul || "–",
-            members: membersList,
-            progress: 0,
-            status: "Not Started",
-            submitted: false,
-            nilai: nilaiDict
-          };
-        });
-        setGroups(formatted);
+      const res = await apiClient.get('/api/kelompok');
+      const data = res?.data || res;
+      if (Array.isArray(data)) {
+        setGroups(data.map(normalizeGroup));
       }
     } catch (error) {
-      console.error(error);
+      console.error("Gagal memuat kelompok:", error);
+    }
+  };
+
+  const fetchAllStudents = async () => {
+    try {
+      const data = await apiClient.get('/api/kelompok/mahasiswa/all');
+      if (Array.isArray(data)) {
+        setAllStudents(data);
+      }
+    } catch (error) {
+      console.error("Gagal memuat mahasiswa:", error);
     }
   };
 
   useEffect(() => {
     fetchGroups();
+    fetchAllStudents();
+    fetchCourses();
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const res = await apiClient.get('/api/mata-kuliah');
+      const data = Array.isArray(res) ? res : (res.data || []);
+      setMataKuliahList(data);
+    } catch (error) {
+      console.error("Gagal memuat mata kuliah:", error);
+    }
+  };
 
   const openNilai = (group) => {
     setGradeInputs({ ...group.nilai });
     setNilaiModal(group);
   };
 
-  const saveNilai = () => {
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === nilaiModal.id ? { ...g, nilai: { ...gradeInputs } } : g,
-      ),
-    );
-    setNilaiModal(null);
-    showToast("Nilai berhasil disimpan!");
+  const saveNilai = async () => {
+    try {
+      await apiClient.put(`/api/kelompok/${nilaiModal.id}/grades`, {
+        grades: gradeInputs
+      });
+      setNilaiModal(null);
+      showToast("Nilai berhasil disimpan!");
+      fetchGroups();
+    } catch (error) {
+      showToast("Gagal menyimpan nilai", "error");
+    }
   };
 
   const removeMember = async (groupId, studentId) => {
@@ -127,10 +134,10 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
     }
   };
 
-  const addMember = async (groupId, studentId) => {
+  const addMember = async (groupId, nim) => {
     try {
       await apiClient.post(`/api/kelompok/${groupId}/members`, {
-        nomorInduk: studentId
+        nim: nim
       });
       showToast("Anggota berhasil ditambahkan!");
       fetchGroups();
@@ -145,26 +152,33 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
       showToast("Nama kelompok wajib diisi.", "error");
       return;
     }
+    if (!selectedMkId) {
+      showToast("Pilih mata kuliah terlebih dahulu.", "error");
+      return;
+    }
     try {
       await apiClient.post('/api/kelompok', {
-        namaKelompok: newGroupName.trim(),
-        idMataKuliah: 1 // default
+        name: newGroupName.trim(),
+        idMataKuliah: parseInt(selectedMkId)
       });
       setNewGroupName("");
+      setSelectedMkId("");
       setCreateModal(false);
       showToast("Kelompok berhasil dibuat!");
       fetchGroups();
     } catch (error) {
-      showToast("Gagal membuat kelompok", "error");
+      showToast(error.message || "Gagal membuat kelompok", "error");
     }
   };
 
+  const getMemberColor = (nim) => {
+    const idx = allStudents.findIndex(s => s.nim === nim);
+    return MEMBER_COLORS[idx >= 0 ? idx % MEMBER_COLORS.length : 0];
+  };
+
   const availableStudents = (groupId) => {
-    const group = groups.find((g) => g.id === groupId);
-    const inAnyGroup = groups.flatMap((g) => g.members);
-    return ALL_STUDENTS.filter(
-      (s) => !inAnyGroup.includes(s.nim) || group?.members.includes(s.nim),
-    ).filter((s) => !group?.members.includes(s.nim));
+    const inAnyGroup = new Set(groups.flatMap((g) => g.members.map(m => m.nim)));
+    return allStudents.filter((s) => !inAnyGroup.has(s.nim));
   };
 
   return (
@@ -199,21 +213,18 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
               </button>
             </div>
             <div className="dk-modal-body">
-              {nilaiModal.members.map((sid) => {
-                let student = ALL_STUDENTS.find((s) => s.nim === sid);
-                if (!student) student = { nim: sid, name: "Mahasiswa", color: "#64748b" }; // fallback
-                return (
-                  <div key={sid} className="dk-grade-row">
+              {nilaiModal.members.map((member) => (
+                  <div key={member.nim} className="dk-grade-row">
                     <div className="dk-grade-student">
                       <div
                         className="dk-avatar-sm"
-                        style={{ background: student.color }}
+                        style={{ background: getMemberColor(member.nim) }}
                       >
-                        {initials(student.name)}
+                        {initials(member.name)}
                       </div>
                       <div>
-                        <p className="dk-grade-name">{student.name}</p>
-                        <p className="dk-grade-nim">{student.nim}</p>
+                        <p className="dk-grade-name">{member.name}</p>
+                        <p className="dk-grade-nim">{member.nim}</p>
                       </div>
                     </div>
                     <div className="dk-grade-input-wrap">
@@ -223,30 +234,29 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                         min={0}
                         max={100}
                         placeholder="0-100"
-                        value={gradeInputs[sid] ?? ""}
+                        value={gradeInputs[member.nim] ?? ""}
                         onChange={(e) =>
                           setGradeInputs({
                             ...gradeInputs,
-                            [sid]: e.target.value,
+                            [member.nim]: e.target.value,
                           })
                         }
                       />
                       <span className="dk-grade-scale">/100</span>
-                      {gradeInputs[sid] && (
+                      {gradeInputs[member.nim] && (
                         <span className="dk-letter-grade">
-                          {+gradeInputs[sid] >= 85
+                          {+gradeInputs[member.nim] >= 85
                             ? "A"
-                            : +gradeInputs[sid] >= 70
+                            : +gradeInputs[member.nim] >= 70
                               ? "B"
-                              : +gradeInputs[sid] >= 55
+                              : +gradeInputs[member.nim] >= 55
                                 ? "C"
                                 : "D"}
                         </span>
                       )}
                     </div>
                   </div>
-                );
-              })}
+                ))}
             </div>
             <div className="dk-modal-footer">
               <button
@@ -287,10 +297,10 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                 </p>
               ) : (
                 availableStudents(addMemberModal).map((s) => (
-                  <div key={s.id} className="dk-member-option">
+                  <div key={s.nim} className="dk-member-option">
                     <div
                       className="dk-avatar-sm"
-                      style={{ background: s.color }}
+                      style={{ background: getMemberColor(s.nim) }}
                     >
                       {initials(s.name)}
                     </div>
@@ -330,6 +340,21 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
               </button>
             </div>
             <div className="dk-modal-body">
+              <div className="dk-field">
+                <label className="dk-label">Mata Kuliah</label>
+                <select
+                  className="dk-input"
+                  value={selectedMkId}
+                  onChange={(e) => setSelectedMkId(e.target.value)}
+                >
+                  <option value="">— Pilih Mata Kuliah —</option>
+                  {mataKuliahList.map((mk) => (
+                    <option key={mk.idMataKuliah} value={mk.idMataKuliah}>
+                      {mk.namaMataKuliah}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="dk-field">
                 <label className="dk-label">Nama Kelompok</label>
                 <input
@@ -464,6 +489,12 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                         </span>
                         {group.task}
                       </p>
+                      <p className="dk-group-task" style={{ color: "var(--color-secondary)", fontSize: "0.75rem" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>
+                          school
+                        </span>
+                        {group.mataKuliahName || "-"}
+                      </p>
                     </div>
                     <span
                       className="dk-progress-status"
@@ -517,21 +548,19 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                       </button>
                     </div>
                     <div className="dk-members-list">
-                      {group.members.map((sid) => {
-                        let student = ALL_STUDENTS.find((s) => s.nim === sid);
-                        if (!student) student = { nim: sid, name: "Mahasiswa", color: "#64748b" }; // fallback
-                        const nilai = group.nilai[sid];
+                      {group.members.map((member) => {
+                        const nilai = group.nilai[member.nim];
                         return (
-                          <div key={sid} className="dk-member-row">
+                          <div key={member.nim} className="dk-member-row">
                             <div
                               className="dk-avatar-sm"
-                              style={{ background: student.color }}
+                              style={{ background: getMemberColor(member.nim) }}
                             >
-                              {initials(student.name)}
+                              {initials(member.name)}
                             </div>
                             <div className="dk-member-info">
-                              <p className="dk-member-name">{student.name}</p>
-                              <p className="dk-member-nim">{student.nim}</p>
+                              <p className="dk-member-name">{member.name}</p>
+                              <p className="dk-member-nim">{member.nim}</p>
                             </div>
                             <div className="dk-member-right">
                               {nilai ? (
@@ -543,7 +572,7 @@ export default function DosenKelompok({ onNavigate, onLogout }) {
                               )}
                               <button
                                 className="dk-remove-btn"
-                                onClick={() => removeMember(group.id, sid)}
+                                onClick={() => removeMember(group.id, member.nim)}
                                 title="Keluarkan anggota"
                               >
                                 <span className="material-symbols-outlined">

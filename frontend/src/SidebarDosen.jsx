@@ -78,7 +78,14 @@ export default function SidebarDosen({
             onClick={() => nav("dosenKelompok")}
           >
             <span className="material-symbols-outlined">groups</span>
-            Kelompok & Nilai
+            Kelompok
+          </button>
+          <button
+            className={cls("dosenNilaiIndividu")}
+            onClick={() => nav("dosenNilaiIndividu")}
+          >
+            <span className="material-symbols-outlined">assignment_ind</span>
+            Nilai Individu
           </button>
           <button
             className={cls("dosenForum")}

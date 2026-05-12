@@ -9,274 +9,7 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
-const INITIAL_SEMESTERS = [
-  {
-    label: "Semester 1",
-    year: "2022/2023 Ganjil",
-    ipk: 3.75,
-    sks: 20,
-    matkul: [
-      {
-        kode: "IF001",
-        nama: "Pengantar Teknologi Informasi",
-        sks: 3,
-        tugas: 85,
-        uts: 80,
-        uas: 88,
-        nilai: "A",
-      },
-      {
-        kode: "IF002",
-        nama: "Matematika Diskrit",
-        sks: 4,
-        tugas: 78,
-        uts: 72,
-        uas: 79,
-        nilai: "B+",
-      },
-      {
-        kode: "IF003",
-        nama: "Algoritma & Pemrograman",
-        sks: 4,
-        tugas: 90,
-        uts: 87,
-        uas: 92,
-        nilai: "A",
-      },
-      {
-        kode: "MU001",
-        nama: "Pendidikan Agama",
-        sks: 2,
-        tugas: 88,
-        uts: 85,
-        uas: 90,
-        nilai: "A",
-      },
-      {
-        kode: "MU002",
-        nama: "Bahasa Indonesia",
-        sks: 2,
-        tugas: 82,
-        uts: 78,
-        uas: 80,
-        nilai: "B+",
-      },
-      {
-        kode: "IF004",
-        nama: "Logika Komputasi",
-        sks: 3,
-        tugas: 75,
-        uts: 70,
-        uas: 74,
-        nilai: "B",
-      },
-      {
-        kode: "MU003",
-        nama: "Pancasila",
-        sks: 2,
-        tugas: 80,
-        uts: 77,
-        uas: 82,
-        nilai: "B+",
-      },
-    ],
-  },
-  {
-    label: "Semester 2",
-    year: "2022/2023 Genap",
-    ipk: 3.82,
-    sks: 21,
-    matkul: [
-      {
-        kode: "IF005",
-        nama: "Pemrograman Berorientasi Objek",
-        sks: 4,
-        tugas: 92,
-        uts: 88,
-        uas: 90,
-        nilai: "A",
-      },
-      {
-        kode: "IF006",
-        nama: "Struktur Data",
-        sks: 4,
-        tugas: 85,
-        uts: 82,
-        uas: 86,
-        nilai: "A-",
-      },
-      {
-        kode: "IF007",
-        nama: "Sistem Basis Data",
-        sks: 3,
-        tugas: 78,
-        uts: 75,
-        uas: 80,
-        nilai: "B+",
-      },
-      {
-        kode: "IF008",
-        nama: "Jaringan Komputer Dasar",
-        sks: 3,
-        tugas: 80,
-        uts: 77,
-        uas: 79,
-        nilai: "B+",
-      },
-      {
-        kode: "MU004",
-        nama: "Kewarganegaraan",
-        sks: 2,
-        tugas: 83,
-        uts: 80,
-        uas: 84,
-        nilai: "A-",
-      },
-      {
-        kode: "IF009",
-        nama: "Matematika Komputasi",
-        sks: 3,
-        tugas: 72,
-        uts: 68,
-        uas: 71,
-        nilai: "B",
-      },
-      {
-        kode: "MU005",
-        nama: "Bahasa Inggris Teknik",
-        sks: 2,
-        tugas: 88,
-        uts: 84,
-        uas: 86,
-        nilai: "A-",
-      },
-    ],
-  },
-  {
-    label: "Semester 3",
-    year: "2023/2024 Ganjil",
-    ipk: 3.9,
-    sks: 22,
-    matkul: [
-      {
-        kode: "IF010",
-        nama: "Desain & Analisis Algoritma",
-        sks: 4,
-        tugas: 90,
-        uts: 88,
-        uas: 91,
-        nilai: "A",
-      },
-      {
-        kode: "IF011",
-        nama: "Rekayasa Perangkat Lunak",
-        sks: 3,
-        tugas: 87,
-        uts: 85,
-        uas: 89,
-        nilai: "A",
-      },
-      {
-        kode: "IF012",
-        nama: "Sistem Operasi",
-        sks: 3,
-        tugas: 82,
-        uts: 80,
-        uas: 83,
-        nilai: "A-",
-      },
-      {
-        kode: "IF013",
-        nama: "Kalkulus & Statistika",
-        sks: 4,
-        tugas: 76,
-        uts: 73,
-        uas: 77,
-        nilai: "B+",
-      },
-      {
-        kode: "IF014",
-        nama: "Kecerdasan Buatan Dasar",
-        sks: 4,
-        tugas: 91,
-        uts: 89,
-        uas: 93,
-        nilai: "A",
-      },
-      {
-        kode: "IF015",
-        nama: "Basis Data Lanjut",
-        sks: 4,
-        tugas: 85,
-        uts: 83,
-        uas: 86,
-        nilai: "A-",
-      },
-    ],
-  },
-  {
-    label: "Semester 4 (Aktif)",
-    year: "2023/2024 Genap",
-    ipk: null,
-    sks: 19,
-    matkul: [
-      {
-        kode: "IF016",
-        nama: "Analisis Desain Interaksi",
-        sks: 3,
-        tugas: 88,
-        uts: 85,
-        uas: null,
-        nilai: null,
-      },
-      {
-        kode: "IF017",
-        nama: "Pemrograman Web Lanjut",
-        sks: 4,
-        tugas: 90,
-        uts: 88,
-        uas: null,
-        nilai: null,
-      },
-      {
-        kode: "IF018",
-        nama: "Arsitektur & Org. Komputer",
-        sks: 3,
-        tugas: 82,
-        uts: 78,
-        uas: null,
-        nilai: null,
-      },
-      {
-        kode: "IF019",
-        nama: "Machine Learning Dasar",
-        sks: 4,
-        tugas: 86,
-        uts: 84,
-        uas: null,
-        nilai: null,
-      },
-      {
-        kode: "IF020",
-        nama: "Etika Profesi IT",
-        sks: 2,
-        tugas: 90,
-        uts: 88,
-        uas: null,
-        nilai: null,
-      },
-      {
-        kode: "IF021",
-        nama: "Proyek Perangkat Lunak",
-        sks: 3,
-        tugas: 85,
-        uts: null,
-        uas: null,
-        nilai: null,
-      },
-    ],
-  },
-];
+const INITIAL_SEMESTERS = [];
 
 const NILAI_COLOR = {
   A: { bg: "#ecfdf5", color: "#059669" },
@@ -323,7 +56,7 @@ function getIPKKumulatif(semesters) {
 
 function calculateGrade(tugas, kuis) {
   // Simplifikasi grading untuk integrasi, misal tugas 50% kuis 50%
-  const total = (Number(tugas || 0) * 0.5) + (Number(kuis || 0) * 0.5);
+  const total = Number(tugas || 0) * 0.5 + Number(kuis || 0) * 0.5;
   if (total >= 85) return "A";
   if (total >= 80) return "A-";
   if (total >= 75) return "B+";
@@ -335,34 +68,54 @@ function calculateGrade(tugas, kuis) {
 }
 
 function convertGradeToPoint(grade) {
-  const map = { "A": 4, "A-": 3.75, "B+": 3.5, "B": 3.0, "B-": 2.75, "C": 2.0, "D": 1.0, "E": 0 };
+  const map = {
+    A: 4,
+    "A-": 3.75,
+    "B+": 3.5,
+    B: 3.0,
+    "B-": 2.75,
+    C: 2.0,
+    D: 1.0,
+    E: 0,
+  };
   return map[grade] || 0;
 }
 
 export default function Nilai({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [semesters, setSemesters] = useState([]);
-  const [activeSem, setActiveSem] = useState(0); 
+  const [activeSem, setActiveSem] = useState(0);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTranskrip = async () => {
       try {
-        const res = await apiClient.get('/api/nilai/transkrip/mahasiswa');
-        if (res && res.data) {
-          const keys = Object.keys(res.data).sort((a,b) => (a === 'null' ? 99 : Number(a)) - (b === 'null' ? 99 : Number(b)));
-          const formattedSems = keys.map(k => {
+        const res = await apiClient.get("/api/nilai/transkrip/mahasiswa");
+        console.log("Transkrip raw response:", res);
+
+        let data = res;
+        if (res && res.data) data = res.data;
+        if (res && res.status === "success" && res.data) data = res.data;
+
+        console.log("Transkrip data:", data);
+
+        if (data && typeof data === "object" && Object.keys(data).length > 0) {
+          const keys = Object.keys(data).sort(
+            (a, b) =>
+              (a === "null" ? 99 : Number(a)) - (b === "null" ? 99 : Number(b)),
+          );
+          const formattedSems = keys.map((k) => {
             let totalSks = 0;
             let totalPoint = 0;
-            
-            const matkul = res.data[k].map(m => {
+
+            const matkul = (data[k] || []).map((m) => {
               const tugas = m.nilaiTugas ? parseFloat(m.nilaiTugas) : null;
               const kuis = m.nilaiKuis ? parseFloat(m.nilaiKuis) : null;
               const finalScore = m.nilaiAkhir ? parseFloat(m.nilaiAkhir) : null;
               const grade = finalScore ? calculateGrade(tugas, kuis) : null;
-              
-              const sks = 3; // hardcode sks for now as it's not in db
+
+              const sks = 3;
               totalSks += sks;
               if (grade) {
                 totalPoint += convertGradeToPoint(grade) * sks;
@@ -373,34 +126,39 @@ export default function Nilai({ onNavigate, onLogout }) {
                 nama: m.mataKuliah?.namaMataKuliah || "Mata Kuliah",
                 sks: sks,
                 tugas: tugas,
-                uts: kuis, // mapping kuis to uts in UI
+                uts: kuis,
                 uas: finalScore,
-                nilai: grade
+                nilai: grade,
               };
             });
 
-            const ipk = totalSks > 0 && totalPoint > 0 ? totalPoint / totalSks : null;
+            const ipk =
+              totalSks > 0 && totalPoint > 0 ? totalPoint / totalSks : null;
 
             return {
-              label: k === 'null' ? 'Semester Aktif' : `Semester ${k}`,
-              year: 'Tahun Akademik',
+              label: k === "null" ? "Semester Aktif" : `Semester ${k}`,
+              year: "Tahun Akademik",
               ipk: ipk,
               sks: totalSks,
-              matkul: matkul
+              matkul: matkul,
             };
           });
-          
+
           if (formattedSems.length > 0) {
             setSemesters(formattedSems);
-            setActiveSem(formattedSems.length - 1); // Set to last semester active
+            setActiveSem(formattedSems.length - 1);
           } else {
             setSemesters(INITIAL_SEMESTERS);
-            setActiveSem(3);
+            setActiveSem(0);
           }
+        } else {
+          setSemesters(INITIAL_SEMESTERS);
+          setActiveSem(0);
         }
       } catch (error) {
+        console.error("Error fetching transkrip:", error);
         setSemesters(INITIAL_SEMESTERS);
-        setActiveSem(3);
+        setActiveSem(0);
       } finally {
         setLoading(false);
       }
@@ -413,18 +171,41 @@ export default function Nilai({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const sem = semesters[activeSem] || { matkul: [], label: "", year: "", sks: 0, ipk: null };
+  const sem = semesters[activeSem] || {
+    matkul: [],
+    label: "",
+    year: "",
+    sks: 0,
+    ipk: null,
+  };
   const ipkKumulatif = semesters.length > 0 ? getIPKKumulatif(semesters) : "—";
-  const totalSksSelesai = semesters.length > 0 ? semesters.filter((s) => s.ipk !== null).reduce(
-    (acc, s) => acc + s.sks,
-    0,
-  ) : 0;
+  const totalSksSelesai =
+    semesters.length > 0
+      ? semesters
+          .filter((s) => s.ipk !== null)
+          .reduce((acc, s) => acc + s.sks, 0)
+      : 0;
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
 
   if (loading) {
-    return <div className="page-shell"><main className="page-main"><div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>Memuat transkrip...</div></main></div>;
+    return (
+      <div className="page-shell">
+        <main className="page-main">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            Memuat transkrip...
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -477,7 +258,17 @@ export default function Nilai({ onNavigate, onLogout }) {
         style={{ backgroundColor: "var(--color-background)" }}
       >
         {/* Navbar */}
-        <Navbar role="Mahasiswa" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
+        <Navbar
+          role="Mahasiswa"
+          onOpenSidebar={openSidebar}
+          onNavigate={
+            typeof nav !== "undefined"
+              ? nav
+              : typeof onNavigate !== "undefined"
+                ? onNavigate
+                : undefined
+          }
+        />
 
         <div className="page-content">
           {/* Page Header */}
@@ -485,7 +276,8 @@ export default function Nilai({ onNavigate, onLogout }) {
             <div>
               <h1 className="nlai-title">Transkrip Nilai</h1>
               <p className="nlai-subtitle">
-                Rekap nilai akademik {storedUser.nama || "Mahasiswa"} — NIM {storedUser.nomorInduk || "NIM"}
+                Rekap nilai akademik {storedUser.nama || "Mahasiswa"} — NIM{" "}
+                {storedUser.nomorInduk || "NIM"}
               </p>
             </div>
             <button
@@ -539,7 +331,15 @@ export default function Nilai({ onNavigate, onLogout }) {
             </div>
           </div>
 
-          {/* Semester Tabs */}
+          {semesters.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "1rem", marginTop: "2rem" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "4rem", color: "var(--slate-300)" }}>article</span>
+              <h3 style={{ marginTop: "1rem", color: "var(--slate-700)" }}>Belum Ada Transkrip Nilai</h3>
+              <p style={{ color: "var(--slate-500)", marginTop: "0.5rem" }}>Nilai akan muncul setelah dosen melakukan penilaian pada akhir semester.</p>
+            </div>
+          ) : (
+            <>
+              {/* Semester Tabs */}
           <div className="nlai-sem-tabs">
             {semesters.map((s, i) => (
               <button
@@ -674,28 +474,32 @@ export default function Nilai({ onNavigate, onLogout }) {
           <div className="nlai-chart-card">
             <h3 className="nlai-chart-title">Perkembangan IP Per Semester</h3>
             <div className="nlai-chart-bars">
-              {semesters.filter((s) => s.ipk !== null).map((s, i) => {
-                const pct = (s.ipk / 4.0) * 100;
-                return (
-                  <div key={i} className="nlai-chart-col">
-                    <div className="nlai-bar-wrap">
-                      <span className="nlai-bar-val">{s.ipk.toFixed(2)}</span>
-                      <div className="nlai-bar-track">
-                        <div
-                          className="nlai-bar-fill"
-                          style={{ height: `${pct}%` }}
-                        ></div>
+              {semesters
+                .filter((s) => s.ipk !== null)
+                .map((s, i) => {
+                  const pct = (s.ipk / 4.0) * 100;
+                  return (
+                    <div key={i} className="nlai-chart-col">
+                      <div className="nlai-bar-wrap">
+                        <span className="nlai-bar-val">{s.ipk.toFixed(2)}</span>
+                        <div className="nlai-bar-track">
+                          <div
+                            className="nlai-bar-fill"
+                            style={{ height: `${pct}%` }}
+                          ></div>
+                        </div>
                       </div>
+                      <p className="nlai-bar-lbl">Sem {i + 1}</p>
                     </div>
-                    <p className="nlai-bar-lbl">Sem {i + 1}</p>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
             <div className="nlai-chart-legend">
               <span>Skala 4.0 — IP ≥ 3.51 = Cum Laude</span>
             </div>
           </div>
+          </>
+          )}
         </div>
       </main>
     </div>

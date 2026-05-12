@@ -9,17 +9,23 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR_HERO =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 export default function Dashboard({ onNavigate, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState(AVATAR_HERO);
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         setUser(storedUser);
+        if (storedUser.fotoUrl) {
+          setAvatarUrl(`${API_BASE}${storedUser.fotoUrl}`);
+        }
         const res = await apiClient.get("/api/dashboard/mahasiswa");
         setDashboardData(res.data);
       } catch (error) {
@@ -80,7 +86,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                 <div className="db-hero-circle-2"></div>
                 <div className="db-hero-body">
                   <div className="db-hero-avatar">
-                    <img alt="Profile" src={AVATAR_HERO} />
+                    <img alt="Profile" src={avatarUrl} onError={(e) => { e.target.src = AVATAR_HERO; }} />
                   </div>
                   <div className="db-hero-info">
                     <span className="db-badge">Profil Mahasiswa</span>
@@ -177,7 +183,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                 <div className="db-schedule-row">
                   <div>
                     <p className="db-sched-lbl">Jadwal Terdekat</p>
-                    <p className="db-sched-time">13:30 - Matematika Diskrit</p>
+                    <p className="db-sched-time">{dashboardData?.mataKuliah?.[0]?.nama || "Tidak ada jadwal"}</p>
                   </div>
                   <span className="db-pulse-dot"></span>
                 </div>

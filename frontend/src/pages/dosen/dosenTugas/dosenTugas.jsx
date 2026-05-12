@@ -13,12 +13,6 @@ import {
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const MATKUL_LIST = [
-  "Sistem Operasi",
-  "Basis Data Terdistribusi",
-  "Metodologi Penelitian",
-];
-
 const INITIAL_TASKS = [];
 
 function daysLeft(deadline) {
@@ -31,6 +25,7 @@ function daysLeft(deadline) {
 export default function DosenTugas({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [matkulList, setMatkulList] = useState([]);
   const [toast, setToast] = useState(null);
   const [view, setView] = useState("list"); // "list" | "create" | "edit"
   const [editId, setEditId] = useState(null);
@@ -38,15 +33,32 @@ export default function DosenTugas({ onNavigate, onLogout }) {
   const [filter, setFilter] = useState("Semua");
   const [gradeModal, setGradeModal] = useState(null);
   const [gradeInputs, setGradeInputs] = useState({});
+  const [gradeStudents, setGradeStudents] = useState([]);
+  const [savingGrades, setSavingGrades] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
-    matkul: MATKUL_LIST[0],
+    matkulId: "",
+    matkulName: "",
     desc: "",
     type: "Kelompok",
     deadline: "",
     total: 41,
   });
+
+  const fetchMatkulList = async () => {
+    try {
+      const res = await apiClient.get('/api/mata-kuliah');
+      const data = Array.isArray(res) ? res : (res.data || []);
+      const mapped = data.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah }));
+      setMatkulList(mapped);
+      if (mapped.length > 0 && !form.matkulId) {
+        setForm(prev => ({ ...prev, matkulId: mapped[0].id, matkulName: mapped[0].name }));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const [isConverting, setIsConverting] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState(0);
@@ -60,20 +72,28 @@ export default function DosenTugas({ onNavigate, onLogout }) {
   const fetchTasks = async () => {
     try {
       const res = await apiClient.get('/api/dosen/tugas');
-      if (res && res.data) {
-        const formatted = res.data.map(t => ({
-          id: t.idTugas,
-          title: t.judul,
-          matkul: t.mataKuliah?.namaMataKuliah || "Mata Kuliah",
-          matkulId: t.idMataKuliah,
-          desc: t.deskripsi,
-          type: t.tipeTugas || "Individu",
-          deadline: t.deadlineTugas ? t.deadlineTugas.split('T')[0] : "",
-          createdAt: t.tanggalDibuat ? t.tanggalDibuat.split('T')[0] : "",
-          submitted: t.pengumpulanTugas?.length || 0,
-          total: 41,
-          status: "Aktif"
-        }));
+      const raw = res.data || res;
+      if (Array.isArray(raw)) {
+        const formatted = raw.map(t => {
+          // Format dari TugasDosenUseCase menggunakan: id, tipe, title, matkul, deadline, status
+          const dl = t.deadline ? new Date(t.deadline) : null;
+          const now = new Date();
+          const status = t.status || (dl && dl < now ? "Selesai" : "Aktif");
+          return {
+            id: t.id,
+            tipe: t.tipe || 'Tugas', // 'Tugas' atau 'Kuis'
+            title: t.title || t.judul || '',
+            matkul: t.matkul || t.mataKuliah?.namaMataKuliah || 'Mata Kuliah',
+            matkulId: t.idMataKuliah,
+            desc: t.desc || t.detailTugas || '',
+            type: t.type || 'Individu',
+            deadline: t.deadline || '',
+            createdAt: t.createdAt || '',
+            submitted: t.submitted || 0,
+            total: t.total || 41,
+            status
+          };
+        });
         setTasks(formatted);
       }
     } catch (error) {
@@ -82,6 +102,7 @@ export default function DosenTugas({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
+    fetchMatkulList();
     fetchTasks();
   }, []);
 
@@ -92,33 +113,54 @@ export default function DosenTugas({ onNavigate, onLogout }) {
       return;
     }
     try {
-      await apiClient.post('/api/dosen/tugas', {
-        judul: form.title,
-        idMataKuliah: MATKUL_LIST.indexOf(form.matkul) + 1, // dummy mapped id
-        deskripsi: form.desc,
-        tipeTugas: form.type,
-        deadlineTugas: new Date(form.deadline).toISOString(),
-      });
+      if (form.type === "Kuis") {
+        // Buat kuis via /api/kuis
+        await apiClient.post('/api/kuis', {
+          idMataKuliah: parseInt(form.matkulId),
+          judul: form.title,
+          deadlineKuis: new Date(form.deadline).toISOString(),
+          soal: quizData.map(q => ({
+            pertanyaan: q.text,
+            kunciJawaban: ['A','B','C','D'][q.correctIndex] || 'A',
+            skor: 1,
+            pilihanJawaban: q.options.map(opt => ({ teksJawaban: opt }))
+          }))
+        });
+      } else {
+        // Buat tugas biasa
+        await apiClient.post('/api/dosen/tugas', {
+          judul: form.title,
+          idMataKuliah: parseInt(form.matkulId),
+          detailTugas: form.desc,
+          tipe: form.type,
+          deadlineTugas: new Date(form.deadline).toISOString(),
+        });
+      }
+      const first = matkulList[0];
       setForm({
         title: "",
-        matkul: MATKUL_LIST[0],
+        matkulId: first ? first.id : "",
+        matkulName: first ? first.name : "",
         desc: "",
         type: "Kelompok",
         deadline: "",
         total: 41,
       });
+      setQuizData([]);
+      setQuizQuestions(0);
       setView("list");
-      showToast("Tugas berhasil dibuat!");
+      showToast("Berhasil dibuat!");
       fetchTasks();
     } catch (error) {
-      showToast("Gagal membuat tugas", "error");
+      showToast("Gagal membuat: " + (error.message || ""), "error");
     }
   };
 
   const handleEdit = (task) => {
     setForm({
       title: task.title,
-      matkul: task.matkul,
+      matkulId: task.matkulId,
+      matkulName: task.matkul,
       desc: task.desc,
       type: task.type,
       deadline: task.deadline,
@@ -128,13 +170,26 @@ export default function DosenTugas({ onNavigate, onLogout }) {
     setView("edit");
   };
 
-  const handleUpdate = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    setTasks((prev) =>
-      prev.map((t) => (t.id === editId ? { ...t, ...form } : t)),
-    );
-    setView("list");
-    showToast("Tugas berhasil diperbarui!");
+    if (!form.title.trim() || !form.deadline) {
+      showToast("Judul dan deadline wajib diisi.", "error");
+      return;
+    }
+    try {
+      await apiClient.put(`/api/dosen/tugas/${editId}`, {
+        judul: form.title,
+        idMataKuliah: parseInt(form.matkulId),
+        deskripsi: form.desc,
+        tipeTugas: form.type,
+        deadlineTugas: new Date(form.deadline).toISOString(),
+      });
+      setView("list");
+      showToast("Tugas berhasil diperbarui!");
+      fetchTasks();
+    } catch (error) {
+      showToast("Gagal memperbarui tugas", "error");
+    }
   };
 
   const confirmDelete = (id) => setDeleteId(id);
@@ -150,32 +205,69 @@ export default function DosenTugas({ onNavigate, onLogout }) {
     setDeleteId(null);
   };
 
-  const handleGradeTask = (task) => {
+  const handleGradeTask = async (task) => {
     if (task.type === "Kelompok") {
       if (onNavigate) onNavigate("dosenKelompok");
-    } else {
-      setGradeModal(task);
-      setGradeInputs({});
+      return;
+    }
+    setGradeModal(task);
+    setGradeInputs({});
+    setGradeStudents([]);
+    try {
+      const res = await apiClient.get('/api/kelompok/mahasiswa/all');
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      // Format: { nim, nama } - normalisasi field
+      const normalized = list.map(s => ({
+        nim: s.nim || s.mahasiswa?.nim,
+        nomorInduk: s.nomorInduk || s.user?.nomorInduk || s.mahasiswa?.nomorInduk,
+        nama: s.name || s.nama || s.user?.nama || s.mahasiswa?.user?.nama || "-"
+      })).filter(s => s.nim);
+      setGradeStudents(normalized);
+    } catch (error) {
+      showToast("Gagal memuat daftar mahasiswa", "error");
     }
   };
 
-  const saveGrades = () => {
-    setGradeModal(null);
-    showToast("Nilai berhasil disimpan!");
+  const saveGrades = async () => {
+    if (!gradeModal) return;
+    const filled = Object.fromEntries(
+      Object.entries(gradeInputs).filter(([, v]) => v !== "" && v !== null && v !== undefined)
+    );
+    if (Object.keys(filled).length === 0) {
+      showToast("Belum ada nilai yang diisi.", "error");
+      return;
+    }
+    setSavingGrades(true);
+    try {
+      await apiClient.post('/api/dosen/tugas/grades', {
+        idMataKuliah: gradeModal.matkulId,
+        idTugas: gradeModal.id,
+        gradeInputs: filled
+      });
+      showToast("Nilai berhasil disimpan!");
+      setGradeModal(null);
+    } catch (error) {
+      showToast(error.message || "Gagal menyimpan nilai", "error");
+    } finally {
+      setSavingGrades(false);
+    }
   };
 
   const filtered =
     filter === "Semua" ? tasks : tasks.filter((t) => t.status === filter);
 
   function startForm() {
+    const first = matkulList[0];
     setForm({
       title: "",
-      matkul: MATKUL_LIST[0],
+      matkulId: first ? first.id : "",
+      matkulName: first ? first.name : "",
       desc: "",
       type: "Kelompok",
       deadline: "",
       total: 41,
     });
+    setEditId(null);
     setView("create");
   }
 
@@ -228,11 +320,15 @@ export default function DosenTugas({ onNavigate, onLogout }) {
               <label className="dt-label">Mata Kuliah</label>
               <select
                 className="dt-select"
-                value={form.matkul}
-                onChange={(e) => setForm({ ...form, matkul: e.target.value })}
+                value={form.matkulId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  const name = matkulList.find(m => String(m.id) === id)?.name || "";
+                  setForm({ ...form, matkulId: id, matkulName: name });
+                }}
               >
-                {MATKUL_LIST.map((mk) => (
-                  <option key={mk}>{mk}</option>
+                {matkulList.map((mk) => (
+                  <option key={mk.id} value={mk.id}>{mk.name}</option>
                 ))}
               </select>
             </div>
@@ -626,11 +722,11 @@ export default function DosenTugas({ onNavigate, onLogout }) {
         </div>
       )}
       {gradeModal && (
-        <div className="dt-overlay" onClick={() => setGradeModal(null)}>
+        <div className="dt-modal-overlay" onClick={() => setGradeModal(null)}>
           <div
             className="dt-modal"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "500px" }}
+            style={{ maxWidth: "560px", textAlign: "left", padding: "1.75rem" }}
           >
             <div
               className="dt-modal-header"
@@ -641,7 +737,7 @@ export default function DosenTugas({ onNavigate, onLogout }) {
                 marginBottom: "1rem",
               }}
             >
-              <h3 style={{ color: "var(--blue-900)" }}>
+              <h3 style={{ color: "var(--blue-900)", margin: 0 }}>
                 Penilaian Individu: {gradeModal.title}
               </h3>
               <button
@@ -652,130 +748,89 @@ export default function DosenTugas({ onNavigate, onLogout }) {
                 X
               </button>
             </div>
+            <p style={{ fontSize: "0.85rem", color: "var(--slate-500)", marginTop: 0 }}>
+              Mata Kuliah: <strong>{gradeModal.matkul}</strong> · {gradeStudents.length} mahasiswa
+            </p>
             <div
               className="dt-modal-body"
-              style={{ maxHeight: "300px", overflowY: "auto" }}
+              style={{ maxHeight: "360px", overflowY: "auto" }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  marginBottom: "1rem",
-                  paddingBottom: "1rem",
-                  borderBottom: "1px solid var(--color-border)",
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--blue-100)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    color: "var(--blue-700)",
-                  }}
-                >
-                  F
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontWeight: 600 }}>Firman Mahasiswa</p>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.875rem",
-                      color: "var(--slate-500)",
-                    }}
-                  >
-                    NIM: 1301210001
-                  </p>
-                </div>
-                <div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    placeholder="0-100"
-                    className="dt-input"
-                    style={{ width: "80px", textAlign: "center" }}
-                    value={gradeInputs["1301210001"] || ""}
-                    onChange={(e) =>
-                      setGradeInputs({
-                        ...gradeInputs,
-                        1301210001: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  marginBottom: "1rem",
-                  paddingBottom: "1rem",
-                  borderBottom: "1px solid var(--color-border)",
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--color-primary)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    color: "white",
-                  }}
-                >
-                  S
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontWeight: 600 }}>Siti Aminah</p>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.875rem",
-                      color: "var(--slate-500)",
-                    }}
-                  >
-                    NIM: 1301210002
-                  </p>
-                </div>
-                <div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    placeholder="0-100"
-                    className="dt-input"
-                    style={{ width: "80px", textAlign: "center" }}
-                    value={gradeInputs["1301210002"] || ""}
-                    onChange={(e) =>
-                      setGradeInputs({
-                        ...gradeInputs,
-                        1301210002: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
+              {gradeStudents.length === 0 ? (
+                <p style={{ textAlign: "center", color: "var(--slate-500)", padding: "1rem" }}>
+                  Memuat daftar mahasiswa...
+                </p>
+              ) : (
+                gradeStudents.map((s, idx) => {
+                  const initial = (s.nama || "?").charAt(0).toUpperCase();
+                  const palette = ["var(--blue-100)", "var(--color-primary)", "#fde68a", "#bbf7d0"];
+                  const textPalette = ["var(--blue-700)", "white", "#92400e", "#065f46"];
+                  const bg = palette[idx % palette.length];
+                  const fg = textPalette[idx % textPalette.length];
+                  const key = s.nomorInduk || s.nim;
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        marginBottom: "0.75rem",
+                        paddingBottom: "0.75rem",
+                        borderBottom: "1px solid var(--color-border)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          backgroundColor: bg,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: "bold",
+                          color: fg,
+                        }}
+                      >
+                        {initial}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontWeight: 600 }}>{s.nama}</p>
+                        <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--slate-500)" }}>
+                          NIM: {s.nim}
+                        </p>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="0-100"
+                        className="dt-input"
+                        style={{ width: "80px", textAlign: "center" }}
+                        value={gradeInputs[key] ?? ""}
+                        onChange={(e) =>
+                          setGradeInputs({ ...gradeInputs, [key]: e.target.value })
+                        }
+                      />
+                    </div>
+                  );
+                })
+              )}
             </div>
             <div className="dt-modal-actions" style={{ marginTop: "1rem" }}>
               <button
                 className="dt-btn-cancel"
                 onClick={() => setGradeModal(null)}
+                disabled={savingGrades}
               >
                 Batal
               </button>
-              <button className="dt-btn-submit" onClick={saveGrades}>
-                Simpan Nilai
+              <button
+                className="dt-btn-submit"
+                onClick={saveGrades}
+                disabled={savingGrades || gradeStudents.length === 0}
+              >
+                {savingGrades ? "Menyimpan..." : "Simpan Nilai"}
               </button>
             </div>
           </div>
@@ -873,7 +928,7 @@ export default function DosenTugas({ onNavigate, onLogout }) {
                   },
                   {
                     label: "Belum Dinilai",
-                    value: 42,
+                    value: tasks.filter((t) => t.status === "Aktif" && t.submitted < t.total).length,
                     icon: "rate_review",
                     color: "#dc2626",
                   },

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 import "../../../shared.css";
 import "./presensiMahasiswa.css";
 import Sidebar from "../../../Sidebar";
@@ -33,22 +34,24 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
   const [upcoming, setUpcoming]     = useState([]);
   const [history, setHistory]       = useState([]);
   const scanTimeoutRef              = useRef(null);
+  const html5QrCodeRef              = useRef(null);
+  const scannerContainerId          = "pmh-qr-reader";
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await apiClient.get('/api/mata-kuliah');
-        const formatted = res.map((c) => ({
+        // Hanya mata kuliah yang diikuti mahasiswa (berdasarkan relasi Presensi di DB)
+        const res = await apiClient.get('/api/mata-kuliah/mahasiswa/me');
+        const list = Array.isArray(res) ? res : (res?.data || []);
+        const formatted = list.map((c) => ({
           id: c.idMataKuliah,
           code: `MK${c.idMataKuliah.toString().padStart(3, '0')}`,
-          name: c.namaMataKuliah,
-          time: "08:00 - 10:30",
-          room: "Ruang Kelas",
-          dosen: "Dosen Pengampu"
+          name: c.namaMataKuliah
         }));
         setUpcoming(formatted);
       } catch (error) {
-        console.error("Failed to load courses");
+        console.error("Failed to load courses", error);
+        setUpcoming([]);
       }
     };
     fetchCourses();
@@ -61,14 +64,22 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
     const fetchHistory = async () => {
       if (upcoming.length > 0 && upcoming[selectedClass]) {
         try {
+          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+          const myNim = storedUser.nomorInduk || "";
+
           const res = await apiClient.get(`/api/presensi/mata-kuliah/${upcoming[selectedClass].id}`);
+          const allData = res.data || res || [];
+          const myRecords = Array.isArray(allData) ? allData : [];
+
           // Format respons untuk UI
-          const formattedHist = res.data.map(h => ({
-            date: new Date(h.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }),
+          const formattedHist = myRecords.map(h => ({
+            date: h.tanggalPertemuan
+              ? new Date(h.tanggalPertemuan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })
+              : "-",
             code: upcoming[selectedClass].code,
             name: upcoming[selectedClass].name,
-            status: h.status.charAt(0).toUpperCase() + h.status.slice(1).toLowerCase(),
-            time: "08:00"
+            status: (h.statusKehadiran || "Hadir").charAt(0).toUpperCase() + (h.statusKehadiran || "Hadir").slice(1).toLowerCase(),
+            time: h.waktuPresensi ? new Date(h.waktuPresensi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-"
           }));
           setHistory(formattedHist);
         } catch (error) {
@@ -84,25 +95,63 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const startScan = () => {
-    setScanState("scanning");
-    scanTimeoutRef.current = setTimeout(async () => {
+  const stopCamera = useCallback(async () => {
+    if (html5QrCodeRef.current) {
       try {
-        if (!upcoming[selectedClass]) throw new Error("Pilih kelas terlebih dahulu");
-        // Simulate a token we read from camera
-        const simToken = `LeMaS-${Date.now()}`;
-        await apiClient.post("/api/presensi/scan", {
-          idMataKuliah: upcoming[selectedClass].id,
-          token: simToken
-        });
-        setScanState("success");
-        showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
-      } catch (error) {
-        setScanState("error");
-        showToast("error", error.message || "Gagal melakukan presensi");
-        setTimeout(() => setScanState("idle"), 2000);
+        const state = html5QrCodeRef.current.getState();
+        if (state === 2) { // SCANNING
+          await html5QrCodeRef.current.stop();
+        }
+      } catch (e) {
+        // ignore stop errors
       }
-    }, 2400);
+      html5QrCodeRef.current = null;
+    }
+  }, []);
+
+  const onQrCodeSuccess = useCallback(async (decodedText) => {
+    await stopCamera();
+    setScanState("scanning");
+    try {
+      if (!upcoming[selectedClass]) throw new Error("Pilih kelas terlebih dahulu");
+      await apiClient.post("/api/presensi/scan", {
+        idMataKuliah: upcoming[selectedClass].id,
+        token: decodedText
+      });
+      setScanState("success");
+      showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
+    } catch (error) {
+      setScanState("error");
+      showToast("error", error.message || "Gagal melakukan presensi");
+      setTimeout(() => setScanState("idle"), 2000);
+    }
+  }, [upcoming, selectedClass, stopCamera]);
+
+  const startScan = async () => {
+    if (!upcoming[selectedClass]) {
+      showToast("error", "Pilih kelas terlebih dahulu");
+      return;
+    }
+    setScanState("scanning");
+
+    // Wait for the DOM element to render
+    await new Promise((r) => setTimeout(r, 100));
+
+    try {
+      const html5QrCode = new Html5Qrcode(scannerContainerId);
+      html5QrCodeRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => onQrCodeSuccess(decodedText),
+        () => {} // ignore scan failures (no QR found in frame)
+      );
+    } catch (err) {
+      console.error("Camera error:", err);
+      setScanState("idle");
+      showToast("error", "Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.");
+    }
   };
 
   const handleManualInput = (e) => {
@@ -129,10 +178,18 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
     setScanCode("");
   };
 
-  const resetScan = () => {
+  const resetScan = async () => {
     clearTimeout(scanTimeoutRef.current);
+    await stopCamera();
     setScanState("idle");
   };
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
@@ -171,16 +228,15 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                 <div className="pmh-class-tabs">
                   {upcoming.length > 0 ? upcoming.map((c, i) => (
                     <button
-                      key={i}
+                      key={c.id}
                       className={`pmh-class-tab ${selectedClass === i ? "pmh-class-tab--active" : ""}`}
                       onClick={() => { setSelectedClass(i); resetScan(); }}
                     >
                       <span className="pmh-class-tab-code">{c.code}</span>
                       <span className="pmh-class-tab-name">{c.name}</span>
-                      <span className="pmh-class-tab-time">{c.time}</span>
                     </button>
                   )) : (
-                    <p style={{ color: "var(--slate-500)" }}>Tidak ada kelas aktif</p>
+                    <p style={{ color: "var(--slate-500)" }}>Belum terdaftar di mata kuliah manapun</p>
                   )}
                 </div>
               </div>
@@ -215,13 +271,7 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                       <div className="pmh-vf-corner pmh-vf-corner--tr pmh-corner--active"></div>
                       <div className="pmh-vf-corner pmh-vf-corner--bl pmh-corner--active"></div>
                       <div className="pmh-vf-corner pmh-vf-corner--br pmh-corner--active"></div>
-                      <div className="pmh-scan-line"></div>
-                      <div className="pmh-vf-inner pmh-vf-inner--scanning">
-                        <span className="material-symbols-outlined" style={{ fontSize: "2.5rem", color: "rgba(255,255,255,0.7)" }}>
-                          qr_code_2
-                        </span>
-                        <p>Memindai...</p>
-                      </div>
+                      <div id={scannerContainerId} className="pmh-camera-feed"></div>
                     </div>
                     <button className="pmh-cancel-btn" onClick={resetScan}>
                       Batalkan
@@ -295,16 +345,12 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                 <h3 className="pmh-session-name">{upcoming[selectedClass]?.name || "Memuat..."}</h3>
                 <div className="pmh-session-details">
                   <div className="pmh-detail-row">
-                    <span className="material-symbols-outlined">schedule</span>
-                    <span>{upcoming[selectedClass]?.time || "-"} WIB</span>
+                    <span className="material-symbols-outlined">tag</span>
+                    <span>Kode: {upcoming[selectedClass]?.code || "-"}</span>
                   </div>
                   <div className="pmh-detail-row">
-                    <span className="material-symbols-outlined">location_on</span>
-                    <span>{upcoming[selectedClass]?.room || "-"}</span>
-                  </div>
-                  <div className="pmh-detail-row">
-                    <span className="material-symbols-outlined">person</span>
-                    <span>{upcoming[selectedClass]?.dosen || "-"}</span>
+                    <span className="material-symbols-outlined">event_available</span>
+                    <span>Total sesi: {history.length}</span>
                   </div>
                 </div>
               </div>
@@ -317,14 +363,14 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                     <svg viewBox="0 0 80 80" className="pmh-ring-svg">
                       <circle cx="40" cy="40" r="30" fill="none" stroke="#e2e8f0" strokeWidth="10"/>
                       <circle cx="40" cy="40" r="30" fill="none" stroke="#2f9696" strokeWidth="10"
-                        strokeDasharray={`${(12/16)*188} 188`}
+                        strokeDasharray={`${history.length > 0 ? ((history.filter(h => h.status === "Hadir").length / history.length) * 188) : 0} 188`}
                         strokeDashoffset="47"
                         strokeLinecap="round"
                         transform="rotate(-90 40 40)"
                       />
                     </svg>
                     <div className="pmh-ring-label">
-                      <span className="pmh-ring-pct">75%</span>
+                      <span className="pmh-ring-pct">{history.length > 0 ? Math.round((history.filter(h => h.status === "Hadir").length / history.length) * 100) : 0}%</span>
                       <span className="pmh-ring-sub">Kehadiran</span>
                     </div>
                   </div>
@@ -332,22 +378,22 @@ export default function PresensiMahasiswa({ onNavigate, onLogout }) {
                     <div className="pmh-sum-item">
                       <span className="pmh-sum-dot" style={{ backgroundColor: "#2f9696" }}></span>
                       <span className="pmh-sum-label">Hadir</span>
-                      <span className="pmh-sum-val">12</span>
+                      <span className="pmh-sum-val">{history.filter(h => h.status === "Hadir").length}</span>
                     </div>
                     <div className="pmh-sum-item">
                       <span className="pmh-sum-dot" style={{ backgroundColor: "#c47f17" }}></span>
                       <span className="pmh-sum-label">Izin</span>
-                      <span className="pmh-sum-val">2</span>
+                      <span className="pmh-sum-val">{history.filter(h => h.status === "Izin").length}</span>
                     </div>
                     <div className="pmh-sum-item">
                       <span className="pmh-sum-dot" style={{ backgroundColor: "#4b53bc" }}></span>
                       <span className="pmh-sum-label">Sakit</span>
-                      <span className="pmh-sum-val">1</span>
+                      <span className="pmh-sum-val">{history.filter(h => h.status === "Sakit").length}</span>
                     </div>
                     <div className="pmh-sum-item">
                       <span className="pmh-sum-dot" style={{ backgroundColor: "#dc2626" }}></span>
                       <span className="pmh-sum-label">Alpa</span>
-                      <span className="pmh-sum-val">1</span>
+                      <span className="pmh-sum-val">{history.filter(h => h.status === "Alpa").length}</span>
                     </div>
                   </div>
                 </div>

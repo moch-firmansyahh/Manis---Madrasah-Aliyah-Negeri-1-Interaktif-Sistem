@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./shared.css";
 import "./pages/mahasiswa/dashboard/notifikasi.css";
 
@@ -26,15 +26,24 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const isDosen = role === "Dosen";
-  const avatarUrl = isDosen ? AVATAR_DOSEN : AVATAR_MAHASISWA;
+  const defaultAvatar = isDosen ? AVATAR_DOSEN : AVATAR_MAHASISWA;
 
-  // Read logged-in user data from localStorage
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
   const userName = storedUser.nama || (isDosen ? "Dosen" : "Mahasiswa");
-  const firstName = userName.split(" ")[0];
+  const [avatarUrl, setAvatarUrl] = useState(defaultAvatar);
 
-  const name = isDosen ? `Halo, ${firstName}` : `Halo, ${firstName}`;
+  const API_BASE = import.meta.env.VITE_API_URL || "";
+
+  useEffect(() => {
+    if (storedUser.fotoUrl) {
+      setAvatarUrl(`${API_BASE}${storedUser.fotoUrl}`);
+    } else {
+      setAvatarUrl(defaultAvatar);
+    }
+  }, [storedUser.fotoUrl, API_BASE, defaultAvatar]);
+
+  const name = isDosen ? `Halo, ${userName}` : `Halo, ${userName}`;
   const subtitle = isDosen ? "Dosen Tetap" : "Mahasiswa";
   const placeholder = isDosen ? "Cari materi atau mahasiswa..." : "Cari materi atau tugas...";
   const notifications = isDosen ? dosenNotifications : mhsNotifications;
@@ -46,11 +55,11 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
   const searchIndex = [
     { id: 's1', type: 'Mahasiswa', title: 'Budi Santoso', desc: 'NIM: 1301210001 - Kelas IF-48-08', mhsPage: 'profile', dosenPage: 'dosenProfile' },
     { id: 's2', type: 'Mahasiswa', title: 'Siti Aminah', desc: 'NIM: 1301210002 - Kelas IF-48-08', mhsPage: 'profile', dosenPage: 'dosenProfile' },
-    { id: 's3', type: 'Materi', title: 'Pengenalan Sistem Operasi', desc: 'Bab 1 - Konsep Dasar OS', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
-    { id: 's4', type: 'Materi', title: 'Arsitektur Komputer Modern', desc: 'Modul 3 - Organisasi Komputer', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
-    { id: 's5', type: 'Tugas', title: 'Tugas Besar PBO', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
-    { id: 's6', type: 'Tugas', title: 'Analisis Arsitektur Cloud', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
-    { id: 's7', type: 'Forum', title: 'Diskusi Algoritma Lanjut', desc: 'Forum pertemuan ke-4', mhsPage: 'forumDiskusi', dosenPage: 'dosenForum' },
+    { id: 's3', type: 'Materi', title: 'Pemrograman Web', desc: 'Bab 1 - Konsep Dasar Web', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
+    { id: 's4', type: 'Materi', title: 'Rekayasa Perangkat Lunak', desc: 'Modul 3 - SDLC', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
+    { id: 's5', type: 'Tugas', title: 'Tugas PBO', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
+    { id: 's6', type: 'Tugas', title: 'Analisis Kebutuhan RPL', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
+    { id: 's7', type: 'Forum', title: 'Diskusi Web API', desc: 'Forum pertemuan ke-4', mhsPage: 'forumDiskusi', dosenPage: 'dosenForum' },
   ];
 
   const handleSearchChange = (e) => {

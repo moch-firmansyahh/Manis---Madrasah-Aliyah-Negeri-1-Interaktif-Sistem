@@ -9,7 +9,6 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const INITIAL_THREADS = [];
 
 function Avatar({ src, initials, color, size = 40 }) {
   if (src) {
@@ -50,9 +49,11 @@ function Avatar({ src, initials, color, size = 40 }) {
   );
 }
 
-export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
+const COURSE_COLORS = ["#4b53bc", "#2f9696", "#c47f17", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#be185d"];
+
+export default function DosenForum({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [view, setView] = useState("forum");
+  const [view, setView] = useState("courses"); // "courses" | "forum" | "create"
   const [threads, setThreads] = useState([]);
   const [toast, setToast] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -65,16 +66,37 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [mataKuliahList, setMataKuliahList] = useState([]);
+  const [selectedMatkul, setSelectedMatkul] = useState(null);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+
+  // Fetch mata kuliah list
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get('/api/mata-kuliah');
+        const data = Array.isArray(res) ? res : (res.data || []);
+        setMataKuliahList(data);
+      } catch (error) {
+        console.error("Failed to load courses", error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 4000);
   };
 
-  const fetchThreads = async () => {
+  const fetchThreads = async (matkulId) => {
+    const id = matkulId || (selectedMatkul && selectedMatkul.idMataKuliah);
+    if (!id) return;
     try {
       setLoading(true);
-      const res = await apiClient.get(`/api/dosen/forum/mata-kuliah/${idMataKuliah}`);
+      const res = await apiClient.get(`/api/dosen/forum/mata-kuliah/${id}`);
       const data = res.data || res;
       if (Array.isArray(data)) {
         const formatted = data.map(t => ({
@@ -111,8 +133,19 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
   };
 
   useEffect(() => {
-    fetchThreads();
-  }, [idMataKuliah]);
+    if (selectedMatkul) fetchThreads(selectedMatkul.idMataKuliah);
+  }, [selectedMatkul]);
+
+  const handleSelectCourse = (matkul) => {
+    setSelectedMatkul(matkul);
+    setView("forum");
+  };
+
+  const handleBackToCourses = () => {
+    setView("courses");
+    setSelectedMatkul(null);
+    setThreads([]);
+  };
 
   const wrapText = (before, after = before) => {
     const ta = textareaRef.current;
@@ -139,7 +172,7 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
     
     try {
       await apiClient.post("/api/dosen/forum/", {
-        idMataKuliah: parseInt(idMataKuliah),
+        idMataKuliah: selectedMatkul.idMataKuliah,
         judul: formTitle.trim(),
         isiForum: formBody.trim()
       });
@@ -155,7 +188,8 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
     }
   };
 
-  const toggleLike = (threadId, replyId) => {
+  const toggleLike = async (threadId, replyId) => {
+    // Optimistic update
     setThreads((prev) =>
       prev.map((t) => {
         if (t.id === threadId && !replyId)
@@ -180,6 +214,13 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
         return t;
       }),
     );
+    // Persist to backend
+    try {
+      await apiClient.post(`/api/dosen/forum/${threadId}/like`);
+    } catch (error) {
+      console.error('Like error:', error);
+      fetchThreads();
+    }
   };
 
   const submitReply = async (threadId) => {
@@ -191,7 +232,8 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
       setReplyingTo(null);
       setReplyText("");
       showToast("success", "Balasan berhasil dikirim!");
-      fetchThreads(); // Reload threads to show the new reply
+      await fetchThreads();
+      setExpandedIds(prev => new Set([...prev, threadId]));
     } catch (error) {
       showToast("error", error.message || "Gagal mengirim balasan");
     }
@@ -242,47 +284,89 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
         <Navbar
           role="Dosen"
           onOpenSidebar={openSidebar}
-          onNavigate={
-            typeof nav !== "undefined"
-              ? nav
-              : typeof onNavigate !== "undefined"
-                ? onNavigate
-                : undefined
-          }
+          onNavigate={onNavigate}
         />
 
         <div className="page-content">
+          {/* COURSE LIST VIEW */}
+          {view === "courses" && (
+            <>
+              <div className="fd-topbar">
+                <div>
+                  <nav className="fd-breadcrumb">
+                    <span>LMS</span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
+                  </nav>
+                  <h2 className="fd-page-title">Forum Diskusi</h2>
+                  <p className="fd-page-sub">
+                    Pilih mata kuliah untuk melihat dan mengelola forum diskusi kelas.
+                  </p>
+                </div>
+              </div>
+
+              {loadingCourses ? (
+                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat daftar mata kuliah...</div>
+              ) : mataKuliahList.length === 0 ? (
+                <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>school</span>
+                  <h3>Tidak Ada Mata Kuliah</h3>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada mata kuliah yang tersedia.</p>
+                </div>
+              ) : (
+                <div className="fd-course-grid">
+                  {mataKuliahList.map((mk, i) => (
+                    <div
+                      key={mk.idMataKuliah}
+                      className="fd-course-card"
+                      onClick={() => handleSelectCourse(mk)}
+                    >
+                      <div className="fd-course-accent" style={{ backgroundColor: COURSE_COLORS[i % COURSE_COLORS.length] }}></div>
+                      <div className="fd-course-body">
+                        <div className="fd-course-icon" style={{ background: `${COURSE_COLORS[i % COURSE_COLORS.length]}15`, color: COURSE_COLORS[i % COURSE_COLORS.length] }}>
+                          <span className="material-symbols-outlined">forum</span>
+                        </div>
+                        <h3 className="fd-course-name">{mk.namaMataKuliah}</h3>
+                        <p className="fd-course-code">Kode: MK{String(mk.idMataKuliah).padStart(3, '0')}</p>
+                        <div className="fd-course-footer">
+                          <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>arrow_forward</span>
+                          <span>Lihat Forum</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {/* FORUM LIST */}
           {view === "forum" && (
             <>
               <div className="fd-topbar">
                 <div>
                   <nav className="fd-breadcrumb">
-                    <span>MATA KULIAH</span>
-                    <span className="material-symbols-outlined">
-                      chevron_right
-                    </span>
-                    <span>SISTEM OPERASI</span>
-                    <span className="material-symbols-outlined">
-                      chevron_right
-                    </span>
-                    <span className="fd-breadcrumb--active">FORUM DISKUSI</span>
+                    <button className="fd-breadcrumb-link" onClick={handleBackToCourses}>FORUM DISKUSI</button>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="fd-breadcrumb--active">{selectedMatkul?.namaMataKuliah || "MATA KULIAH"}</span>
                   </nav>
-                  <h2 className="fd-page-title">Forum Diskusi Kelas</h2>
+                  <h2 className="fd-page-title">Forum Diskusi — {selectedMatkul?.namaMataKuliah}</h2>
                   <p className="fd-page-sub">
                     Ruang interaksi dosen dan mahasiswa untuk diskusi akademik.
                     <br />
-                    Sebagai dosen, Anda dapat memantau dan merespons semua
-                    diskusi.
+                    Sebagai dosen, Anda dapat memantau dan merespons semua diskusi.
                   </p>
                 </div>
-                <button
-                  className="fd-new-btn"
-                  onClick={() => setView("create")}
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Mulai Diskusi Baru
-                </button>
+                <div style={{ display: "flex", gap: "0.625rem", flexShrink: 0 }}>
+                  <button className="fd-new-btn" style={{ backgroundColor: "var(--color-secondary)" }} onClick={handleBackToCourses}>
+                    <span className="material-symbols-outlined">arrow_back</span>
+                    Kembali
+                  </button>
+                  <button className="fd-new-btn" onClick={() => setView("create")}>
+                    <span className="material-symbols-outlined">add</span>
+                    Mulai Diskusi Baru
+                  </button>
+                </div>
               </div>
 
               {loading ? (
@@ -328,7 +412,7 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
                         </div>
                         <div
                           className="fd-thread-body"
-                          dangerouslySetInnerHTML={{ __html: thread.content }}
+                          dangerouslySetInnerHTML={{ __html: thread.content || "" }}
                         />
                         <div className="fd-thread-actions">
                           <button
@@ -397,7 +481,7 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
                                 <p
                                   className="fd-reply-text"
                                   dangerouslySetInnerHTML={{
-                                    __html: reply.content,
+                                    __html: reply.content || "",
                                   }}
                                 />
                                 <button
@@ -498,7 +582,7 @@ export default function DosenForum({ onNavigate, onLogout, idMataKuliah = 1 }) {
                       className="fd-breadcrumb-link"
                       onClick={() => setView("forum")}
                     >
-                      Forum Diskusi
+                      {selectedMatkul?.namaMataKuliah || "Forum Diskusi"}
                     </button>
                     <span className="material-symbols-outlined">
                       chevron_right

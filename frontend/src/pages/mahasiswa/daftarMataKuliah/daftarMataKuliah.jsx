@@ -14,14 +14,16 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const data = await apiClient.get("/api/mata-kuliah");
-        // Berhubung backend hanya mengembalikan idMataKuliah dan namaMataKuliah,
-        // kita tambahkan properti dummy untuk kebutuhan UI sementara
+        const res = await apiClient.get("/api/mata-kuliah/mahasiswa/me");
+        const data = Array.isArray(res) ? res : (res.data || []);
+        // Format data mata kuliah untuk tampilan UI
         const formattedData = data.map(course => ({
           id: course.idMataKuliah,
           name: course.namaMataKuliah,
           category: "Mata Kuliah",
           icon: "menu_book",
+          dosen: course.dosen?.user?.nama || "Belum ditentukan",
+          jadwal: course.jadwal || "-",
           desc: "Materi dan tugas untuk mata kuliah " + course.namaMataKuliah,
           progress: 0
         }));
@@ -88,6 +90,16 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
                 </div>
                 <h3 className="dm-course-name">{c.name}</h3>
                 <p className="dm-course-desc">{c.desc}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: '8px 0' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person</span>
+                    {c.dosen}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
+                    {c.jadwal}
+                  </span>
+                </div>
                 <div className="dm-progress-row">
                   <p className="dm-prog-label">Progress Belajar</p>
                   <p className="dm-prog-pct">{c.progress}% Selesai</p>

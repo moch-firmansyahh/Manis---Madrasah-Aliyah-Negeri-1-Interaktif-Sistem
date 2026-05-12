@@ -614,6 +614,12 @@
   font-weight: 600;
 }
 
+.dp-time {
+  font-size: 0.8125rem;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+
 .dp-status-wrap {
   position: relative;
   display: inline-flex;
@@ -688,4 +694,122 @@
   color: white;
   border-color: var(--color-secondary);
   font-weight: 700;
+}
+
+/* Jadwal Picker */
+.dp-jadwal-picker {
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.dp-jadwal-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  margin-bottom: 0.75rem;
+}
+
+.dp-day-grid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.dp-day-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dp-day-btn:hover {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+.dp-day-btn--selected {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: white;
+}
+
+.dp-btn-save-jadwal {
+  width: 100%;
+  padding: 0.625rem;
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dp-btn-save-jadwal:hover {
+  background: #256363;
+}
+
+/* Date Filter */
+.dp-date-filter {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--white);
+  font-size: 0.8125rem;
+  color: var(--slate-700);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.dp-date-filter:hover {
+  border-color: var(--color-secondary);
+}
+
+/* Jadwal Popup */
+.dp-jadwal-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  min-width: 280px;
+}
+
+.dp-jadwal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dp-jadwal-header span {
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.dp-jadwal-header button {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--slate-500);
+  cursor: pointer;
 }

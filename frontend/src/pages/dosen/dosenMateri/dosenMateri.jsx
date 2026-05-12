@@ -9,12 +9,6 @@ import { apiClient } from "../../../utils/apiClient";
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
-const MATKUL_LIST = [
-  { id: 1, name: "Basis Data" },
-  { id: 2, name: "Pemrograman Web" },
-  { id: 3, name: "Metodologi Penelitian" },
-];
-
 const TIPE_LIST = [
   "PDF",
   "Video",
@@ -53,6 +47,7 @@ const INITIAL_MATERI = [];
 export default function DosenMateri({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [materi, setMateri] = useState(INITIAL_MATERI);
+  const [matkulList, setMatkulList] = useState([]);
   const [toast, setToast] = useState(null);
   const [view, setView] = useState("list"); // "list" | "create" | "edit"
   const [editId, setEditId] = useState(null);
@@ -61,6 +56,16 @@ export default function DosenMateri({ onNavigate, onLogout }) {
   const [filterTipe, setFilterTipe] = useState("Semua");
   const [previewItem, setPreviewItem] = useState(null);
   const fileInputRef = useRef(null);
+
+  const fetchMatkulList = async () => {
+    try {
+      const res = await apiClient.get('/api/mata-kuliah');
+      const data = Array.isArray(res) ? res : (res.data || []);
+      setMatkulList(data.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah })));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const [form, setForm] = useState({
     judul: "",
@@ -77,21 +82,25 @@ export default function DosenMateri({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const fetchMateri = async () => {
+  const fetchMateri = async (mkFilter = filterMatkul, tpFilter = filterTipe) => {
     try {
-      const res = await apiClient.get('/api/modul-ajar');
-      const data = res.data || res;
+      const params = new URLSearchParams();
+      if (mkFilter && mkFilter !== "Semua") params.append('matkul', mkFilter);
+      if (tpFilter && tpFilter !== "Semua") params.append('tipe', tpFilter);
+      const query = params.toString() ? `?${params.toString()}` : '';
+      const res = await apiClient.get(`/api/modul-ajar${query}`);
+      const data = Array.isArray(res) ? res : (res.data || []);
       if (Array.isArray(data)) {
         setMateri(data.map(m => ({
-          id: m.idModulAjar,
+          id: m.idModulAjar || m.id,
           judul: m.judul,
-          tipe: m.tipe_modul,
-          matkul: m.idMataKuliah,
-          matakuliah: m.mataKuliah?.namaMataKuliah || "Mata Kuliah",
+          tipe: m.tipe_modul || m.tipe,
+          matkul: m.idMataKuliah || m.matkul,
+          matakuliah: m.mataKuliah?.namaMataKuliah || m.matakuliah || "Mata Kuliah",
           deskripsi: m.deskripsi,
           url: m.url,
           ukuran: m.ukuran,
-          tanggal: new Date(m.tanggal).toISOString().slice(0, 10),
+          tanggal: m.tanggal ? new Date(m.tanggal).toISOString().slice(0, 10) : "",
           diunduh: m.diunduh || 0,
           canDownload: m.canDownload,
           file: null
@@ -103,11 +112,16 @@ export default function DosenMateri({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
-    fetchMateri();
+    fetchMatkulList();
+    fetchMateri("Semua", "Semua");
   }, []);
 
+  useEffect(() => {
+    fetchMateri(filterMatkul, filterTipe);
+  }, [filterMatkul, filterTipe]);
+
   const matakuliahName = (id) =>
-    MATKUL_LIST.find((m) => m.id === id)?.name || id;
+    matkulList.find((m) => m.id === id)?.name || id;
 
   const filtered = materi.filter((m) => {
     const mk = filterMatkul === "Semua" || m.matkul === filterMatkul;
@@ -119,7 +133,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
     setForm({
       judul: "",
       tipe: "PDF",
-      matkul: 1,
+      matkul: matkulList.length > 0 ? matkulList[0].id : 1,
       deskripsi: "",
       url: "",
       file: null,
@@ -464,7 +478,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
                 <div className="dm-filter-group">
                   <label className="dm-filter-label">Mata Kuliah:</label>
                   <div className="dm-filter-pills">
-                    {["Semua", ...MATKUL_LIST.map((m) => m.id)].map((id) => (
+                    {["Semua", ...matkulList.map((m) => m.id)].map((id) => (
                       <button
                         key={id}
                         className={`dm-pill ${filterMatkul === id ? "dm-pill--active" : ""}`}
@@ -472,7 +486,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
                       >
                         {id === "Semua"
                           ? "Semua"
-                          : MATKUL_LIST.find((m) => m.id === id)?.name}
+                          : matkulList.find((m) => m.id === id)?.name}
                       </button>
                     ))}
                   </div>
@@ -605,33 +619,18 @@ export default function DosenMateri({ onNavigate, onLogout }) {
                           </span>
                           {item.diunduh}× diunduh
                         </div>
-                        {item.canDownload ? (
-                          <button
-                            className="dm-dl-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(item);
-                            }}
-                          >
-                            <span className="material-symbols-outlined">
-                              download
-                            </span>
-                            Unduh
-                          </button>
-                        ) : (
-                          <button
-                            className="dm-dl-btn dm-dl-btn--link"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              showToast("Membuka link...");
-                            }}
-                          >
-                            <span className="material-symbols-outlined">
-                              open_in_new
-                            </span>
-                            Buka
-                          </button>
-                        )}
+                        <button
+                          className="dm-dl-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewItem(item);
+                          }}
+                        >
+                          <span className="material-symbols-outlined">
+                            visibility
+                          </span>
+                          Lihat Detail
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -725,7 +724,7 @@ export default function DosenMateri({ onNavigate, onLogout }) {
                           setForm({ ...form, matkul: e.target.value })
                         }
                       >
-                        {MATKUL_LIST.map((mk) => (
+                        {matkulList.map((mk) => (
                           <option key={mk.id} value={mk.id}>
                             {mk.name} ({mk.id})
                           </option>

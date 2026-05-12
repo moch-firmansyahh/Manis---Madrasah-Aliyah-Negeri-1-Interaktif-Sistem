@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./login.css";
+import { apiClient } from "../../../utils/apiClient";
 
 function Login({ onLogin }) {
   const [role, setRole] = useState("Mahasiswa");
@@ -15,26 +16,11 @@ function Login({ onLogin }) {
     setIsLoading(true);
 
     try {
-      // Mengambil URL backend dari environment variable (.env)
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-      
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nomorInduk: nomorInduk,
-          password: password,
-          role: role, // Optional: backend lms-be dapat menerima role jika diperlukan
-        }),
+      const data = await apiClient.post("/api/auth/login", {
+        nomorInduk: nomorInduk,
+        password: password,
+        role: role,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Gagal melakukan login");
-      }
 
       // 1. Simpan token JWT ke localStorage untuk sesi
       localStorage.setItem("token", data.data.token);
@@ -42,15 +28,13 @@ function Login({ onLogin }) {
 
       // 2. Beritahu App component bahwa login berhasil
       if (onLogin) {
-        // Backend mengembalikan role dalam huruf kapital (misal "MAHASISWA" atau "DOSEN")
-        // Namun App.jsx mengharapkan format "Mahasiswa" atau "Dosen" (huruf awal kapital)
         const rawRole = data.data.user.role || role;
-        const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
-        
+        const formattedRole =
+          rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
         onLogin(formattedRole);
       }
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(err.message || "Gagal melakukan login");
     } finally {
       setIsLoading(false);
     }
@@ -64,19 +48,16 @@ function Login({ onLogin }) {
       <div className="circle-decoration-2"></div>
 
       <div className="login-container">
-        {/* Logo & Branding */}
-        <div className="brand-header">
-          <div className="logo-box">
-            <h1 className="logo-text"></h1>
-          </div>
-          <h2 className="welcome-text">Selamat Datang</h2>
-          <p className="welcome-subtext">
-            Silakan masuk ke Learning Management System Kelompok 8.
-          </p>
-        </div>
-
         {/* Login Card */}
         <div className="login-card">
+          {/* Logo & Branding */}
+          <div className="brand-header">
+            <h2 className="welcome-text">Selamat Datang!!</h2>
+            <p className="welcome-subtext">
+              Learning Management System Kelompok 8.
+            </p>
+          </div>
+
           {/* Role Toggle */}
           <div className="role-toggle">
             <button
@@ -93,12 +74,19 @@ function Login({ onLogin }) {
             </button>
           </div>
 
-          <form
-            className="login-form"
-            onSubmit={handleLoginSubmit}
-          >
+          <form className="login-form" onSubmit={handleLoginSubmit}>
             {errorMsg && (
-              <div style={{ color: "red", marginBottom: "1rem", fontSize: "14px", textAlign: "center", backgroundColor: "#ffebee", padding: "8px", borderRadius: "4px" }}>
+              <div
+                style={{
+                  color: "red",
+                  marginBottom: "1rem",
+                  fontSize: "14px",
+                  textAlign: "center",
+                  backgroundColor: "#ffebee",
+                  padding: "8px",
+                  borderRadius: "4px",
+                }}
+              >
                 {errorMsg}
               </div>
             )}
@@ -161,9 +149,15 @@ function Login({ onLogin }) {
             </div>
 
             {/* Primary Button */}
-            <button className="submit-button" type="submit" disabled={isLoading}>
+            <button
+              className="submit-button"
+              type="submit"
+              disabled={isLoading}
+            >
               <span>{isLoading ? "Memproses..." : "Masuk"}</span>
-              {!isLoading && <span className="material-symbols-outlined">arrow_forward</span>}
+              {!isLoading && (
+                <span className="material-symbols-outlined">arrow_forward</span>
+              )}
             </button>
           </form>
         </div>

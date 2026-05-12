@@ -107,16 +107,41 @@ export default function QuizKuis({ onNavigate, onLogout, idKuis = 1 }) {
     setAnswers(newAnswers);
   };
 
-  const handleSubmit = () => {
-    let correctCount = 0;
-    questions.forEach((q, index) => {
-      if (answers[index] === q.correct) {
-        correctCount++;
+  const handleSubmit = async () => {
+    try {
+      // API call ke backend untuk submit kuis
+      const response = await apiClient.post(`/api/kuis/${idKuis}/submit`, {
+        answers
+      });
+      
+      // Gunakan skor dari backend jika tersedia
+      if (response && response.score !== undefined) {
+        setScore(response.score);
+      } else {
+        // Fallback jika API gagal mengembalikan skor (kalkulasi lokal)
+        let correctCount = 0;
+        questions.forEach((q, index) => {
+          if (answers[index] === q.correct) {
+            correctCount++;
+          }
+        });
+        const finalScore = Math.round((correctCount / questions.length) * 100);
+        setScore(finalScore);
       }
-    });
-    const finalScore = Math.round((correctCount / questions.length) * 100);
-    setScore(finalScore);
-    setIsSubmitted(true);
+    } catch (error) {
+      console.error("Gagal mengirim kuis", error);
+      // Kalkulasi lokal sebagai fallback jika offline/gagal
+      let correctCount = 0;
+      questions.forEach((q, index) => {
+        if (answers[index] === q.correct) {
+          correctCount++;
+        }
+      });
+      const finalScore = Math.round((correctCount / questions.length) * 100);
+      setScore(finalScore);
+    } finally {
+      setIsSubmitted(true);
+    }
   };
 
   const handleNextQuestion = () => {
