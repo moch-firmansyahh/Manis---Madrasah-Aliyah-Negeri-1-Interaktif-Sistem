@@ -78,6 +78,28 @@ export class NilaiController {
     }
   }
 
+  async getTugasByMataKuliah(req, res) {
+    try {
+      const { idMataKuliah } = req.params;
+      const result = await this.nilaiUseCase.getTugasByMataKuliah(idMataKuliah);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getPengumpulanPerTugas(req, res) {
+    try {
+      const { idTugas } = req.params;
+      const { idMataKuliah } = req.query;
+      if (!idMataKuliah) return res.status(400).json({ error: 'idMataKuliah diperlukan' });
+      const result = await this.nilaiUseCase.getPengumpulanPerTugas(idTugas, idMataKuliah);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async saveNilaiTugas(req, res) {
     try {
       const result = await this.nilaiUseCase.saveNilaiTugas(req.body);

@@ -19,12 +19,16 @@ async getDaftarKelompok(idMataKuliah) {
         });
 
         const lastSubmission = k.pengumpulan?.[0] || null;
+        const totalAnggota = k.anggota.length;
+        const nimSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nim));
+        const sudahSubmit = k.anggota.filter(a => nimSudahSubmit.has(a.nim)).length;
+        const progress = totalAnggota > 0 ? Math.round((sudahSubmit / totalAnggota) * 100) : 0;
         return {
             id: k.idKelompok,
             name: k.namaKelompok,
             color: k.warna || "#4b53bc",
             task: k.tugasName || "–",
-            progress: k.progress,
+            progress,
             status: k.status,
             submitted: lastSubmission !== null,
             fileKumpulan: lastSubmission?.fileJawaban || null,
@@ -68,12 +72,16 @@ async getAllKelompok(nipDosen) {
         });
 
         const lastSubmission = k.pengumpulan?.[0] || null;
+        const totalAnggota = k.anggota.length;
+        const nimSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nim));
+        const sudahSubmit = k.anggota.filter(a => nimSudahSubmit.has(a.nim)).length;
+        const progress = totalAnggota > 0 ? Math.round((sudahSubmit / totalAnggota) * 100) : 0;
         return {
             id: k.idKelompok,
             name: k.namaKelompok,
             color: k.warna || "#4b53bc",
             task: k.tugasName || "–",
-            progress: k.progress,
+            progress,
             status: k.status,
             submitted: lastSubmission !== null,
             fileKumpulan: lastSubmission?.fileJawaban || null,

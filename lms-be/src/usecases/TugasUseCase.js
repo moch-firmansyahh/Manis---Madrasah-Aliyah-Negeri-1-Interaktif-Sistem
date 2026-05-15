@@ -59,7 +59,9 @@ export class TugasUseCase {
     if (!tugas) throw new Error("Tugas tidak ditemukan");
 
     // Cek apakah mahasiswa ini punya kelompok di matkul yang sama
-    const anggotaKelompok = await this.tugasRepository.findKelompokByNim(nim, tugas.idMataKuliah);
+    // Tapi hanya pakai kelompok kalau tipeTugas bukan Individu
+    const isIndividu = (tugas.tipeTugas || 'Individu') === 'Individu';
+    const anggotaKelompok = isIndividu ? null : await this.tugasRepository.findKelompokByNim(nim, tugas.idMataKuliah);
     const kelompok = anggotaKelompok?.kelompok;
 
     if (kelompok) {

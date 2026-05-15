@@ -104,6 +104,38 @@ export class NilaiUseCase {
     return result.filter(r => r !== null);
   }
 
+  async getTugasByMataKuliah(idMataKuliah) {
+    const tugas = await this.repository.getTugasByMataKuliah(idMataKuliah);
+    return tugas.map(t => ({
+      idTugas: t.idTugas,
+      judul: t.judul,
+      deadlineTugas: t.deadlineTugas ? t.deadlineTugas.toISOString() : null,
+      tipeTugas: t.tipeTugas || 'Individu'
+    }));
+  }
+
+  async getPengumpulanPerTugas(idTugas, idMataKuliah) {
+    // Ambil semua mahasiswa di matkul ini
+    const semuaMahasiswa = await this.repository.getMahasiswaByMataKuliah(idMataKuliah);
+    // Ambil yang sudah submit
+    const submissions = await this.repository.getPengumpulanPerTugas(idTugas);
+    const submissionMap = new Map(submissions.map(s => [s.nim, s]));
+
+    return semuaMahasiswa.map(mhs => {
+      const sub = submissionMap.get(mhs.nim);
+      return {
+        nim: mhs.nim,
+        nomorInduk: mhs.user?.nomorInduk || mhs.nim,
+        nama: mhs.user?.nama || 'Mahasiswa',
+        sudahKumpul: !!sub,
+        idPengumpulan: sub?.idPengumpulan || null,
+        fileJawaban: sub?.fileJawaban || null,
+        tanggalKumpul: sub?.deadlineTugas || null,
+        nilai: null
+      };
+    });
+  }
+
   async saveNilaiTugas(data) {
     const { nomorInduk, idMataKuliah, nilaiTugas } = data;
     

@@ -43,7 +43,7 @@ export class TugasController {
       } else if (idMkList.length > 0) {
         filter.idMataKuliah = { in: idMkList };
       }
-      filter.nim = nim; // For checking submission status
+      filter.nim = nim; // Hanya untuk cek status pengumpulan, bukan filter row
       
       const data = await this.tugasUseCase.getDaftarTugas(filter);
       res.status(200).json(data);

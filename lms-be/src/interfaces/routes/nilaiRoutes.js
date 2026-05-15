@@ -19,6 +19,8 @@ router.get('/mahasiswa/:idMataKuliah', (req, res) => controller.getByMahasiswa(r
 router.patch('/:id', (req, res) => controller.update(req, res));
 
 router.get('/submissions/individu/:idMataKuliah', authMiddleware, (req, res) => controller.getPengumpulanIndividu(req, res));
+router.get('/submissions/tugas/:idTugas', authMiddleware, (req, res) => controller.getPengumpulanPerTugas(req, res));
+router.get('/tugas-list/:idMataKuliah', authMiddleware, (req, res) => controller.getTugasByMataKuliah(req, res));
 router.post('/submissions/nilai', authMiddleware, (req, res) => controller.saveNilaiTugas(req, res));
 
 export default router;

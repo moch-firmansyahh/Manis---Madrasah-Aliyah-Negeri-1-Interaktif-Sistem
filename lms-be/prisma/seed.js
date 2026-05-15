@@ -536,7 +536,6 @@ const matkulList = [
     for (let j = 0; j < 2 && j < mkTugas.length; j++) {
       const t = mkTugas[j];
       pengumpulanData.push({
-        idKelompok: kelompokCreated[i * 2].idKelompok,
         idTugas: t.idTugas,
         nim: t.nim,
         judul: `Submission: ${t.judul}`,

@@ -5,28 +5,34 @@ export class PrismaTugasRepository {
     const where = {};
     if (filter.idMataKuliah) {
       if (typeof filter.idMataKuliah === 'object' && filter.idMataKuliah.in) {
-        // Array of course IDs: { in: [1, 2, 3] }
         where.idMataKuliah = { in: filter.idMataKuliah.in.map(id => parseInt(id)) };
       } else {
-        // Single course ID
         where.idMataKuliah = parseInt(filter.idMataKuliah);
       }
     }
-    // Filter by NIM to get only tasks assigned to this specific student
-    // (prevents duplicates when same task is assigned to multiple students)
-    if (filter.nim) {
-      where.nim = filter.nim;
-    }
-    return await prisma.tugas.findMany({
+
+    const allTugas = await prisma.tugas.findMany({
       where,
-      include: { 
-        mataKuliah: true, 
-        pengumpulanTugas: filter.nim ? {
-          where: { nim: filter.nim }
-        } : true 
+      include: {
+        mataKuliah: true,
+        pengumpulanTugas: filter.nim ? { where: { nim: filter.nim } } : false
       },
       orderBy: { deadlineTugas: 'asc' }
     });
+
+    // Deduplicate: satu tugas (judul+matkul+deadline) hanya tampil 1x
+    const seen = new Map();
+    for (const t of allTugas) {
+      const key = `${t.judul}__${t.idMataKuliah}__${t.deadlineTugas?.toISOString() || ''}`;
+      if (!seen.has(key)) {
+        seen.set(key, t);
+      } else if (filter.nim) {
+        // Kalau filter nim, utamakan row yang nimnya cocok
+        if (t.nim === filter.nim) seen.set(key, t);
+      }
+    }
+
+    return Array.from(seen.values());
   }
 
   async findTugasById(idTugas) {

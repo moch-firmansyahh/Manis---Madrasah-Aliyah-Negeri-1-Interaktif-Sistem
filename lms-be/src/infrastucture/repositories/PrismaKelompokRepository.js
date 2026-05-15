@@ -17,8 +17,7 @@ async findAll(nipDosen) {
                 }
             },
             pengumpulan: {
-                orderBy: { idPengumpulan: 'desc' },
-                take: 1
+                orderBy: { idPengumpulan: 'desc' }
             }
         }
     });
@@ -36,8 +35,7 @@ async findByMataKuliah(idMataKuliah) {
                 }
             },
             pengumpulan: {
-                orderBy: { idPengumpulan: 'desc' },
-                take: 1
+                orderBy: { idPengumpulan: 'desc' }
             }
         }
     });
