@@ -221,7 +221,15 @@ export default function PengumpulanTugas({ onNavigate, onLogout, taskId }) {
                 {submission && !file && submission.fileJawaban && (
                   <p className="pt-file-name">
                     <span className="material-symbols-outlined">description</span>
-                    File sebelumnya: {submission.fileJawaban}
+                    File sebelumnya:{" "}
+                    <a
+                      href={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${submission.fileJawaban}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#4b53bc", fontWeight: 600, textDecoration: "underline" }}
+                    >
+                      {submission.fileJawaban.split("/").pop()}
+                    </a>
                   </p>
                 )}
               </div>

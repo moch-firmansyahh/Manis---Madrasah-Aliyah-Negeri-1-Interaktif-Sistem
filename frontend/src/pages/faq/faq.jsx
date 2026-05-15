@@ -65,12 +65,12 @@ const FAQ_DATA = {
             <p>Langkah-langkah mengumpulkan tugas:</p>
             <ol>
               <li>Masuk ke menu <strong>Tugas</strong> di sidebar.</li>
-              <li>Pilih mata kuliah dan tugas yang ingin dikumpulkan.</li>
+              <li>Semua tugas dari seluruh mata kuliah akan tampil. Pilih tugas yang ingin dikumpulkan.</li>
               <li>Klik tombol <strong>Kumpulkan</strong>.</li>
-              <li>Unggah file atau isi jawaban sesuai instruksi.</li>
+              <li>Unggah file jawaban (PDF, Word, Zip, dll).</li>
               <li>Klik <strong>Kirim</strong> untuk mengonfirmasi pengumpulan.</li>
             </ol>
-            <p>Pastikan pengumpulan dilakukan sebelum batas waktu yang ditentukan dosen.</p>
+            <p>Jika sudah pernah mengumpulkan, nama file sebelumnya akan tampil sebagai <strong>link biru</strong> yang bisa diklik untuk membuka file. Kamu bisa memperbarui pengumpulan selama deadline belum lewat.</p>
           </>
         ),
       },
@@ -97,10 +97,16 @@ const FAQ_DATA = {
         icon: "grade",
         question: "Di mana saya bisa melihat nilai saya?",
         answer: (
-          <p>
-            Nilai dapat dilihat di menu <strong>Nilai</strong> pada sidebar. Pilih mata kuliah untuk melihat
-            rincian nilai tugas, kuis, dan nilai akhir yang sudah diinputkan dosen.
-          </p>
+          <>
+            <p>
+              Nilai dapat dilihat di menu <strong>Nilai</strong> pada sidebar. Di sana kamu bisa melihat
+              rincian nilai tugas, UTS, UAS, dan nilai akhir per mata kuliah yang sudah diinputkan dosen.
+            </p>
+            <p>
+              Tersedia juga fitur <strong>Unduh Transkrip</strong> untuk mencetak atau menyimpan rekap nilai
+              seluruh mata kuliah dalam format PDF.
+            </p>
+          </>
         ),
       },
       {
@@ -169,16 +175,18 @@ const FAQ_DATA = {
       },
       {
         icon: "assignment_turned_in",
-        question: "Bagaimana cara memberi nilai tugas mahasiswa?",
+        question: "Bagaimana cara memberi nilai tugas individu mahasiswa?",
         answer: (
           <>
             <ol>
-              <li>Masuk ke menu <strong>Tugas</strong>.</li>
-              <li>Pilih tugas yang ingin dinilai.</li>
-              <li>Klik nama mahasiswa untuk melihat file pengumpulan.</li>
-              <li>Masukkan nilai pada kolom yang tersedia.</li>
-              <li>Klik <strong>Simpan Nilai</strong>.</li>
+              <li>Masuk ke menu <strong>Nilai Individu</strong> di sidebar.</li>
+              <li>Pilih <strong>Mata Kuliah</strong> dari dropdown.</li>
+              <li>Pilih <strong>Tugas</strong> spesifik yang ingin dinilai.</li>
+              <li>Daftar seluruh mahasiswa akan tampil beserta status pengumpulan (Sudah Kumpul / Belum Kumpul).</li>
+              <li>Klik tombol <strong>Nilai</strong> di baris mahasiswa yang sudah mengumpulkan.</li>
+              <li>Masukkan nilai (0–100) lalu klik <strong>Simpan</strong>.</li>
             </ol>
+            <p>Kamu bisa filter mahasiswa berdasarkan status: <strong>Semua</strong>, <strong>Sudah Kumpul</strong>, atau <strong>Belum Kumpul</strong>. Tombol nilai hanya aktif untuk mahasiswa yang sudah mengumpulkan.</p>
           </>
         ),
       },
@@ -204,8 +212,8 @@ const FAQ_DATA = {
         answer: (
           <p>
             LeMaS direkomendasikan menggunakan browser versi terbaru dari <strong>Google Chrome</strong>,
-            <strong> Mozilla Firefox</strong>, atau <strong>Microsoft Edge</strong>. Aktifkan JavaScript dan izinkan
-            akses kamera untuk fitur QR Code.
+            <strong> Mozilla Firefox</strong>, atau <strong>Microsoft Edge</strong>. Izinkan akses kamera
+            di browser untuk menggunakan fitur presensi QR Code.
           </p>
         ),
       },

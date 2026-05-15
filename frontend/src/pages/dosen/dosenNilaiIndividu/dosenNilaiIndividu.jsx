@@ -7,75 +7,29 @@ import Navbar from "../../../Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
 const MEMBER_COLORS = ["#4b53bc", "#2f9696", "#c47f17", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#be185d", "#8991fe"];
-
-// Dummy data untuk siswa yang sudah mengumpulkan tugas (nilai null = belum dinilai)
-const DUMMY_SUBMISSIONS = [
-  {
-    idPengumpulan: 1,
-    nim: "220001",
-    nomorInduk: "220001",
-    nama: "Ahmad Fauzi",
-    nilai: null,
-    tanggalKumpul: "2024-05-10T08:30:00",
-    tugas: { judul: "Tugas 1 - Algoritma Dasar" },
-    fileJawaban: "/uploads/sample-jawaban.pdf"
-  },
-  {
-    idPengumpulan: 2,
-    nim: "220002",
-    nomorInduk: "220002",
-    nama: "Budi Santoso",
-    nilai: null,
-    tanggalKumpul: "2024-05-10T10:15:00",
-    tugas: { judul: "Tugas 1 - Algoritma Dasar" },
-    fileJawaban: "/uploads/sample-jawaban.docx"
-  },
-  {
-    idPengumpulan: 3,
-    nim: "220003",
-    nomorInduk: "220003",
-    nama: "Citra Lestari",
-    nilai: null,
-    tanggalKumpul: "2024-05-09T14:20:00",
-    tugas: { judul: "Tugas 1 - Algoritma Dasar" },
-    fileJawaban: null // Belum upload file
-  },
-  {
-    idPengumpulan: 4,
-    nim: "220004",
-    nomorInduk: "220004",
-    nama: "Dedi Pratama",
-    nilai: null,
-    tanggalKumpul: "2024-05-11T09:00:00",
-    tugas: { judul: "Tugas 1 - Algoritma Dasar" },
-    fileJawaban: "/uploads/sample-jawaban.pdf"
-  },
-  {
-    idPengumpulan: 5,
-    nim: "220005",
-    nomorInduk: "220005",
-    nama: "Eka Wulandari",
-    nilai: null,
-    tanggalKumpul: "2024-05-10T16:45:00",
-    tugas: { judul: "Tugas 1 - Algoritma Dasar" },
-    fileJawaban: "/uploads/sample-jawaban.xlsx"
-  }
-];
 
 function initials(name) {
   if (!name) return "?";
   return name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
 }
 
+function getColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return MEMBER_COLORS[Math.abs(hash) % MEMBER_COLORS.length];
+}
+
 export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [selectedMk, setSelectedMk] = useState("");
-  const [submissions, setSubmissions] = useState([]);
+  const [tugasList, setTugasList] = useState([]);
+  const [selectedTugas, setSelectedTugas] = useState(null);
+  const [mahasiswaList, setMahasiswaList] = useState([]);
   const [filter, setFilter] = useState("semua");
   const [loading, setLoading] = useState(false);
+  const [loadingMhs, setLoadingMhs] = useState(false);
   const [toast, setToast] = useState(null);
   const [nilaiModal, setNilaiModal] = useState(null);
   const [nilaiInput, setNilaiInput] = useState("");
@@ -85,66 +39,69 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  useEffect(() => {
-    fetchMataKuliah();
-  }, []);
+  useEffect(() => { fetchMataKuliah(); }, []);
 
   useEffect(() => {
     if (selectedMk) {
-      fetchSubmissions();
+      setSelectedTugas(null);
+      setMahasiswaList([]);
+      fetchTugasList();
     }
   }, [selectedMk]);
+
+  useEffect(() => {
+    if (selectedTugas) fetchMahasiswaList();
+  }, [selectedTugas]);
 
   const fetchMataKuliah = async () => {
     try {
       const res = await apiClient.get('/api/mata-kuliah');
-      console.log("Mata Kuliah response:", res);
       const data = res?.data || res;
-      if (Array.isArray(data)) {
-        setMataKuliahList(data);
-      }
-    } catch (error) {
-      console.error("Gagal memuat mata kuliah:", error);
-    }
+      if (Array.isArray(data)) setMataKuliahList(data);
+    } catch (e) {}
   };
 
-  const fetchSubmissions = async () => {
+  const fetchTugasList = async () => {
     if (!selectedMk) return;
     setLoading(true);
-    setSubmissions([]);
+    setTugasList([]);
     try {
-      const res = await apiClient.get(`/api/nilai/submissions/individu/${selectedMk}`);
-
-      let data = [];
-      if (res?.data) data = res.data;
-      else if (Array.isArray(res)) data = res;
-
-      // Gunakan dummy data jika API tidak mengembalikan data (untuk testing/demo)
-      if (!data || data.length === 0) {
-        console.log("Menggunakan dummy data untuk demo");
-        data = DUMMY_SUBMISSIONS;
-      }
-
-      setSubmissions(data);
-    } catch (error) {
-      console.error("Gagal memuat pengumpulan:", error);
-      // Gunakan dummy data saat error (untuk testing/demo)
-      console.log("Menggunakan dummy data karena error API");
-      setSubmissions(DUMMY_SUBMISSIONS);
+      const res = await apiClient.get(`/api/nilai/tugas-list/${selectedMk}`);
+      const data = res?.data || res;
+      const list = Array.isArray(data) ? data : (data?.data || []);
+      setTugasList(list);
+    } catch (e) {
+      showToast("Gagal memuat daftar tugas", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredSubmissions = submissions.filter(s => {
-    if (filter === "sudah") return s.nilai !== null;
-    if (filter === "belum") return s.nilai === null;
+  const fetchMahasiswaList = async () => {
+    if (!selectedTugas) return;
+    setLoadingMhs(true);
+    setMahasiswaList([]);
+    try {
+      const res = await apiClient.get(`/api/nilai/submissions/tugas/${selectedTugas.idTugas}?idMataKuliah=${selectedMk}`);
+      const data = res?.data || res;
+      const list = Array.isArray(data) ? data : (data?.data || []);
+      setMahasiswaList(list);
+    } catch (e) {
+      showToast("Gagal memuat data mahasiswa", "error");
+    } finally {
+      setLoadingMhs(false);
+    }
+  };
+
+  const filteredList = mahasiswaList.filter(m => {
+    if (filter === "kumpul") return m.sudahKumpul;
+    if (filter === "belum") return !m.sudahKumpul;
     return true;
   });
 
-  const openNilaiModal = (submission) => {
-    setNilaiModal(submission);
-    setNilaiInput(submission.nilai !== null ? String(submission.nilai) : "");
+  const openNilaiModal = (mhs) => {
+    setNilaiModal(mhs);
+    setNilaiInput(mhs.nilai !== null && mhs.nilai !== undefined ? String(mhs.nilai) : "");
   };
 
   const saveNilai = async () => {
@@ -162,33 +119,33 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
       });
       showToast("Nilai berhasil disimpan!");
       setNilaiModal(null);
-      fetchSubmissions();
-    } catch (error) {
-      showToast(error.message || "Gagal menyimpan nilai", "error");
+      setMahasiswaList(prev => prev.map(m =>
+        m.nim === nilaiModal.nim ? { ...m, nilai } : m
+      ));
+    } catch (e) {
+      showToast(e.message || "Gagal menyimpan nilai", "error");
     }
   };
 
   const formatDate = (date) => {
     if (!date) return "-";
-    return new Date(date).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    });
+    return new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
   };
 
   const getLetterGrade = (nilai) => {
     if (nilai === null || nilai === undefined) return "-";
     if (nilai >= 85) return "A";
+    if (nilai >= 80) return "A-";
+    if (nilai >= 75) return "B+";
     if (nilai >= 70) return "B";
-    if (nilai >= 55) return "C";
-    return "D";
+    if (nilai >= 65) return "B-";
+    if (nilai >= 60) return "C";
+    if (nilai >= 50) return "D";
+    return "E";
   };
 
-  const getColor = (nim) => {
-    const idx = submissions.findIndex(s => s.nim === nim);
-    return MEMBER_COLORS[idx >= 0 ? idx % MEMBER_COLORS.length : 0];
-  };
+  const sudahKumpulCount = mahasiswaList.filter(m => m.sudahKumpul).length;
+  const sudahNilaiCount = mahasiswaList.filter(m => m.nilai !== null && m.nilai !== undefined).length;
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
@@ -217,19 +174,17 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
                 </div>
                 <div>
                   <p className="dni-student-name">{nilaiModal.nama}</p>
-                  <p className="dni-student-nim">{nilaiModal.nim}</p>
+                  <p className="dni-student-nim">{nilaiModal.nomorInduk}</p>
                 </div>
               </div>
               <p className="dni-task-title">
-                <strong>Tugas:</strong> {nilaiModal.tugas?.judul || "-"}
+                <strong>Tugas:</strong> {selectedTugas?.judul || "-"}
               </p>
               <div className="dni-input-group">
-                <label>Nilai Tugas</label>
+                <label>Nilai Tugas (0–100)</label>
                 <div className="dni-input-wrap">
                   <input
-                    type="number"
-                    min="0"
-                    max="100"
+                    type="number" min="0" max="100"
                     value={nilaiInput}
                     onChange={e => setNilaiInput(e.target.value)}
                     placeholder="0-100"
@@ -237,17 +192,15 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
                   />
                   <span className="dni-input-suffix">/100</span>
                 </div>
-                {nilaiInput && (
+                {nilaiInput !== "" && (
                   <span className="dni-letter-grade">
-                    Grade: {getLetterGrade(parseFloat(nilaiInput))}
+                    Grade: <strong>{getLetterGrade(parseFloat(nilaiInput))}</strong>
                   </span>
                 )}
               </div>
             </div>
             <div className="dni-modal-footer">
-              <button className="dni-btn-cancel" onClick={() => setNilaiModal(null)}>
-                Batal
-              </button>
+              <button className="dni-btn-cancel" onClick={() => setNilaiModal(null)}>Batal</button>
               <button className="dni-btn-save" onClick={saveNilai}>
                 <span className="material-symbols-outlined">save</span>
                 Simpan
@@ -257,82 +210,114 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
         </div>
       )}
 
-      <SidebarDosen
-        onNavigate={onNavigate}
-        onLogout={onLogout}
-        activePage="dosenNilaiIndividu"
-        mobileOpen={sidebarOpen}
-        onClose={closeSidebar}
-      />
+      <SidebarDosen onNavigate={onNavigate} onLogout={onLogout} activePage="dosenNilaiIndividu" mobileOpen={sidebarOpen} onClose={closeSidebar} />
 
       <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar
-          role="Dosen"
-          onOpenSidebar={openSidebar}
-          onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)}
-        />
+        <Navbar role="Dosen" onOpenSidebar={openSidebar} onNavigate={typeof onNavigate !== "undefined" ? onNavigate : undefined} />
 
         <div className="page-content">
           <div className="dni-header">
             <div>
               <h2 className="dni-title">Nilai Tugas Individu</h2>
-              <p className="dni-subtitle">Beri penilaian untuk tugas individu mahasiswa</p>
+              <p className="dni-subtitle">Pilih mata kuliah dan tugas untuk memberi penilaian</p>
             </div>
           </div>
 
+          {/* Step 1 & 2: Pilih Matkul + Tugas */}
           <div className="dni-filters">
             <div className="dni-select-wrap">
               <label>Mata Kuliah</label>
-              <select
-                value={selectedMk}
-                onChange={e => setSelectedMk(e.target.value)}
-                className="dni-select"
-              >
+              <select value={selectedMk} onChange={e => setSelectedMk(e.target.value)} className="dni-select">
                 <option value="">-- Pilih Mata Kuliah --</option>
                 {mataKuliahList.map(mk => (
-                  <option key={mk.idMataKuliah} value={mk.idMataKuliah}>
-                    {mk.namaMataKuliah}
-                  </option>
+                  <option key={mk.idMataKuliah} value={mk.idMataKuliah}>{mk.namaMataKuliah}</option>
                 ))}
               </select>
             </div>
 
-            <div className="dni-tabs">
-              <button
-                className={`dni-tab ${filter === "semua" ? "dni-tab--active" : ""}`}
-                onClick={() => setFilter("semua")}
-              >
-                Semua ({submissions.length})
-              </button>
-              <button
-                className={`dni-tab ${filter === "sudah" ? "dni-tab--active" : ""}`}
-                onClick={() => setFilter("sudah")}
-              >
-                Sudah Dinilai ({submissions.filter(s => s.nilai !== null).length})
-              </button>
-              <button
-                className={`dni-tab ${filter === "belum" ? "dni-tab--active" : ""}`}
-                onClick={() => setFilter("belum")}
-              >
-                Belum Dinilai ({submissions.filter(s => s.nilai === null).length})
-              </button>
-            </div>
+            {selectedMk && (
+              <div className="dni-select-wrap">
+                <label>Tugas</label>
+                {loading ? (
+                  <p style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}>Memuat tugas...</p>
+                ) : tugasList.length === 0 ? (
+                  <p style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}>Belum ada tugas untuk mata kuliah ini</p>
+                ) : (
+                  <select
+                    value={selectedTugas?.idTugas || ""}
+                    onChange={e => {
+                      const t = tugasList.find(t => String(t.idTugas) === e.target.value);
+                      setSelectedTugas(t || null);
+                    }}
+                    className="dni-select"
+                  >
+                    <option value="">-- Pilih Tugas --</option>
+                    {tugasList.map(t => (
+                      <option key={t.idTugas} value={t.idTugas}>{t.judul}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
           </div>
 
-          {loading ? (
-            <div className="dni-loading">
-              <span className="material-symbols-outlined">hourglass_empty</span>
-              <p>Memuat data...</p>
+          {/* Info bar tugas terpilih */}
+          {selectedTugas && (
+            <div className="dni-tugas-info">
+              <div className="dni-tugas-info-left">
+                <span className="material-symbols-outlined">assignment</span>
+                <div>
+                  <p className="dni-tugas-name">{selectedTugas.judul}</p>
+                  <p className="dni-tugas-deadline">
+                    Deadline: {selectedTugas.deadlineTugas ? formatDate(selectedTugas.deadlineTugas) : "Tanpa deadline"}
+                  </p>
+                </div>
+              </div>
+              {mahasiswaList.length > 0 && (
+                <div className="dni-tugas-stats">
+                  <span className="dni-stat-pill dni-stat-pill--green">{sudahKumpulCount} Sudah Kumpul</span>
+                  <span className="dni-stat-pill dni-stat-pill--gray">{mahasiswaList.length - sudahKumpulCount} Belum Kumpul</span>
+                  <span className="dni-stat-pill dni-stat-pill--blue">{sudahNilaiCount} Sudah Dinilai</span>
+                </div>
+              )}
             </div>
-          ) : !selectedMk ? (
+          )}
+
+          {/* Filter tabs */}
+          {selectedTugas && mahasiswaList.length > 0 && (
+            <div className="dni-tabs" style={{ marginBottom: "1rem" }}>
+              {[
+                { key: "semua", label: `Semua (${mahasiswaList.length})` },
+                { key: "kumpul", label: `Sudah Kumpul (${sudahKumpulCount})` },
+                { key: "belum", label: `Belum Kumpul (${mahasiswaList.length - sudahKumpulCount})` },
+              ].map(tab => (
+                <button key={tab.key} className={`dni-tab ${filter === tab.key ? "dni-tab--active" : ""}`} onClick={() => setFilter(tab.key)}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Content */}
+          {!selectedMk ? (
             <div className="dni-empty">
               <span className="material-symbols-outlined">school</span>
-              <p>Pilih mata kuliah untuk melihat pengumpulan tugas</p>
+              <p>Pilih mata kuliah terlebih dahulu</p>
             </div>
-          ) : filteredSubmissions.length === 0 ? (
+          ) : !selectedTugas ? (
+            <div className="dni-empty">
+              <span className="material-symbols-outlined">assignment</span>
+              <p>Pilih tugas untuk melihat daftar mahasiswa</p>
+            </div>
+          ) : loadingMhs ? (
+            <div className="dni-loading">
+              <span className="material-symbols-outlined">hourglass_empty</span>
+              <p>Memuat data mahasiswa...</p>
+            </div>
+          ) : filteredList.length === 0 ? (
             <div className="dni-empty">
               <span className="material-symbols-outlined">inbox</span>
-              <p>Belum ada mahasiswa yang mengumpulkan tugas untuk mata kuliah ini</p>
+              <p>Tidak ada data untuk filter ini</p>
             </div>
           ) : (
             <div className="dni-table-wrap">
@@ -341,7 +326,7 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
                   <tr>
                     <th>No</th>
                     <th>Mahasiswa</th>
-                    <th>Tugas</th>
+                    <th>Status</th>
                     <th>Tanggal Kumpul</th>
                     <th>File Jawaban</th>
                     <th>Nilai</th>
@@ -349,41 +334,35 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSubmissions.map((s, i) => (
-                    <tr key={s.idPengumpulan}>
+                  {filteredList.map((m, i) => (
+                    <tr key={m.nim} className={!m.sudahKumpul ? "dni-row--belum" : ""}>
                       <td className="dni-cell-no">{i + 1}</td>
                       <td>
                         <div className="dni-student-cell">
-                          <div className="dni-avatar-sm" style={{ background: getColor(s.nim) }}>
-                            {initials(s.nama)}
+                          <div className="dni-avatar-sm" style={{ background: getColor(m.nim) }}>
+                            {initials(m.nama)}
                           </div>
                           <div>
-                            <p className="dni-name">{s.nama}</p>
-                            <p className="dni-nim">{s.nim}</p>
+                            <p className="dni-name">{m.nama}</p>
+                            <p className="dni-nim">{m.nomorInduk}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="dni-cell-tugas">
-                        {s.tugas?.judul || "-"}
-                      </td>
-                      <td>{formatDate(s.tanggalKumpul)}</td>
                       <td>
-                        {s.fileJawaban ? (
-                          <a
-                            href={`${API_BASE}${s.fileJawaban}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="dni-file-link"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.25rem",
-                              color: "var(--blue-600)",
-                              textDecoration: "none",
-                              fontSize: "0.875rem",
-                              fontWeight: 500
-                            }}
-                          >
+                        {m.sudahKumpul ? (
+                          <span className="dni-status dni-status--kumpul">
+                            <span className="material-symbols-outlined">check_circle</span> Sudah Kumpul
+                          </span>
+                        ) : (
+                          <span className="dni-status dni-status--belum">
+                            <span className="material-symbols-outlined">cancel</span> Belum Kumpul
+                          </span>
+                        )}
+                      </td>
+                      <td>{m.sudahKumpul ? formatDate(m.tanggalKumpul) : "-"}</td>
+                      <td>
+                        {m.fileJawaban ? (
+                          <a href={`${API_BASE}${m.fileJawaban}`} target="_blank" rel="noopener noreferrer" className="dni-file-link">
                             <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>description</span>
                             Lihat File
                           </a>
@@ -392,22 +371,23 @@ export default function DosenNilaiIndividu({ onNavigate, onLogout }) {
                         )}
                       </td>
                       <td>
-                        {s.nilai !== null ? (
+                        {m.nilai !== null && m.nilai !== undefined ? (
                           <span className="dni-nilai-badge">
-                            {s.nilai} ({getLetterGrade(s.nilai)})
+                            {m.nilai} <span style={{ opacity: 0.7 }}>({getLetterGrade(m.nilai)})</span>
                           </span>
                         ) : (
                           <span className="dni-nilai-badge dni-nilai-badge--empty">-</span>
                         )}
                       </td>
                       <td>
-                        <button
-                          className="dni-btn-nilai"
-                          onClick={() => openNilaiModal(s)}
-                        >
-                          <span className="material-symbols-outlined">edit</span>
-                          Nilai
-                        </button>
+                        {m.sudahKumpul ? (
+                          <button className="dni-btn-nilai" onClick={() => openNilaiModal(m)}>
+                            <span className="material-symbols-outlined">edit</span>
+                            {m.nilai !== null ? "Edit" : "Nilai"}
+                          </button>
+                        ) : (
+                          <span style={{ color: "var(--slate-400)", fontSize: "0.8rem" }}>—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
