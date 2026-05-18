@@ -105,35 +105,82 @@ export class NilaiUseCase {
   }
 
   async getTugasByMataKuliah(idMataKuliah) {
-    const tugas = await this.repository.getTugasByMataKuliah(idMataKuliah);
-    return tugas.map(t => ({
+    const intIdMk = parseInt(idMataKuliah);
+    
+    // 1. Fetch Tugas
+    const tugas = await this.repository.getTugasByMataKuliah(intIdMk);
+    const mappedTugas = tugas.map(t => ({
       idTugas: t.idTugas,
       judul: t.judul,
       deadlineTugas: t.deadlineTugas ? t.deadlineTugas.toISOString() : null,
-      tipeTugas: t.tipeTugas || 'Individu'
+      tipeTugas: t.tipeTugas || 'Individu',
+      tipe: 'Tugas'
     }));
+
+    // 2. Fetch Kuis
+    const kuis = await this.repository.getKuisByMataKuliah(intIdMk);
+    const mappedKuis = kuis.map(k => ({
+      idTugas: k.idKuis,
+      judul: k.judul,
+      deadlineTugas: k.deadlineKuis ? k.deadlineKuis.toISOString() : null,
+      tipeTugas: 'Kuis',
+      tipe: 'Kuis'
+    }));
+
+    // Combine both lists
+    return [...mappedTugas, ...mappedKuis];
   }
 
-  async getPengumpulanPerTugas(idTugas, idMataKuliah) {
+  async getPengumpulanPerTugas(idTugas, idMataKuliah, tipe) {
     // Ambil semua mahasiswa di matkul ini
     const semuaMahasiswa = await this.repository.getMahasiswaByMataKuliah(idMataKuliah);
-    // Ambil yang sudah submit
-    const submissions = await this.repository.getPengumpulanPerTugas(idTugas);
-    const submissionMap = new Map(submissions.map(s => [s.nim, s]));
+    
+    if (tipe === 'Kuis') {
+      // Ambil dari jawabanKuis untuk idKuis ini
+      const submissions = await this.repository.getJawabanKuisPerKuis(parseInt(idTugas));
+      const submissionMap = new Map(submissions.map(s => [s.nim, s]));
+      
+      return semuaMahasiswa.map(mhs => {
+        const sub = submissionMap.get(mhs.nim);
+        return {
+          nim: mhs.nim,
+          nomorInduk: mhs.user?.nomorInduk || mhs.nim,
+          nama: mhs.user?.nama || 'Mahasiswa',
+          sudahKumpul: !!sub,
+          idPengumpulan: sub?.idJawabanKuis || null,
+          fileJawaban: null,
+          tanggalKumpul: sub?.tanggalKerja || null,
+          nilai: sub ? sub.skor : null,
+          isKuis: true
+        };
+      });
+    } else {
+      // Ambil yang sudah submit tugas
+      const submissions = await this.repository.getPengumpulanPerTugas(idTugas);
+      const submissionMap = new Map(submissions.map(s => [s.nim, s]));
 
-    return semuaMahasiswa.map(mhs => {
-      const sub = submissionMap.get(mhs.nim);
-      return {
-        nim: mhs.nim,
-        nomorInduk: mhs.user?.nomorInduk || mhs.nim,
-        nama: mhs.user?.nama || 'Mahasiswa',
-        sudahKumpul: !!sub,
-        idPengumpulan: sub?.idPengumpulan || null,
-        fileJawaban: sub?.fileJawaban || null,
-        tanggalKumpul: sub?.deadlineTugas || null,
-        nilai: null
-      };
-    });
+      // Ambil semua nilai di matkul ini untuk dimap ke mahasiswa
+      const allNilai = await this.repository.findAll();
+      const nilaiMap = new Map(allNilai.filter(n => n.idMataKuliah === parseInt(idMataKuliah)).map(n => [n.nomorInduk, n]));
+
+      return semuaMahasiswa.map(mhs => {
+        const sub = submissionMap.get(mhs.nim);
+        const nilaiObj = mhs.user?.nomorInduk ? nilaiMap.get(mhs.user.nomorInduk) : null;
+        const nilaiVal = nilaiObj?.nilaiTugas !== undefined && nilaiObj?.nilaiTugas !== null ? parseFloat(nilaiObj.nilaiTugas) : null;
+        
+        return {
+          nim: mhs.nim,
+          nomorInduk: mhs.user?.nomorInduk || mhs.nim,
+          nama: mhs.user?.nama || 'Mahasiswa',
+          sudahKumpul: !!sub,
+          idPengumpulan: sub?.idPengumpulan || null,
+          fileJawaban: sub?.fileJawaban || null,
+          tanggalKumpul: sub?.tanggalKumpul || sub?.createdAt || null,
+          nilai: nilaiVal,
+          isKuis: false
+        };
+      });
+    }
   }
 
   async saveNilaiTugas(data) {

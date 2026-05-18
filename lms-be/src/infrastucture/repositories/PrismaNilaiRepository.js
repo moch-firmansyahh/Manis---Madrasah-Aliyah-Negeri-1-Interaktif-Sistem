@@ -181,4 +181,24 @@ export class PrismaNilaiRepository {
       }
     });
   }
+
+  async getKuisByMataKuliah(idMataKuliah) {
+    const intIdMk = parseInt(idMataKuliah);
+    return await prisma.kuis.findMany({
+      where: { idMataKuliah: intIdMk },
+      orderBy: { idKuis: 'asc' }
+    });
+  }
+
+  async getJawabanKuisPerKuis(idKuis) {
+    return await prisma.jawabanKuis.findMany({
+      where: { idKuis: parseInt(idKuis) },
+      include: {
+        mahasiswa: {
+          include: { user: { select: { nama: true, nomorInduk: true } } }
+        }
+      },
+      orderBy: { idJawabanKuis: 'asc' }
+    });
+  }
 }

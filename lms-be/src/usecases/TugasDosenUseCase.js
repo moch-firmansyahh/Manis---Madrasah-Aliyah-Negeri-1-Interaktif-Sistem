@@ -51,8 +51,10 @@ async getDaftarTugas(dosenIdMataKuliahList) {
         desc: '',
         type: 'Kuis',
         deadline: k.deadlineKuis ? k.deadlineKuis.toISOString() : null,
-        submitted: 0,
-        total: k.soal ? k.soal.length : 0,
+        submitted: k.jumlahPengerjaan || 0,
+        total: k.totalMahasiswa || 0,
+        jumlahPengerjaan: k.jumlahPengerjaan || 0,
+        totalMahasiswa: k.totalMahasiswa || 0,
         status: k.deadlineKuis && new Date(k.deadlineKuis) < new Date() ? 'Selesai' : 'Aktif'
     }));
 

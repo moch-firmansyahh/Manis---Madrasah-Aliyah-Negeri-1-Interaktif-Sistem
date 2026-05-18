@@ -75,4 +75,14 @@ async getMahasiswa(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+
+async deleteKelompok(req, res) {
+    try {
+        const { idKelompok } = req.params;
+        await this.kelompokUseCase.deleteKelompok(idKelompok);
+        res.status(200).json({ status: 'success', message: "Kelompok berhasil dihapus" });
+    } catch (error) {
+        res.status(400).json({ status: 'error', message: error.message });
+    }
+}
 }

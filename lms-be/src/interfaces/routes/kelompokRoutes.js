@@ -21,5 +21,6 @@ router.post('/', (req, res) => controller.createKelompok(req, res));
 router.post('/:idKelompok/members', (req, res) => controller.addMember(req, res));
 router.delete('/:idKelompok/members/:nim', (req, res) => controller.removeMember(req, res));
 router.put('/:idKelompok/grades', (req, res) => controller.saveGrades(req, res));
+router.delete('/:idKelompok', (req, res) => controller.deleteKelompok(req, res));
 
 export default router;

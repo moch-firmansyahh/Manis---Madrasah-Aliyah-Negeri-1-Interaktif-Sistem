@@ -80,16 +80,16 @@ async function main() {
   // 3. MAHASISWA (10 Mahasiswa)
   // ══════════════════════════════════════════════
   const mahasiswaList = [
-    { ni: 'U001', nim: '2026001', nama: 'Andi Pratama',       email: 'andi.pratama@kampus.ac.id' },
-    { ni: 'U002', nim: '2026002', nama: 'Bella Safitri',      email: 'bella.safitri@kampus.ac.id' },
-    { ni: 'U003', nim: '2026003', nama: 'Cahya Nugraha',      email: 'cahya.nugraha@kampus.ac.id' },
-    { ni: 'U004', nim: '2026004', nama: 'Dina Maharani',      email: 'dina.maharani@kampus.ac.id' },
-    { ni: 'U005', nim: '2026005', nama: 'Eko Saputra',        email: 'eko.saputra@kampus.ac.id' },
-    { ni: 'U006', nim: '2026006', nama: 'Fitri Handayani',    email: 'fitri.handayani@kampus.ac.id' },
-    { ni: 'U007', nim: '2026007', nama: 'Galih Wicaksono',    email: 'galih.wicaksono@kampus.ac.id' },
-    { ni: 'U008', nim: '2026008', nama: 'Hana Permata',       email: 'hana.permata@kampus.ac.id' },
-    { ni: 'U009', nim: '2026009', nama: 'Irfan Maulana',      email: 'irfan.maulana@kampus.ac.id' },
-    { ni: 'U010', nim: '2026010', nama: 'Jasmine Putri',      email: 'jasmine.putri@kampus.ac.id' },
+    { ni: 'U001', nim: 'U001', nama: 'Andi Pratama',       email: 'andi.pratama@kampus.ac.id' },
+    { ni: 'U002', nim: 'U002', nama: 'Bella Safitri',      email: 'bella.safitri@kampus.ac.id' },
+    { ni: 'U003', nim: 'U003', nama: 'Cahya Nugraha',      email: 'cahya.nugraha@kampus.ac.id' },
+    { ni: 'U004', nim: 'U004', nama: 'Dina Maharani',      email: 'dina.maharani@kampus.ac.id' },
+    { ni: 'U005', nim: 'U005', nama: 'Eko Saputra',        email: 'eko.saputra@kampus.ac.id' },
+    { ni: 'U006', nim: 'U006', nama: 'Fitri Handayani',    email: 'fitri.handayani@kampus.ac.id' },
+    { ni: 'U007', nim: 'U007', nama: 'Galih Wicaksono',    email: 'galih.wicaksono@kampus.ac.id' },
+    { ni: 'U008', nim: 'U008', nama: 'Hana Permata',       email: 'hana.permata@kampus.ac.id' },
+    { ni: 'U009', nim: 'U009', nama: 'Irfan Maulana',      email: 'irfan.maulana@kampus.ac.id' },
+    { ni: 'U010', nim: 'U010', nama: 'Jasmine Putri',      email: 'jasmine.putri@kampus.ac.id' },
   ];
 
   for (const m of mahasiswaList) {
@@ -99,9 +99,9 @@ async function main() {
         nama: m.nama,
         email: m.email,
         password: hashedPassword,
-        telepon: `08123${m.nim}`,
+        telepon: `08123${m.ni}`,
         roleId: 2,
-        mahasiswa: { create: { nim: m.nim } }
+        mahasiswa: { create: { nim: m.ni } }
       }
     });
   }
@@ -165,14 +165,14 @@ const matkulList = [
   for (const mk of createdMatkul) {
     for (const m of mahasiswaList) {
       presensiData.push({
-        nim: m.nim,
+        nim: m.ni,
         idMataKuliah: mk.idMataKuliah,
         tanggalPertemuan: lastWeek,
         waktuPresensi: new Date(lastWeek.getTime() + (8 + Math.floor(Math.random() * 4)) * 3600000),
         statusKehadiran: statusOptions[Math.floor(Math.random() * statusOptions.length)],
       });
       presensiData.push({
-        nim: m.nim,
+        nim: m.ni,
         idMataKuliah: mk.idMataKuliah,
         tanggalPertemuan: today,
         statusKehadiran: 'Alpha',
@@ -348,7 +348,7 @@ const matkulList = [
         const deadlineDate = new Date(today.getTime() + tmpl.deadlineDays * 24 * 3600000);
         tugasData.push({
           idMataKuliah: mk.idMataKuliah,
-          nim: m.nim,
+          nim: m.ni,
           judul: tmpl.judul,
           detailTugas: tmpl.detail,
           deadlineTugas: deadlineDate,
@@ -554,7 +554,7 @@ const matkulList = [
   const notifData = [];
   for (const mk of sem4Matkul) {
     notifData.push({
-      nim: '2026001',
+      nim: 'U001',
       judul: 'Materi Baru',
       pesan: `Materi "Pengantar ${mk.namaMataKuliah}" untuk mata kuliah ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
       tipe: 'materi',
@@ -562,7 +562,7 @@ const matkulList = [
       tipeRef: 'materi'
     });
     notifData.push({
-      nim: '2026001',
+      nim: 'U001',
       judul: 'Tugas Baru',
       pesan: `Tugas baru telah tersedia untuk mata kuliah ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
       tipe: 'tugas',

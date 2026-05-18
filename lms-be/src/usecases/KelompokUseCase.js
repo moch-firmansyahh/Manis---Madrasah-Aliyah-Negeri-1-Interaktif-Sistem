@@ -102,4 +102,8 @@ async getAllMahasiswa() {
         nomorInduk: m.user?.nomorInduk || m.nim
     }));
 }
+
+async deleteKelompok(idKelompok) {
+    return await this.kelompokRepository.deleteKelompok(idKelompok);
+}
 }

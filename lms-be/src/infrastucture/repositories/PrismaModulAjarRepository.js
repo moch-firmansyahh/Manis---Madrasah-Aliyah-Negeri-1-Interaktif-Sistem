@@ -74,7 +74,10 @@ async create(data) {
 async update(id, data) {
     return await prisma.modulAjar.update({
         where: { idModulAjar: parseInt(id) },
-        data
+        data: {
+            ...data,
+            idMataKuliah: data.idMataKuliah ? parseInt(data.idMataKuliah) : undefined
+        }
     });
 }
 

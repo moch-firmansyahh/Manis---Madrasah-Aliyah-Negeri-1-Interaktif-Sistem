@@ -32,7 +32,13 @@ async findAllByDosen(idMataKuliahList) {
         include: { mataKuliah: true, soal: true }
     });
 
-    return { tugas, kuis };
+    const kuisWithCounts = await Promise.all(kuis.map(async (k) => {
+        const jumlahPengerjaan = await prisma.jawabanKuis.count({ where: { idKuis: k.idKuis } });
+        const totalMahasiswa = await prisma.nilai.count({ where: { idMataKuliah: k.idMataKuliah } });
+        return { ...k, jumlahPengerjaan, totalMahasiswa };
+    }));
+
+    return { tugas, kuis: kuisWithCounts };
     }
 
 async createTugas(data) {

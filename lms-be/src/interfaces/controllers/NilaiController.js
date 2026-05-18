@@ -91,9 +91,9 @@ export class NilaiController {
   async getPengumpulanPerTugas(req, res) {
     try {
       const { idTugas } = req.params;
-      const { idMataKuliah } = req.query;
+      const { idMataKuliah, tipe } = req.query;
       if (!idMataKuliah) return res.status(400).json({ error: 'idMataKuliah diperlukan' });
-      const result = await this.nilaiUseCase.getPengumpulanPerTugas(idTugas, idMataKuliah);
+      const result = await this.nilaiUseCase.getPengumpulanPerTugas(idTugas, idMataKuliah, tipe);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       res.status(500).json({ error: error.message });
