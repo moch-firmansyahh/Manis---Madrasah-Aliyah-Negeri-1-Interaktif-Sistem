@@ -3,26 +3,31 @@
 ## Status Koneksi
 
 ### Backend Configuration ✅
+
 - [x] CORS middleware ditambahkan
 - [x] Imports: `import cors from "cors"`
 - [x] Setup CORS middleware dengan frontend URL
 - [x] Credentials enabled untuk cookies/auth
 
 **Backend .env updated:**
+
 ```
 FRONTEND_URL=http://localhost:5173
 ```
 
 ### Frontend Configuration ✅
+
 - [x] API base URL dikonfigurasi
 - [x] Environment variable ditambahkan
 
 **Frontend .env updated:**
+
 ```
 VITE_API_URL=http://localhost:3000
 ```
 
 ### Dependencies ✅
+
 - [x] CORS package diinstall di backend (`npm install cors`)
 
 ---
@@ -30,6 +35,7 @@ VITE_API_URL=http://localhost:3000
 ## 🚀 Cara Menjalankan
 
 ### Opsi 1: Script Otomatis (Recommended)
+
 ```bash
 # Double-click di Windows File Explorer
 run-lms.bat
@@ -42,17 +48,21 @@ run-lms.bat
 ### Opsi 2: Manual (2 Terminal)
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd lms-be
 npm run dev
 ```
+
 ✅ Akan berjalan di: `http://localhost:3000`
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
 ```
+
 ✅ Akan berjalan di: `http://localhost:5173`
 
 ---
@@ -60,10 +70,13 @@ npm run dev
 ## 🔍 Verifikasi Koneksi
 
 ### Cek Backend Running
+
 ```
 http://localhost:3000/ping
 ```
+
 Response:
+
 ```json
 {
   "status": "ok",
@@ -73,9 +86,11 @@ Response:
 ```
 
 ### Cek Frontend Running
+
 ```
 http://localhost:5173
 ```
+
 Browser akan menampilkan login page
 
 ---
@@ -89,11 +104,13 @@ Setelah kedua service berjalan:
 3. Gunakan credentials:
 
 **Mahasiswa:**
-- NIM: `2021002`
+
+- NIM: `2026001`
 - Password: `password123`
 
 **Dosen:**
-- NIP: `197803252005012002`
+
+- NIP: `D001`
 - Password: `password123`
 
 ---
@@ -106,7 +123,7 @@ LMS/
 ├── SETUP_GUIDE.md              ← Dokumentasi lengkap
 ├── CONNECTION_STATUS.md        ← File ini
 │
-├── frontend/                   
+├── frontend/
 │   ├── .env                    ← VITE_API_URL=http://localhost:3000
 │   ├── src/
 │   └── package.json
@@ -141,6 +158,7 @@ Browser
 ## ✨ Features Siap Digunakan
 
 ### Mahasiswa
+
 - ✅ Dashboard
 - ✅ Daftar mata kuliah
 - ✅ Lihat nilai & transkrip
@@ -151,6 +169,7 @@ Browser
 - ✅ Profile
 
 ### Dosen
+
 - ✅ Dashboard dosen
 - ✅ Manajemen presensi + QR Code
 - ✅ Kelola tugas
@@ -164,6 +183,7 @@ Browser
 ## 🛑 Jika Ada Error
 
 ### 1. Port Sudah Terpakai
+
 ```bash
 # Windows - Cari port 3000
 netstat -ano | findstr :3000
@@ -173,19 +193,22 @@ taskkill /PID <nomor_pid> /F
 ```
 
 ### 2. CORS Error di Browser
+
 ✅ Sudah diperbaiki dengan middleware di backend
 
 ### 3. Database Error
+
 - Pastikan PostgreSQL running
 - Verifikasi credentials di `.env`
 - Database "LMS" sudah ada
 
 ### 4. Dependencies Error
+
 ```bash
 # Backend
 cd lms-be && npm install
 
-# Frontend  
+# Frontend
 cd frontend && npm install
 ```
 
@@ -193,12 +216,12 @@ cd frontend && npm install
 
 ## 📊 Ports & URLs
 
-| Service | URL | Port |
-|---------|-----|------|
-| Frontend | http://localhost:5173 | 5173 |
-| Backend API | http://localhost:3000 | 3000 |
-| PostgreSQL | localhost | 5432 |
-| API Health | http://localhost:3000/ping | 3000 |
+| Service     | URL                        | Port |
+| ----------- | -------------------------- | ---- |
+| Frontend    | http://localhost:5173      | 5173 |
+| Backend API | http://localhost:3000      | 3000 |
+| PostgreSQL  | localhost                  | 5432 |
+| API Health  | http://localhost:3000/ping | 3000 |
 
 ---
 
@@ -218,6 +241,6 @@ cd frontend && npm install
 
 ---
 
-**Dibuat:** 30 April 2026  
+**Dibuat:** 18 Mei 2026  
 **Status:** ✅ Production Ready  
 **Tested:** ✅ Yes
