@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "../../mahasiswa/profile/profile.css";
 import "./dosenProfile.css";
-import SidebarDosen from "../../../SidebarDosen";
-import { useSidebar } from "../../../useSidebar";
-import Navbar from "../../../Navbar";
+import SidebarDosen from "../../../components/SidebarDosen";
+import { useSidebar } from "../../../usecomponents/Sidebar";
+import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 const DEFAULT_AVATAR =

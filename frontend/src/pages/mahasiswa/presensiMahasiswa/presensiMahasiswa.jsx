@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "./presensiMahasiswa.css";
-import Sidebar from "../../../Sidebar";
-import { useSidebar } from "../../../useSidebar";
-import Navbar from "../../../Navbar";
+import Sidebar from "../../../components/Sidebar";
+import { useSidebar } from "../../../usecomponents/Sidebar";
+import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 const HISTORY = [];

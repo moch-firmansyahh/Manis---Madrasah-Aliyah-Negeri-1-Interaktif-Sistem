@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "./kuis.css";
-import Sidebar from "../../../Sidebar";
-import { useSidebar } from "../../../useSidebar";
-import Navbar from "../../../Navbar";
+import Sidebar from "../../../components/Sidebar";
+import { useSidebar } from "../../../usecomponents/Sidebar";
+import Navbar from "../../../components/Navbar";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";

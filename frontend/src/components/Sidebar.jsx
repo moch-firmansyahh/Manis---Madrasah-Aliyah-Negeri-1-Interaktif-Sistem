@@ -1,4 +1,4 @@
-import logoImg from "./assets/logo.png";
+import logoImg from "../assets/logo.png";
 import "./shared.css";
 
 export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogout, mobileOpen, onClose }) {

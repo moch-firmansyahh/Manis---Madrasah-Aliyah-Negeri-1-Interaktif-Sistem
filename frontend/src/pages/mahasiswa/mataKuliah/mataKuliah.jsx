@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "./mataKuliah.css";
 import "./videoMataKuliah.css";
-import Sidebar from "../../../Sidebar";
-import { useSidebar } from "../../../useSidebar";
-import Navbar from "../../../Navbar";
+import Sidebar from "../../../components/Sidebar";
+import { useSidebar } from "../../../usecomponents/Sidebar";
+import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {

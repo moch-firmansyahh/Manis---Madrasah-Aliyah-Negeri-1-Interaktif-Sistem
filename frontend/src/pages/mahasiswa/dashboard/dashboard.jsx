@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "./dashboard.css";
 import "./notifikasi.css";
-import Sidebar from "../../../Sidebar";
-import Navbar from "../../../Navbar";
+import Sidebar from "../../../components/Sidebar";
+import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR_HERO =

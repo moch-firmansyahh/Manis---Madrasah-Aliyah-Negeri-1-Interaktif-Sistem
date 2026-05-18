@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import "../../../shared.css";
+import "../../../components/shared.css";
 import "./dosenPresensi.css";
-import SidebarDosen from "../../../SidebarDosen";
-import { useSidebar } from "../../../useSidebar";
-import Navbar from "../../../Navbar";
+import SidebarDosen from "../../../components/SidebarDosen";
+import { useSidebar } from "../../../usecomponents/Sidebar";
+import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
