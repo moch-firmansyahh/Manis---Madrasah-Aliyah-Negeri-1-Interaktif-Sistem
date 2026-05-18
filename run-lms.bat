@@ -48,11 +48,11 @@ echo Database: PostgreSQL (localhost:5432)
 echo.
 echo Credentials for testing:
 echo   Mahasiswa:
-echo     - NIM: 2021002
+echo     - NIM: 2026001
 echo     - Password: password123
 echo.
 echo   Dosen:
-echo     - NIP: 197803252005012002
+echo     - NIP: D001
 echo     - Password: password123
 echo ========================================
 pause
