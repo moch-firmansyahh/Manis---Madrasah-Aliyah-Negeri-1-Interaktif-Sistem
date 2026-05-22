@@ -1,4 +1,4 @@
-import { prisma } from './lib/prisma.ts';
+import { prisma } from './src/prismaClient.js';
 
 async function main() {
   const presensi = await prisma.presensi.findMany({

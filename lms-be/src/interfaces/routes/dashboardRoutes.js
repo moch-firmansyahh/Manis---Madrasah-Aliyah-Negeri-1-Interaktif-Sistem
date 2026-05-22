@@ -3,7 +3,7 @@ import { DashboardSiswaUseCase } from '../../usecases/DashboardSiswaUseCase.js';
 import { DashboardController } from '../controllers/DashboardController.js';
 import { PrismaMataKuliahRepository } from '../../infrastucture/repositories/PrismaMataKuliahReposiory.js';
 import { PrismaForumRepository } from '../../infrastucture/repositories/PrismaForumRepository.js';
-import { prisma } from '../../../lib/prisma.ts';
+import { prisma } from '../../prismaClient.js';
 
 const router = express.Router();
 const mataKuliahRepo = new PrismaMataKuliahRepository();

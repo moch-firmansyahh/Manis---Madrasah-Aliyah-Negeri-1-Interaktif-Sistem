@@ -1,20 +1,44 @@
 // Seed file untuk dummy data Materi dan Kuis
 // Jalankan: node prisma/seed-dummy.js
 
-import { prisma } from "../lib/prisma.ts";
+import { prisma } from "../src/prismaClient.js";
 
 async function main() {
   console.log('🌱 Membuat dummy data...');
 
-  // ID mata kuliah dari semester aktif (sesuaikan dengan database)
-  const mataKuliahIds = [13, 14, 15, 16]; // Pemrograman Web, Kecerdasan Buatan, RPL, IMK
+  // Query mata kuliah secara dinamis agar ID sesuai dengan database
+  const subjects = await prisma.mataKuliah.findMany({
+    where: {
+      namaMataKuliah: {
+        in: [
+          "Matematika Wajib XI",
+          "Fisika Modern dan Astronomi",
+          "Kimia Organik dan Makromolekul",
+          "Ekologi dan Lingkungan"
+        ]
+      }
+    }
+  });
+
+  const getSubjectId = (name) => {
+    const s = subjects.find(x => x.namaMataKuliah === name);
+    if (!s) {
+      throw new Error(`Mata kuliah "${name}" tidak ditemukan di database. Pastikan seed.js sudah dijalankan.`);
+    }
+    return s.idMataKuliah;
+  };
+
+  const idMath = getSubjectId("Matematika Wajib XI");
+  const idFisika = getSubjectId("Fisika Modern dan Astronomi");
+  const idKimia = getSubjectId("Kimia Organik dan Makromolekul");
+  const idEkologi = getSubjectId("Ekologi dan Lingkungan");
 
   // ====== DUMMY MATERI PDF ======
   console.log('📄 Membuat materi PDF...');
   
   const pdfMaterials = [
     {
-      idMataKuliah: 13, // Matematika Wajib XI
+      idMataKuliah: idMath, // Matematika Wajib XI
       judul: 'Konsep Turunan Fungsi Aljabar',
       tipe_modul: 'PDF',
       deskripsi: 'Modul dasar turunan fungsi aljabar beserta rumus-rumus dasarnya.',
@@ -22,7 +46,7 @@ async function main() {
       ukuran: '12 KB',
     },
     {
-      idMataKuliah: 13,
+      idMataKuliah: idMath,
       judul: 'Aplikasi Turunan Fungsi',
       tipe_modul: 'PDF',
       deskripsi: 'Panduan pemecahan masalah optimasi dan nilai ekstrem menggunakan turunan.',
@@ -30,7 +54,7 @@ async function main() {
       ukuran: '12 KB',
     },
     {
-      idMataKuliah: 15, // Kimia Organik dan Makromolekul
+      idMataKuliah: idKimia, // Kimia Organik dan Makromolekul
       judul: 'Tata Nama Senyawa Hidrokarbon',
       tipe_modul: 'PDF',
       deskripsi: 'Panduan tata nama IUPAC untuk Alkana, Alkena, dan Alkuna.',
@@ -38,7 +62,7 @@ async function main() {
       ukuran: '12 KB',
     },
     {
-      idMataKuliah: 14, // Fisika Modern dan Astronomi
+      idMataKuliah: idFisika, // Fisika Modern dan Astronomi
       judul: 'Teori Relativitas Khusus',
       tipe_modul: 'PDF',
       deskripsi: 'Modul pembahasan dilatasi waktu, kontraksi panjang, dan kesetaraan massa-energi Einstein.',
@@ -62,7 +86,7 @@ async function main() {
   
   const videoMaterials = [
     {
-      idMataKuliah: 13, // Matematika Wajib XI
+      idMataKuliah: idMath, // Matematika Wajib XI
       judul: 'Tutorial Turunan Fungsi Aljabar',
       tipe_modul: 'Video',
       deskripsi: 'Video pembahasan contoh soal turunan fungsi aljabar.',
@@ -70,7 +94,7 @@ async function main() {
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 15, // Kimia Organik
+      idMataKuliah: idKimia, // Kimia Organik
       judul: 'Identifikasi Gugus Fungsi Karbon',
       tipe_modul: 'Video',
       deskripsi: 'Video eksperimen reaksi identifikasi alkohol, aldehida, dan keton.',
@@ -78,7 +102,7 @@ async function main() {
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 14, // Fisika Modern
+      idMataKuliah: idFisika, // Fisika Modern
       judul: 'Penjelasan Efek Fotolistrik',
       tipe_modul: 'Video',
       deskripsi: 'Animasi konsep pelepasan elektron akibat radiasi elektromagnetik.',
@@ -86,7 +110,7 @@ async function main() {
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 16, // Ekologi
+      idMataKuliah: idEkologi, // Ekologi
       judul: 'Dinamika Ekosistem dan Aliran Energi',
       tipe_modul: 'Video',
       deskripsi: 'Video penjelasan interaksi biotik-abiotik dan piramida ekologi.',
@@ -114,7 +138,7 @@ async function main() {
     update: {},
     create: {
       idKuis: 1,
-      idMataKuliah: 13,
+      idMataKuliah: idMath,
       judul: 'Kuis Turunan Fungsi Aljabar',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
@@ -195,7 +219,7 @@ async function main() {
     update: {},
     create: {
       idKuis: 2,
-      idMataKuliah: 15,
+      idMataKuliah: idKimia,
       judul: 'Kuis Senyawa Hidrokarbon',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
@@ -275,7 +299,7 @@ async function main() {
     update: {},
     create: {
       idKuis: 3,
-      idMataKuliah: 14,
+      idMataKuliah: idFisika,
       judul: 'Kuis Teori Relativitas dan Kuantum',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
@@ -349,7 +373,7 @@ async function main() {
     }
   }
 
-    console.log('✅ Dummy data berhasil dibuat!');
+  console.log('✅ Dummy data berhasil dibuat!');
   console.log(`📄 ${pdfMaterials.length} Materi PDF`);
   console.log(`🎥 ${videoMaterials.length} Materi Video`);
   console.log(`📝 3 Kuis dengan 12 Soal total`);
