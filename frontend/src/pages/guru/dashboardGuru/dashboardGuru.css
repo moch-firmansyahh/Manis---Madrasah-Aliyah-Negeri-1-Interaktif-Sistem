@@ -41,7 +41,7 @@
 .dd-btn:active { transform: scale(0.96); }
 .dd-btn--blue  { background-color: var(--color-secondary); }
 .dd-btn--dark  { background-color: #000d0d; }
-.dd-btn--amber { background-color: var(--color-amber); }
+.dd-btn--amber { background-color: var(--color-primary); }
 
 /* ─── Stats Grid ─── */
 .dd-stats-grid {
@@ -160,7 +160,7 @@
 
 .dd-grade-btn {
   padding: 0.4375rem 0.875rem;
-  background-color: var(--color-amber);
+  background-color: var(--color-primary);
   color: white;
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -360,7 +360,7 @@
 }
 .dd-mini-btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .dd-mini-btn .material-symbols-outlined { font-size: 1.1rem !important; }
-.dd-mini-btn--amber { background: var(--color-amber); }
+.dd-mini-btn--amber { background: var(--color-primary); }
 .dd-mini-btn--blue  { background: var(--color-secondary); }
 .dd-mini-btn--teal  { background: #2f9696; }
 

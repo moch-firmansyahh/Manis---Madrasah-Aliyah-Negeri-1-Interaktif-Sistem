@@ -296,7 +296,7 @@
 }
 
 .dt-fokus-stat--blue  .dt-fokus-num { color: var(--color-secondary); }
-.dt-fokus-stat--amber .dt-fokus-num { color: var(--color-amber); }
+.dt-fokus-stat--amber .dt-fokus-num { color: var(--color-primary); }
 .dt-fokus-stat--teal  .dt-fokus-num { color: var(--teal-600); }
 
 .dt-fokus-lbl {

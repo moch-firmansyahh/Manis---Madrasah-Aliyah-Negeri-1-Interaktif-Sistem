@@ -253,13 +253,13 @@
 }
 
 .quiz-nav-btn--submit {
-  background-color: var(--color-amber);
+  background-color: var(--color-primary);
   color: white;
   box-shadow: 0 4px 12px rgba(196, 127, 23, 0.3);
 }
 
 .quiz-nav-btn--submit:hover:not(:disabled) {
-  background-color: var(--color-amber-dark);
+  background-color: var(--blue-700);
 }
 
 .quiz-nav-btn .material-symbols-outlined {
@@ -353,7 +353,7 @@
 
 .quiz-result-icon .material-symbols-outlined {
   font-size: 4rem;
-  color: var(--color-amber);
+  color: var(--color-primary);
   font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
 }
 

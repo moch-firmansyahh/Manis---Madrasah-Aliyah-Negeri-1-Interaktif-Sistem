@@ -333,7 +333,7 @@ img { display: block; }
   gap: 0.75rem;
   width: 100%;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, var(--color-amber) 0%, var(--color-amber-dark) 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--blue-700) 100%);
   color: white;
   border: none;
   border-radius: var(--radius-md);
@@ -452,7 +452,7 @@ img { display: block; }
   right: 0;
   width: 0.5rem;
   height: 0.5rem;
-  background-color: var(--color-amber);
+  background-color: var(--color-primary);
   border-radius: var(--radius-full);
   border: 2px solid white;
 }
