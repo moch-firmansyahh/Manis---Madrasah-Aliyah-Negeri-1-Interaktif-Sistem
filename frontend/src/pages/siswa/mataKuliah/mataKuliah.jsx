@@ -5,9 +5,8 @@ import "./videoMataKuliah.css";
 import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import { apiClient } from "../../../utils/apiClient";
+import { apiClient, API_URL as API_BASE } from "../../../utils/apiClient";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();

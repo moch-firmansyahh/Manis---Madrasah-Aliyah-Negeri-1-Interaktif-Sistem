@@ -4,9 +4,9 @@ import "./guruNilaiIndividu.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import { apiClient } from "../../../utils/apiClient";
+import { apiClient, API_URL } from "../../../utils/apiClient";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE = API_URL;
 const MEMBER_COLORS = ["#4b53bc", "#2f9696", "#c47f17", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#be185d", "#8991fe"];
 
 function initials(name) {

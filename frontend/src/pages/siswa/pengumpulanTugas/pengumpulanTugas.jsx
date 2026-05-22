@@ -4,7 +4,7 @@ import "./pengumpulanTugas.css";
 import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import { apiClient } from "../../../utils/apiClient";
+import { apiClient, API_URL } from "../../../utils/apiClient";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
@@ -223,7 +223,7 @@ export default function PengumpulanTugas({ onNavigate, onLogout, taskId }) {
                     <span className="material-symbols-outlined">description</span>
                     File sebelumnya:{" "}
                     <a
-                      href={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${submission.fileJawaban}`}
+                      href={`${API_URL || "http://localhost:3000"}${submission.fileJawaban}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: "#4b53bc", fontWeight: 600, textDecoration: "underline" }}

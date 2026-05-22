@@ -1,5 +1,16 @@
-// When VITE_API_URL is set, use it directly. Otherwise use relative path (proxy handles it).
-const API_URL = import.meta.env.VITE_API_URL || "";
+const normalizeApiUrl = (url) => {
+  if (!url) return "";
+  let trimmed = url.trim();
+  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://") && !trimmed.startsWith("/")) {
+    trimmed = `https://${trimmed}`;
+  }
+  if (trimmed.endsWith("/")) {
+    trimmed = trimmed.slice(0, -1);
+  }
+  return trimmed;
+};
+
+export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || "");
 
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("token");
