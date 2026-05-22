@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - lms-manis
 
 on:
@@ -10,55 +7,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
-
-      - name: npm install and generate prisma client
-        run: |
-          cd lms-be
-          npm install
-          npx prisma generate
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: lms-be
-
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    needs: build
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
+      - uses: actions/checkout@v4
 
-      - name: Login to Azure
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - name: Install dan Generate Prisma
+        run: |
+          cd lms-be
+          npm install
+          npx prisma generate
+          npm run build
+
+      - name: Login ke Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5C7B584B416B4123A0B4F23BB24A81F0 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B4DBBE4863C14D5897A3FEC40E15CD93 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_846CD223ADDA4FFEB4227D232F344699 }}
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+      - name: Deploy ke Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'lms-manis'
-          slot-name: 'Production'
-          package: .
+          app-name: "lms-manis"
+          slot-name: "Production"
+          package: ./lms-be
+          startup-command: "npx prisma generate && npm start"
