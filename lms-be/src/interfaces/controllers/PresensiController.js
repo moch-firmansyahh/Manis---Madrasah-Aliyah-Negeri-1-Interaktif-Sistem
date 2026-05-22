@@ -17,18 +17,18 @@ export class PresensiController {
 
   async scanQR(req, res) {
     try {
-      let nim = req.user?.nomorInduk;
+      let nis = req.user?.nomorInduk;
       
-      // Jika nomorInduk tidak cocok dengan NIM di tabel Presensi, cari NIM dari tabel Mahasiswa
-      const mahasiswa = await prisma.mahasiswa.findUnique({
-        where: { nomorInduk: nim }
+      // Jika nomorInduk tidak cocok dengan NIS di tabel Presensi, cari NIS dari tabel Siswa
+      const siswa = await prisma.siswa.findUnique({
+        where: { nomorInduk: nis }
       });
-      if (mahasiswa) {
-        nim = mahasiswa.nim; // Gunakan nim yang sesuai untuk presensi
+      if (siswa) {
+        nis = siswa.nis; // Gunakan nis yang sesuai untuk presensi
       }
       
       const { idMataKuliah, token } = req.body;
-      const result = await this.presensiUseCase.scanKehadiran(nim, parseInt(idMataKuliah), token);
+      const result = await this.presensiUseCase.scanKehadiran(nis, parseInt(idMataKuliah), token);
       
       res.status(200).json({ status: 'success', message: 'Absen Berhasil!', data: result });
     } catch (error) {
@@ -36,17 +36,17 @@ export class PresensiController {
     }
   }
 
-  async getPresensiMahasiswa(req, res) {
+  async getPresensiSiswa(req, res) {
     try {
-      let nim = req.user?.nomorInduk || req.query.nim;
-      const mahasiswa = await prisma.mahasiswa.findUnique({
-        where: { nomorInduk: nim }
+      let nis = req.user?.nomorInduk || req.query.nis;
+      const siswa = await prisma.siswa.findUnique({
+        where: { nomorInduk: nis }
       });
-      if (mahasiswa) {
-        nim = mahasiswa.nim;
+      if (siswa) {
+        nis = siswa.nis;
       }
       const { idMataKuliah } = req.params;
-      const data = await this.presensiUseCase.getRiwayatKehadiran(nim, parseInt(idMataKuliah));
+      const data = await this.presensiUseCase.getRiwayatKehadiran(nis, parseInt(idMataKuliah));
       res.status(200).json(data);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -55,15 +55,15 @@ export class PresensiController {
 
   async getSummaryPresensi(req, res) {
     try {
-      let nim = req.user?.nomorInduk || req.query.nim;
-      const mahasiswa = await prisma.mahasiswa.findUnique({
-        where: { nomorInduk: nim }
+      let nis = req.user?.nomorInduk || req.query.nis;
+      const siswa = await prisma.siswa.findUnique({
+        where: { nomorInduk: nis }
       });
-      if (mahasiswa) {
-        nim = mahasiswa.nim;
+      if (siswa) {
+        nis = siswa.nis;
       }
       const { idMataKuliah } = req.params;
-      const data = await this.presensiUseCase.getSummaryKehadiran(nim, parseInt(idMataKuliah));
+      const data = await this.presensiUseCase.getSummaryKehadiran(nis, parseInt(idMataKuliah));
       res.status(200).json(data);
     } catch (error) {
       res.status(400).json({ error: error.message });

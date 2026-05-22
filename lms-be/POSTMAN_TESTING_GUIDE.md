@@ -174,7 +174,7 @@ Digunakan untuk mendapatkan token akses (Login).
   ```json
   {
     "idMataKuliah": 1,
-    "token": "LeMaS-abcd1234"
+    "token": "Manis-abcd1234"
   }
   ```
 

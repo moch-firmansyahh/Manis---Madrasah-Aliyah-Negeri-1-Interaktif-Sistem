@@ -6,8 +6,8 @@ constructor(modulAjarUseCase) {
 async getAll(req, res) {
     try {
         const { matkul, tipe } = req.query;
-        const nipDosen = req.user?.role === 'DOSEN' ? req.user?.dosen?.nip : null;
-        const data = await this.useCase.getMateri(matkul, tipe, nipDosen);
+        const nipGuru = req.user?.role === 'GURU' ? req.user?.guru?.nip : null;
+        const data = await this.useCase.getMateri(matkul, tipe, nipGuru);
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });

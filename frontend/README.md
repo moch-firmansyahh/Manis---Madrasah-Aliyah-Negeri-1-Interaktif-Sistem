@@ -1,6 +1,6 @@
-# 🎓 LeMas — Learning Machine System
+# 🎓 Manis — Madrasah Aliyah Negeri 1 Interaktif Sistem
 
-> Platform pembelajaran berbasis web yang memudahkan dosen dalam mengelola kelompok dan memantau progress mahasiswa secara real-time.
+> Platform pembelajaran berbasis web yang memudahkan guru dalam mengelola kelompok dan memantau progress siswa secara real-time.
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 📖 Tentang Proyek
 
-**LeMas (Learning Machine System)** adalah platform pembelajaran yang memberi akses kepada dosen untuk mengelola kelompok dan memantau progress mahasiswa dengan mudah dan efisien.
+**Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)** adalah platform pembelajaran yang memberi akses kepada guru untuk mengelola kelompok dan memantau progress siswa dengan mudah dan efisien.
 
 ---
 
@@ -42,23 +42,23 @@
 
 ### DFD Level 0
 
-![DFD Level 0](Learning_Machine_System/assets/DFD/DFD_Level_0)
+![DFD Level 0](Madrasah_Aliyah_Negeri_1_Interaktif_Sistem/assets/DFD/DFD_Level_0)
 
 ### DFD Level 1
 
-![DFD Level 1](Learning_Machine_System/assets/DFD/DFD_Level_1)
+![DFD Level 1](Madrasah_Aliyah_Negeri_1_Interaktif_Sistem/assets/DFD/DFD_Level_1)
 
 ---
 
 ## 🗄️ Entity Relationship Diagram (ERD)
 
-![ERD](Learning_Machine_System/assets/ERD/ERD.png)
+![ERD](Madrasah_Aliyah_Negeri_1_Interaktif_Sistem/assets/ERD/ERD.png)
 
 ---
 
 ## 🏗️ Class Diagram
 
-![Class Diagram](Learning_Machine_System/assets/Class_Diagram/Class_Diagram.png)
+![Class Diagram](Madrasah_Aliyah_Negeri_1_Interaktif_Sistem/assets/Class_Diagram/Class_Diagram.png)
 
 ---
 
@@ -75,8 +75,8 @@ Pastikan kamu sudah menginstal [Node.js](https://nodejs.org/) sebelum memulai.
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/username/lemas.git
-cd lemas
+git clone https://github.com/username/manis.git
+cd manis
 ```
 
 ### 2. Backend Setup
@@ -91,7 +91,7 @@ Buat file `.env` di folder `backend/` dan isi konfigurasi berikut:
 ```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=lemas_db
+DB_NAME=manis_db
 DB_USER=your_username
 DB_PASS=your_password
 PORT=5000
@@ -118,7 +118,7 @@ Aplikasi akan berjalan di `http://localhost:5173`.
 ## 📁 Struktur Proyek
 
 ```
-lemas/
+manis/
 ├── backend/
 │   ├── src/
 │   ├── package.json

@@ -15,7 +15,7 @@ export class PrismaTugasRepository {
       where,
       include: {
         mataKuliah: true,
-        pengumpulanTugas: filter.nim ? { where: { nim: filter.nim } } : false
+        pengumpulanTugas: filter.nis ? { where: { nis: filter.nis } } : false
       },
       orderBy: { deadlineTugas: 'asc' }
     });
@@ -26,9 +26,9 @@ export class PrismaTugasRepository {
       const key = `${t.judul}__${t.idMataKuliah}__${t.deadlineTugas?.toISOString() || ''}`;
       if (!seen.has(key)) {
         seen.set(key, t);
-      } else if (filter.nim) {
-        // Kalau filter nim, utamakan row yang nimnya cocok
-        if (t.nim === filter.nim) seen.set(key, t);
+      } else if (filter.nis) {
+        // Kalau filter nis, utamakan row yang nisnya cocok
+        if (t.nis === filter.nis) seen.set(key, t);
       }
     }
 
@@ -38,13 +38,13 @@ export class PrismaTugasRepository {
   async findTugasById(idTugas) {
     return await prisma.tugas.findUnique({
       where: { idTugas: parseInt(idTugas) },
-      include: { mataKuliah: true, pengumpulanTugas: { include: { mahasiswa: true } } }
+      include: { mataKuliah: true, pengumpulanTugas: { include: { siswa: true } } }
     });
   }
 
-  async findPengumpulanByNimAndTugas(nim, idTugas) {
+  async findPengumpulanByNisAndTugas(nis, idTugas) {
     return await prisma.pengumpulanTugas.findFirst({
-      where: { nim, idTugas: parseInt(idTugas) }
+      where: { nis, idTugas: parseInt(idTugas) }
     });
   }
 
@@ -52,7 +52,7 @@ export class PrismaTugasRepository {
     return await prisma.pengumpulanTugas.create({
       data: {
         idTugas: parseInt(data.idTugas),
-        nim: data.nim,
+        nis: data.nis,
         judul: data.judul,
         detailTugas: data.detailTugas,
         fileJawaban: data.fileJawaban,
@@ -73,20 +73,20 @@ export class PrismaTugasRepository {
     });
   }
 
-  async getSubmission(idTugas, nim) {
-    return await this.findPengumpulanByNimAndTugas(nim, idTugas);
+  async getSubmission(idTugas, nis) {
+    return await this.findPengumpulanByNisAndTugas(nis, idTugas);
   }
 
-  async findKelompokByNim(nim, idMataKuliah) {
+  async findKelompokByNis(nis, idMataKuliah) {
     return await prisma.anggotaKelompok.findFirst({
       where: {
-        nim: nim,
+        nis: nis,
         kelompok: { idMataKuliah: parseInt(idMataKuliah) }
       },
       include: {
         kelompok: {
           include: {
-            anggota: { select: { nim: true } }
+            anggota: { select: { nis: true } }
           }
         }
       }

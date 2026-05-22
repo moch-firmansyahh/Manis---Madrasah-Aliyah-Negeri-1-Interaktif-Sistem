@@ -17,18 +17,18 @@ export class MataKuliahController {
 
   async getAll(req, res) {
     try {
-      if (req.user && req.user.role === 'DOSEN' && req.user.dosen) {
-        const result = await this.mataKuliahUseCase.getByDosen(req.user.dosen.nip);
+      if (req.user && req.user.role === 'GURU' && req.user.guru) {
+        const result = await this.mataKuliahUseCase.getByGuru(req.user.guru.nip);
         return res.json(result);
       }
       
-      if (req.user && req.user.role === 'MAHASISWA') {
-        let nim = req.user?.nomorInduk;
-        const mahasiswa = await prisma.mahasiswa.findUnique({
-          where: { nomorInduk: nim }
+      if (req.user && req.user.role === 'SISWA') {
+        let nis = req.user?.nomorInduk;
+        const siswa = await prisma.siswa.findUnique({
+          where: { nomorInduk: nis }
         });
-        const actualNim = mahasiswa ? mahasiswa.nim : nim;
-        const result = await this.mataKuliahUseCase.getByNim(actualNim);
+        const actualNis = siswa ? siswa.nis : nis;
+        const result = await this.mataKuliahUseCase.getByNis(actualNis);
         return res.json(result);
       }
       
@@ -41,14 +41,14 @@ export class MataKuliahController {
 
   async getMine(req, res) {
     try {
-      let nim = req.user?.nomorInduk;
-      // Map nomorInduk to actual nim if possible
-      const mahasiswa = await prisma.mahasiswa.findUnique({
-        where: { nomorInduk: nim }
+      let nis = req.user?.nomorInduk;
+      // Map nomorInduk to actual nis if possible
+      const siswa = await prisma.siswa.findUnique({
+        where: { nomorInduk: nis }
       });
-      const actualNim = mahasiswa ? mahasiswa.nim : nim;
+      const actualNis = siswa ? siswa.nis : nis;
       
-      const result = await this.mataKuliahUseCase.getByNim(actualNim);
+      const result = await this.mataKuliahUseCase.getByNis(actualNis);
       res.json(result);
     } catch (error) {
       res.status(400).json({ error: error.message });

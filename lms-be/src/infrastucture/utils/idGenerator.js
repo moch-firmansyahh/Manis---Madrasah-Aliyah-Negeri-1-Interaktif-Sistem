@@ -7,7 +7,7 @@ export class IdGenerator {
   }
 
   // Menghasilkan format 2021001
-  static generateNIM(tahun, lastNumber = 0) {
+  static generateNIS(tahun, lastNumber = 0) {
     const nextNumber = lastNumber + 1;
     return `${tahun}${String(nextNumber).padStart(3, '0')}`;
   }

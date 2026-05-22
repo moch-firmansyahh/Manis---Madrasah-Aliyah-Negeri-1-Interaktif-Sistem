@@ -13,14 +13,14 @@ export class MataKuliahUseCase {
     return await this.mataKuliahRepository.findAll();
   }
 
-  async getByDosen(nipDosen) {
-    if (!nipDosen) throw new Error("NIP Dosen wajib diisi");
-    return await this.mataKuliahRepository.findByDosen(nipDosen);
+  async getByGuru(nipGuru) {
+    if (!nipGuru) throw new Error("NIP Guru wajib diisi");
+    return await this.mataKuliahRepository.findByGuru(nipGuru);
   }
 
-  async getByNim(nim) {
-    if (!nim) throw new Error("NIM wajib diisi");
-    return await this.mataKuliahRepository.findByNim(nim);
+  async getByNis(nis) {
+    if (!nis) throw new Error("NIS wajib diisi");
+    return await this.mataKuliahRepository.findByNis(nis);
   }
 
   async getById(id) {
@@ -38,7 +38,7 @@ export class MataKuliahUseCase {
   }
   
   async getDetailMataKuliah(idMataKuliah) {
-    // Repository harus melakukan "include" Dosen dan ModulAjar
+    // Repository harus melakukan "include" Guru dan ModulAjar
     const course = await this.mataKuliahRepository.getDetailWithModules ? 
       await this.mataKuliahRepository.getDetailWithModules(idMataKuliah) : 
       await this.mataKuliahRepository.findById(idMataKuliah);

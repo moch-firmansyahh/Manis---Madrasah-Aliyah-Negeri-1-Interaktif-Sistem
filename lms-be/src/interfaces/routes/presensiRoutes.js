@@ -12,12 +12,12 @@ const controller = new PresensiController(presensiUseCase);
 // Lindungi rute dengan token JWT
 router.use(authMiddleware);
 
-// Rute untuk Dosen
+// Rute untuk Guru
 router.get('/mata-kuliah/:idMataKuliah', (req, res) => controller.getDaftarHadir(req, res));
 
-// Rute untuk Mahasiswa
+// Rute untuk Siswa
 router.post('/scan', (req, res) => controller.scanQR(req, res));
-router.get('/mahasiswa/:idMataKuliah', (req, res) => controller.getPresensiMahasiswa(req, res));
+router.get('/siswa/:idMataKuliah', (req, res) => controller.getPresensiSiswa(req, res));
 router.get('/summary/:idMataKuliah', (req, res) => controller.getSummaryPresensi(req, res));
 
 export default router;

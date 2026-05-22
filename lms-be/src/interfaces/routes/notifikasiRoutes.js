@@ -7,11 +7,11 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
-    if (!req.user.mahasiswa?.nim) {
+    if (!req.user.siswa?.nis) {
       return res.json([]);
     }
     const notifikasi = await prisma.notifikasi.findMany({
-      where: { nim: req.user.mahasiswa.nim },
+      where: { nis: req.user.siswa.nis },
       orderBy: { createdAt: 'desc' },
       take: 50
     });
@@ -23,9 +23,9 @@ router.get('/', async (req, res) => {
 
 router.get('/unread-count', async (req, res) => {
   try {
-    if (!req.user.mahasiswa?.nim) return res.json({ count: 0 });
+    if (!req.user.siswa?.nis) return res.json({ count: 0 });
     const count = await prisma.notifikasi.count({
-      where: { nim: req.user.mahasiswa.nim, isRead: false }
+      where: { nis: req.user.siswa.nis, isRead: false }
     });
     res.json({ count });
   } catch (error) {
@@ -48,9 +48,9 @@ router.put('/:idNotifikasi/read', async (req, res) => {
 
 router.put('/read-all', async (req, res) => {
   try {
-    if (!req.user.mahasiswa?.nim) return res.json({ message: 'Tidak ada notifikasi' });
+    if (!req.user.siswa?.nis) return res.json({ message: 'Tidak ada notifikasi' });
     await prisma.notifikasi.updateMany({
-      where: { nim: req.user.mahasiswa.nim, isRead: false },
+      where: { nis: req.user.siswa.nis, isRead: false },
       data: { isRead: true }
     });
     res.json({ message: 'Semua notifikasi telah dibaca' });

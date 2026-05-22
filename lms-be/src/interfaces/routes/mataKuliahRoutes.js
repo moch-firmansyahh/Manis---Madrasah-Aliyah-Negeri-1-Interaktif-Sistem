@@ -10,7 +10,7 @@ const useCase = new MataKuliahUseCase(repo);
 const controller = new MataKuliahController(useCase);
 
 router.get('/', (req, res) => controller.getAll(req, res));
-router.get('/mahasiswa/me', (req, res) => controller.getMine(req, res));
+router.get('/siswa/me', (req, res) => controller.getMine(req, res));
 router.get('/:id', (req, res) => controller.getOne(req, res));
 router.get('/:idMataKuliah/detail', (req, res) => controller.getDetail(req, res));
 router.post('/', (req, res) => controller.create(req, res));

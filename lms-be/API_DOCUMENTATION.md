@@ -1,4 +1,4 @@
-# Daftar API LeMaS — Urutan per Sequence Diagram
+# Daftar API Manis — Urutan per Sequence Diagram
 
 Base URL: `http://localhost:3000`  
 Auth: Header `Authorization: Bearer <token>` (kecuali yang ditandai _public_)
@@ -151,7 +151,7 @@ catatan    : Berikut terlampir jawaban tugas
 **Body POST /api/presensi/scan:**
 
 ```json
-{ "token": "LeMaS-1234567890-abc123", "idMataKuliah": 13 }
+{ "token": "Manis-1234567890-abc123", "idMataKuliah": 13 }
 ```
 
 **Body PUT status:**

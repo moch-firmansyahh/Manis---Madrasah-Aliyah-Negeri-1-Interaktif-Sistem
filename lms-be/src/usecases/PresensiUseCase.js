@@ -4,36 +4,36 @@ constructor(presensiRepository, mataKuliahRepository) {
     this.mataKuliahRepository = mataKuliahRepository;
 }
 
-  // Dipanggil Dosen untuk mendapatkan daftar mahasiswa di kelas
+  // Dipanggil Guru untuk mendapatkan daftar siswa di kelas
 async getDaftarHadir(idMataKuliah) {
-    return await this.presensiRepository.getDaftarHadirMahasiswa(idMataKuliah);
+    return await this.presensiRepository.getDaftarHadirSiswa(idMataKuliah);
 }
 
-  // Dipanggil Dosen untuk update status manual (Hadir/Izin/Sakit/Alpha)
+  // Dipanggil Guru untuk update status manual (Hadir/Izin/Sakit/Alpha)
 async updateStatusManual(idPresensi, statusKehadiran) {
     // Normalisasi 'Alpa' dari frontend menjadi 'Alpha' untuk Prisma Enum
     const status = statusKehadiran === 'Alpa' ? 'Alpha' : statusKehadiran;
     return await this.presensiRepository.updateStatus(idPresensi, status);
 }
 
-// Dipanggil Mahasiswa saat memindai QR Code
-  async scanKehadiran(nim, idMataKuliah, tokenScan) {
+// Dipanggil Siswa saat memindai QR Code
+  async scanKehadiran(nis, idMataKuliah, tokenScan) {
     // Validasi dasar - token tidak boleh kosong
     if (!tokenScan || tokenScan.trim().length === 0) {
         throw new Error("Kode tidak boleh kosong.");
     }
 
-    // Update status mahasiswa menjadi Hadir dan kembalikan result
-    const result = await this.presensiRepository.markAsHadir(nim, idMataKuliah, tokenScan);
+    // Update status siswa menjadi Hadir dan kembalikan result
+    const result = await this.presensiRepository.markAsHadir(nis, idMataKuliah, tokenScan);
     return result;
   }
 
-  async getRiwayatKehadiran(nim, idMataKuliah) {
-    return await this.presensiRepository.getRiwayatKehadiran(nim, idMataKuliah);
+  async getRiwayatKehadiran(nis, idMataKuliah) {
+    return await this.presensiRepository.getRiwayatKehadiran(nis, idMataKuliah);
   }
 
-  async getSummaryKehadiran(nim, idMataKuliah) {
-    const riwayat = await this.presensiRepository.getRiwayatKehadiran(nim, idMataKuliah);
+  async getSummaryKehadiran(nis, idMataKuliah) {
+    const riwayat = await this.presensiRepository.getRiwayatKehadiran(nis, idMataKuliah);
     const summary = { hadir: 0, izin: 0, sakit: 0, alpha: 0 };
     for (const r of riwayat) {
       if (r.statusKehadiran === 'Hadir') summary.hadir++;

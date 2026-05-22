@@ -7,7 +7,7 @@ router.use(authMiddleware);
 
 /**
  * GET /api/kuis
- * Mengambil semua kuis (digunakan di dosenTugas untuk manajemen kuis)
+ * Mengambil semua kuis (digunakan di guruTugas untuk manajemen kuis)
  */
 router.get("/", async (req, res) => {
   try {
@@ -43,7 +43,7 @@ router.get("/", async (req, res) => {
 
 /**
  * GET /api/kuis/mata-kuliah/:idMataKuliah
- * Mengambil daftar kuis per mata kuliah (untuk mahasiswa)
+ * Mengambil daftar kuis per mata kuliah (untuk siswa)
  */
 router.get("/mata-kuliah/:idMataKuliah", async (req, res) => {
   try {
@@ -64,7 +64,7 @@ router.get("/mata-kuliah/:idMataKuliah", async (req, res) => {
           where: { idKuis: k.idKuis }
         });
         
-        const totalMahasiswa = await prisma.nilai.count({
+        const totalSiswa = await prisma.nilai.count({
           where: { idMataKuliah: k.idMataKuliah }
         });
 
@@ -75,7 +75,7 @@ router.get("/mata-kuliah/:idMataKuliah", async (req, res) => {
           deadlineKuis: k.deadlineKuis,
           jumlahSoal: k._count.soal,
           jumlahPengerjaan,
-          totalMahasiswa,
+          totalSiswa,
           mataKuliah: k.mataKuliah?.namaMataKuliah || "",
         };
       })
@@ -89,8 +89,8 @@ router.get("/mata-kuliah/:idMataKuliah", async (req, res) => {
 
 /**
  * GET /api/kuis/:idKuis/detail
- * Mengambil detail kuis lengkap dengan soal dan jawaban benar (untuk dosen edit kuis)
- * HANYA untuk dosen yang punya akses ke kuis ini
+ * Mengambil detail kuis lengkap dengan soal dan jawaban benar (untuk guru edit kuis)
+ * HANYA untuk guru yang punya akses ke kuis ini
  */
 router.get("/:idKuis/detail", async (req, res) => {
   try {
@@ -111,7 +111,7 @@ router.get("/:idKuis/detail", async (req, res) => {
       return res.status(404).json({ error: "Kuis tidak ditemukan" });
     }
 
-    // Format soal untuk keperluan edit dosen
+    // Format soal untuk keperluan edit guru
     // Include jawaban benar dan semua pilihan jawaban
     const formattedSoal = (kuis.soal || []).map((s) => {
       const options = (s.pilihanJawaban || []).map((p) => p.teksJawaban);
@@ -142,7 +142,7 @@ router.get("/:idKuis/detail", async (req, res) => {
 
 /**
  * GET /api/kuis/:idKuis/soal
- * Mengambil soal kuis berdasarkan ID kuis (untuk mahasiswa mengerjakan kuis)
+ * Mengambil soal kuis berdasarkan ID kuis (untuk siswa mengerjakan kuis)
  * Format output sesuai kebutuhan frontend QuizKuis component
  */
 router.get("/:idKuis/soal", async (req, res) => {
@@ -189,7 +189,7 @@ router.get("/:idKuis/soal", async (req, res) => {
 
 /**
  * POST /api/kuis
- * Membuat kuis baru beserta soal-soalnya (dari dosen)
+ * Membuat kuis baru beserta soal-soalnya (dari guru)
  * Body: { idMataKuliah, judul, deadlineKuis, soal: [{ pertanyaan, pilihanJawaban: [...], kunciJawaban }] }
  */
 router.post("/", async (req, res) => {
@@ -245,18 +245,18 @@ router.post("/", async (req, res) => {
         ...new Set(relatedData.map((r) => r.nomorInduk)),
       ];
       if (relatedNomorInduk.length > 0) {
-        const mahasiswas = await prisma.mahasiswa.findMany({
+        const siswas = await prisma.siswa.findMany({
           where: { nomorInduk: { in: relatedNomorInduk } },
-          select: { nim: true },
+          select: { nis: true },
         });
-        const relatedNIMs = mahasiswas.map((m) => m.nim);
-        if (relatedNIMs.length > 0) {
+        const relatedNISs = siswas.map((m) => m.nis);
+        if (relatedNISs.length > 0) {
           const mataKuliahData = await prisma.mataKuliah.findUnique({
             where: { idMataKuliah: parseInt(idMataKuliah) },
           });
           await prisma.notifikasi.createMany({
-            data: relatedNIMs.map((nim) => ({
-              nim,
+            data: relatedNISs.map((nis) => ({
+              nis,
               judul: "Kuis Baru",
               pesan: `Kuis "${judul}" untuk mata kuliah ${mataKuliahData?.namaMataKuliah || "ini"} telah tersedia. Ayo kerjakan sekarang!`,
               tipe: "kuis",
@@ -359,7 +359,7 @@ router.delete("/:idKuis", async (req, res) => {
 
 /**
  * POST /api/kuis/:idKuis/submit
- * Mahasiswa submit jawaban kuis & hitung skor
+ * Siswa submit jawaban kuis & hitung skor
  */
 router.post("/:idKuis/submit", async (req, res) => {
   try {
@@ -381,7 +381,7 @@ router.post("/:idKuis/submit", async (req, res) => {
 
     // Cek apakah sudah pernah submit
     const sudahSubmit = await prisma.jawabanKuis.findUnique({
-      where: { idKuis_nim: { idKuis: parseInt(idKuis), nim: user.nomorInduk } }
+      where: { idKuis_nis: { idKuis: parseInt(idKuis), nis: user.nomorInduk } }
     });
     if (sudahSubmit) {
       return res.status(400).json({ error: "Anda sudah mengerjakan kuis ini", sudahDikerjakan: true });
@@ -399,7 +399,7 @@ router.post("/:idKuis/submit", async (req, res) => {
     await prisma.jawabanKuis.create({
       data: {
         idKuis: parseInt(idKuis),
-        nim: user.nomorInduk,
+        nis: user.nomorInduk,
         skor: score,
         jawaban: JSON.stringify(answers),
         tanggalKerja: new Date(),
@@ -433,7 +433,7 @@ router.post("/:idKuis/submit", async (req, res) => {
 
 /**
  * GET /api/kuis/:idKuis/status
- * Cek apakah mahasiswa sudah mengerjakan kuis ini
+ * Cek apakah siswa sudah mengerjakan kuis ini
  */
 router.get("/:idKuis/status", async (req, res) => {
   try {
@@ -441,7 +441,7 @@ router.get("/:idKuis/status", async (req, res) => {
     const user = req.user;
 
     const jawaban = await prisma.jawabanKuis.findUnique({
-      where: { idKuis_nim: { idKuis: parseInt(idKuis), nim: user.nomorInduk } }
+      where: { idKuis_nis: { idKuis: parseInt(idKuis), nis: user.nomorInduk } }
     });
 
     if (jawaban) {
@@ -457,7 +457,7 @@ router.get("/:idKuis/status", async (req, res) => {
 
 /**
  * GET /api/kuis/:idKuis/hasil
- * Ambil hasil kuis mahasiswa (jawaban + detail soal + jawaban benar)
+ * Ambil hasil kuis siswa (jawaban + detail soal + jawaban benar)
  */
 router.get("/:idKuis/hasil", async (req, res) => {
   try {
@@ -465,7 +465,7 @@ router.get("/:idKuis/hasil", async (req, res) => {
     const user = req.user;
 
     const jawaban = await prisma.jawabanKuis.findUnique({
-      where: { idKuis_nim: { idKuis: parseInt(idKuis), nim: user.nomorInduk } }
+      where: { idKuis_nis: { idKuis: parseInt(idKuis), nis: user.nomorInduk } }
     });
 
     if (!jawaban) {

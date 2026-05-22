@@ -1,10 +1,10 @@
 /* Reset & Base Variables from Config */
 :root {
-  --secondary: #4b53bc;
+  --secondary: #1374B8;
   --on-surface-variant: #464653;
   --outline: #767684;
   --outline-variant: #c6c5d5;
-  --on-primary-container: #be7a00;
+  --on-primary-container: #FFD000;
   --surface-container: #eceef0;
   --surface-container-low: #f2f4f6;
   --surface-container-highest: #e0e3e5;
@@ -288,13 +288,13 @@
 .submit-button {
   width: 100%;
   padding: 1rem 0;
-  background-color: var(--on-primary-container);
+  background-color: var(--secondary);
   color: white;
   font-family: var(--font-headline);
   font-weight: 700;
   border-radius: 0.75rem;
   border: none;
-  box-shadow: 0 10px 15px -3px rgba(190, 122, 0, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(19, 116, 184, 0.3);
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -305,7 +305,7 @@
 }
 
 .submit-button:hover {
-  background-color: rgba(190, 122, 0, 0.9);
+  background-color: rgba(19, 116, 184, 0.9);
 }
 
 .submit-button:active {
@@ -377,7 +377,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  animation: modalIn 0.25s ease;
+  anisation: modalIn 0.25s ease;
 }
 
 @keyframes modalIn {

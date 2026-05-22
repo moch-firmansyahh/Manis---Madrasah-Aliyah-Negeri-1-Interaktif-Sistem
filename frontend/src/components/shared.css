@@ -9,12 +9,12 @@
 ══════════════════════════════════════════ */
 :root {
   /* Brand */
-  --color-primary:        #140900;
-  --color-secondary:      #4b53bc;
-  --color-secondary-dim:  #8991fe;
-  --color-amber:          #c47f17;
-  --color-amber-dark:     #a86b10;
-  --color-teal:           #2f9696;
+  --color-primary:        #1374B8;
+  --color-secondary:      #74B8E1;
+  --color-secondary-dim:  rgba(116, 184, 225, 0.25);
+  --color-amber:          #FFD000;
+  --color-amber-dark:     #d6b000;
+  --color-teal:           #1C8A43;
 
   /* Surface / Background */
   --color-surface:        #ffffff;
@@ -178,7 +178,7 @@ img { display: block; }
   z-index: 39;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  animation: sb-fade-in 0.2s ease;
+  anisation: sb-fade-in 0.2s ease;
 }
 @keyframes sb-fade-in {
   from { opacity: 0; }
@@ -301,7 +301,7 @@ img { display: block; }
   font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-/* Role badge (Dosen panel indicator) */
+/* Role badge (Guru panel indicator) */
 .sidebar__role-badge {
   display: flex;
   align-items: center;

@@ -12,8 +12,8 @@ export class UserUseCase {
 
     // 1. Tentukan Prefix & Generate nomorInduk Otomatis
     let prefix = '';
-    if (role.nama === 'MAHASISWA') prefix = 'U';
-    else if (role.nama === 'DOSEN') prefix = 'D';
+    if (role.nama === 'SISWA') prefix = 'U';
+    else if (role.nama === 'GURU') prefix = 'D';
     else if (role.nama === 'ADMIN') prefix = 'P';
 
     const lastCount = await this.userRepository.countByRoleId(data.roleId);
@@ -31,24 +31,24 @@ export class UserUseCase {
     };
 
     // 3. Logika Spesifik Profil
-    if (role.nama === 'MAHASISWA') {
+    if (role.nama === 'SISWA') {
       const currentYear = new Date().getFullYear();
-      const lastMhsCount = await this.userRepository.countMahasiswa();
-      const generatedNIM = IdGenerator.generateNIM(currentYear, lastMhsCount);
+      const lastMhsCount = await this.userRepository.countSiswa();
+      const generatedNIS = IdGenerator.generateNIS(currentYear, lastMhsCount);
 
       return await this.userRepository.createWithProfile(
         userCoreData, 
-        { nim: generatedNIM }, // NIM Otomatis
-        'MAHASISWA'
+        { nis: generatedNIS }, // NIS Otomatis
+        'SISWA'
       );
     }
 
-    if (role.nama === 'DOSEN') {
-      if (!data.nip) throw new Error("NPWP wajib diisi untuk Dosen");
+    if (role.nama === 'GURU') {
+      if (!data.nip) throw new Error("NPWP wajib diisi untuk Guru");
       return await this.userRepository.createWithProfile(
         userCoreData, 
         { nip: data.nip }, // Gunakan NPWP sebagai NIP (sesuai permintaanmu)
-        'DOSEN'
+        'GURU'
       );
     }
 

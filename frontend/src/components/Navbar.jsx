@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./shared.css";
-import "../pages/mahasiswa/dashboard/notifikasi.css";
+import "../pages/siswa/dashboard/notifikasi.css";
 import { apiClient } from "../utils/apiClient";
 
-const AVATAR_MAHASISWA =
+const AVATAR_SISWA =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
 
-const AVATAR_DOSEN =
+const AVATAR_GURU =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
 
 export default function Navbar({ role, onOpenSidebar, onNavigate }) {
@@ -33,13 +33,13 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
     }
   };
 
-  const isDosen = role === "Dosen";
-  const isMahasiswa = role === "Mahasiswa";
-  const defaultAvatar = isDosen ? AVATAR_DOSEN : AVATAR_MAHASISWA;
+  const isGuru = role === "Guru";
+  const isSiswa = role === "Siswa";
+  const defaultAvatar = isGuru ? AVATAR_GURU : AVATAR_SISWA;
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
-  const userName = storedUser.nama || (isDosen ? "Dosen" : "Mahasiswa");
+  const userName = storedUser.nama || (isGuru ? "Guru" : "Siswa");
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatar);
 
   const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -52,24 +52,24 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
     }
   }, [storedUser.fotoUrl, API_BASE, defaultAvatar]);
 
-  const DOSEN_NOTIFICATIONS = [
+  const GURU_NOTIFICATIONS = [
     { id: 'd1', title: 'Jadwal UTS Semester Genap', desc: 'UTS akan dilaksanakan pada tanggal 2–6 Juni 2026. Pastikan materi sudah diunggah sebelum pelaksanaan.', time: '1 jam lalu', read: false, type: 'akademik' },
     { id: 'd2', title: 'Pengumuman Libur Nasional', desc: 'Perkuliahan diliburkan pada Kamis, 29 Mei 2026 dalam rangka Hari Raya Waisak. Jadwal dapat disesuaikan.', time: '3 jam lalu', read: false, type: 'akademik' },
-    { id: 'd3', title: 'Jadwal UAS Semester Genap', desc: 'UAS dijadwalkan pada tanggal 30 Juni – 4 Juli 2026. Dosen dimohon mengumpulkan soal maksimal 2 minggu sebelumnya.', time: '5 jam lalu', read: false, type: 'akademik' },
+    { id: 'd3', title: 'Jadwal UAS Semester Genap', desc: 'UAS dijadwalkan pada tanggal 30 Juni – 4 Juli 2026. Guru dimohon mengumpulkan soal maksimal 2 minggu sebelumnya.', time: '5 jam lalu', read: false, type: 'akademik' },
     { id: 'd4', title: 'Batas Input Nilai UTS', desc: 'Batas akhir pengisian nilai UTS adalah 13 Juni 2026. Harap segera mengisi nilai setelah pelaksanaan ujian.', time: 'Kemarin', read: true, type: 'akademik' },
     { id: 'd5', title: 'Rapat Koordinasi Akademik', desc: 'Rapat koordinasi semester genap akan diadakan pada Jumat, 23 Mei 2026 pukul 09.00 WIB di Ruang Rapat Utama.', time: 'Kemarin', read: true, type: 'akademik' },
     { id: 'd6', title: 'Revisi Kalender Akademik', desc: 'Kalender akademik 2025/2026 telah diperbarui. Silakan unduh versi terbaru melalui portal akademik kampus.', time: '2 hari lalu', read: true, type: 'akademik' },
-    { id: 'd7', title: 'Pengisian KRS Mahasiswa', desc: 'Periode pengisian KRS semester ganjil 2026/2027 dibuka 1–15 Juli 2026. Dosen wali dimohon melakukan persetujuan tepat waktu.', time: '3 hari lalu', read: true, type: 'akademik' },
+    { id: 'd7', title: 'Pengisian KRS Siswa', desc: 'Periode pengisian KRS semester ganjil 2026/2027 dibuka 1–15 Juli 2026. Guru wali dimohon melakukan persetujuan tepat waktu.', time: '3 hari lalu', read: true, type: 'akademik' },
   ];
 
   useEffect(() => {
-    if (isDosen) {
-      setNotifications(DOSEN_NOTIFICATIONS);
-      setUnreadCount(DOSEN_NOTIFICATIONS.filter(n => !n.read).length);
+    if (isGuru) {
+      setNotifications(GURU_NOTIFICATIONS);
+      setUnreadCount(GURU_NOTIFICATIONS.filter(n => !n.read).length);
       return;
     }
 
-    if (!isMahasiswa) return;
+    if (!isSiswa) return;
 
     const fetchNotifications = async () => {
       try {
@@ -96,24 +96,24 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
     
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, [isMahasiswa, isDosen]);
+  }, [isSiswa, isGuru]);
 
-  const name = isDosen ? `Halo, ${userName}` : `Halo, ${userName}`;
-  const subtitle = isDosen ? "Dosen" : "Mahasiswa";
-  const placeholder = isDosen ? "Cari materi atau mahasiswa..." : "Cari materi atau tugas...";
+  const name = isGuru ? `Halo, ${userName}` : `Halo, ${userName}`;
+  const subtitle = isGuru ? "Guru" : "Siswa";
+  const placeholder = isGuru ? "Cari materi atau siswa..." : "Cari materi atau tugas...";
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
 
   // Mock global data for search
   const searchIndex = [
-    { id: 's1', type: 'Mahasiswa', title: 'Budi Santoso', desc: 'NIM: 1301210001 - Kelas IF-48-08', mhsPage: 'profile', dosenPage: 'dosenProfile' },
-    { id: 's2', type: 'Mahasiswa', title: 'Siti Aminah', desc: 'NIM: 1301210002 - Kelas IF-48-08', mhsPage: 'profile', dosenPage: 'dosenProfile' },
-    { id: 's3', type: 'Materi', title: 'Pemrograman Web', desc: 'Bab 1 - Konsep Dasar Web', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
-    { id: 's4', type: 'Materi', title: 'Rekayasa Perangkat Lunak', desc: 'Modul 3 - SDLC', mhsPage: 'daftarMataKuliah', dosenPage: 'dosenMateri' },
-    { id: 's5', type: 'Tugas', title: 'Tugas PBO', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
-    { id: 's6', type: 'Tugas', title: 'Analisis Kebutuhan RPL', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', dosenPage: 'dosenTugas' },
-    { id: 's7', type: 'Forum', title: 'Diskusi Web API', desc: 'Forum pertemuan ke-4', mhsPage: 'forumDiskusi', dosenPage: 'dosenForum' },
+    { id: 's1', type: 'Siswa', title: 'Budi Santoso', desc: 'NIS: 1301210001 - Kelas IF-48-08', mhsPage: 'profile', guruPage: 'guruProfile' },
+    { id: 's2', type: 'Siswa', title: 'Siti Aminah', desc: 'NIS: 1301210002 - Kelas IF-48-08', mhsPage: 'profile', guruPage: 'guruProfile' },
+    { id: 's3', type: 'Materi', title: 'Pemrograman Web', desc: 'Bab 1 - Konsep Dasar Web', mhsPage: 'daftarMataKuliah', guruPage: 'guruMateri' },
+    { id: 's4', type: 'Materi', title: 'Rekayasa Perangkat Lunak', desc: 'Modul 3 - SDLC', mhsPage: 'daftarMataKuliah', guruPage: 'guruMateri' },
+    { id: 's5', type: 'Tugas', title: 'Tugas PBO', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', guruPage: 'guruTugas' },
+    { id: 's6', type: 'Tugas', title: 'Analisis Kebutuhan RPL', desc: 'Tenggat: 20 Desember 2024', mhsPage: 'daftarTugas', guruPage: 'guruTugas' },
+    { id: 's7', type: 'Forum', title: 'Diskusi Web API', desc: 'Forum pertemuan ke-4', mhsPage: 'forumDiskusi', guruPage: 'guruForum' },
   ];
 
   const handleSearchChange = (e) => {
@@ -141,7 +141,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
     setIsSearchOpen(false);
     setSearchQuery("");
     if (onNavigate) {
-      onNavigate(isDosen ? result.dosenPage : result.mhsPage);
+      onNavigate(isGuru ? result.guruPage : result.mhsPage);
     }
   };
 
@@ -151,7 +151,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
         <button className="navbar__hamburger" onClick={handleHamburgerClick}>
           <span className="material-symbols-outlined">menu</span>
         </button>
-        {!isDosen && <div className="navbar__search" style={{ position: "relative" }}>
+        {!isGuru && <div className="navbar__search" style={{ position: "relative" }}>
           <span className="material-symbols-outlined navbar__search-icon">search</span>
           <input
             className="navbar__search-input"
@@ -228,7 +228,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
             <div className="notif-header">
               <h3>Notifikasi</h3>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                {isMahasiswa && notifications.length > 0 && (  
+                {isSiswa && notifications.length > 0 && (  
                   <button className="notif-close" onClick={async () => {
                     try {
                       await apiClient.put('/api/notifikasi/read-all');
@@ -252,7 +252,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
                   key={notif.id}
                   className={`notif-item ${notif.read ? "notif-read" : "notif-unread"}`}
                   onClick={async () => {
-                    if (!notif.read && isMahasiswa) {
+                    if (!notif.read && isSiswa) {
                       try {
                         await apiClient.put(`/api/notifikasi/${notif.id}/read`);
                         setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
@@ -261,15 +261,15 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
                     }
                     setNotifOpen(false);
                     if (onNavigate) {
-                      if (isDosen) {
-                        if (notif.type === "tugas") onNavigate("dosenKelompok");
-                        else if (notif.type === "forum") onNavigate("dosenForum");
-                        else if (notif.type === "presensi") onNavigate("dosenPresensi");
+                      if (isGuru) {
+                        if (notif.type === "tugas") onNavigate("guruKelompok");
+                        else if (notif.type === "forum") onNavigate("guruForum");
+                        else if (notif.type === "presensi") onNavigate("guruPresensi");
                       } else {
                         if (notif.type === "tugas") onNavigate("daftarTugas");
                         else if (notif.type === "kuis") onNavigate("daftarTugas");
                         else if (notif.type === "materi") onNavigate("daftarMataKuliah");
-                        else if (notif.type === "presensi") onNavigate("presensiMahasiswa");
+                        else if (notif.type === "presensi") onNavigate("presensiSiswa");
                         else if (notif.type === "forum") onNavigate("forumDiskusi");
                       }
                     }
@@ -306,7 +306,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
         <div
           className="navbar__profile"
           style={{ cursor: "pointer" }}
-          onClick={() => onNavigate && onNavigate(isDosen ? "dosenProfile" : "profile")}
+          onClick={() => onNavigate && onNavigate(isGuru ? "guruProfile" : "profile")}
           title="Lihat Profil"
         >
           <div className="navbar__profile-info">

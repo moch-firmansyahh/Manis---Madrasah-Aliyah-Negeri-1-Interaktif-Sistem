@@ -15,8 +15,8 @@ async getKelompok(req, res) {
 
 async getAllKelompok(req, res) {
     try {
-        const nipDosen = req.user?.dosen?.nip;
-        const data = await this.kelompokUseCase.getAllKelompok(nipDosen);
+        const nipGuru = req.user?.guru?.nip;
+        const data = await this.kelompokUseCase.getAllKelompok(nipGuru);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
@@ -35,8 +35,8 @@ async createKelompok(req, res) {
 async addMember(req, res) {
     try {
         const { idKelompok } = req.params;
-        const { nim } = req.body;
-        await this.kelompokUseCase.addMember(idKelompok, nim);
+        const { nis } = req.body;
+        await this.kelompokUseCase.addMember(idKelompok, nis);
         res.status(200).json({ status: 'success', message: "Anggota berhasil ditambahkan" });
     } catch (error) {
         if (error.code === 'P2002') {
@@ -48,8 +48,8 @@ async addMember(req, res) {
 
 async removeMember(req, res) {
     try {
-        const { idKelompok, nim } = req.params;
-        await this.kelompokUseCase.removeMember(idKelompok, nim);
+        const { idKelompok, nis } = req.params;
+        await this.kelompokUseCase.removeMember(idKelompok, nis);
         res.status(200).json({ message: "Anggota dikeluarkan" });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -67,9 +67,9 @@ async saveGrades(req, res) {
         }
     }
 
-async getMahasiswa(req, res) {
+async getSiswa(req, res) {
     try {
-        const data = await this.kelompokUseCase.getAllMahasiswa();
+        const data = await this.kelompokUseCase.getAllSiswa();
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -5,8 +5,8 @@ constructor(modulAjarRepository) {
     this.repository = modulAjarRepository;
 }
 
-async getMateri(filterMatkul, filterTipe, nipDosen) {
-    const materiData = await this.repository.findAllByDosen(filterMatkul, filterTipe, nipDosen);
+async getMateri(filterMatkul, filterTipe, nipGuru) {
+    const materiData = await this.repository.findAllByGuru(filterMatkul, filterTipe, nipGuru);
     // Format response agar sesuai dengan kebutuhan UI React
     return materiData.map(m => ({
         id: m.idModulAjar,

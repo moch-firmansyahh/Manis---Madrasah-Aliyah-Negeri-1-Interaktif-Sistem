@@ -6,15 +6,15 @@ export class MateriController {
   async getMateriWithProgress(req, res) {
     try {
       const { idMataKuliah } = req.params;
-      const nim = req.user?.mahasiswa?.nim || req.query.nim;
+      const nis = req.user?.siswa?.nis || req.query.nis;
 
-      if (!nim) {
-        return res.status(400).json({ error: 'NIM diperlukan' });
+      if (!nis) {
+        return res.status(400).json({ error: 'NIS diperlukan' });
       }
 
       const data = await this.materiUseCase.getMateriWithProgress(
         parseInt(idMataKuliah),
-        nim
+        nis
       );
 
       res.status(200).json(data);
@@ -27,15 +27,15 @@ export class MateriController {
   async markAsAccessed(req, res) {
     try {
       const { idModulAjar } = req.params;
-      const nim = req.user?.mahasiswa?.nim || req.body.nim;
+      const nis = req.user?.siswa?.nis || req.body.nis;
 
-      if (!nim) {
-        return res.status(400).json({ error: 'NIM diperlukan' });
+      if (!nis) {
+        return res.status(400).json({ error: 'NIS diperlukan' });
       }
 
       const result = await this.materiUseCase.markAsAccessed(
         parseInt(idModulAjar),
-        nim
+        nis
       );
 
       res.status(200).json({
@@ -51,15 +51,15 @@ export class MateriController {
   async getProgressSummary(req, res) {
     try {
       const { idMataKuliah } = req.params;
-      const nim = req.user?.mahasiswa?.nim || req.query.nim;
+      const nis = req.user?.siswa?.nis || req.query.nis;
 
-      if (!nim) {
-        return res.status(400).json({ error: 'NIM diperlukan' });
+      if (!nis) {
+        return res.status(400).json({ error: 'NIS diperlukan' });
       }
 
       const data = await this.materiUseCase.getProgressSummary(
         parseInt(idMataKuliah),
-        nim
+        nis
       );
 
       res.status(200).json(data);

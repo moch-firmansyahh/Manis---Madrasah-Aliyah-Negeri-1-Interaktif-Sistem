@@ -11,17 +11,17 @@ async getDaftarKelompok(idMataKuliah) {
         const nilaiObj = {};
         k.anggota.forEach(ang => {
             membersArr.push({
-                nim: ang.nim,
-                name: ang.mahasiswa?.user?.nama || "Mahasiswa",
-                nomorInduk: ang.mahasiswa?.nomorInduk || ang.nim
+                nis: ang.nis,
+                name: ang.siswa?.user?.nama || "Siswa",
+                nomorInduk: ang.siswa?.nomorInduk || ang.nis
             });
-            nilaiObj[ang.nim] = ang.nilaiTugas ? ang.nilaiTugas.toString() : "";
+            nilaiObj[ang.nis] = ang.nilaiTugas ? ang.nilaiTugas.toString() : "";
         });
 
         const lastSubmission = k.pengumpulan?.[0] || null;
         const totalAnggota = k.anggota.length;
-        const nimSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nim));
-        const sudahSubmit = k.anggota.filter(a => nimSudahSubmit.has(a.nim)).length;
+        const nisSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nis));
+        const sudahSubmit = k.anggota.filter(a => nisSudahSubmit.has(a.nis)).length;
         const progress = totalAnggota > 0 ? Math.round((sudahSubmit / totalAnggota) * 100) : 0;
         return {
             id: k.idKelompok,
@@ -44,37 +44,37 @@ async createNewGroup(data) {
     return await this.kelompokRepository.createKelompok(data);
 }
 
-async addMember(idKelompok, nim) {
-    return await this.kelompokRepository.addMember(idKelompok, nim);
+async addMember(idKelompok, nis) {
+    return await this.kelompokRepository.addMember(idKelompok, nis);
 }
 
-async removeMember(idKelompok, nim) {
-    return await this.kelompokRepository.removeMember(idKelompok, nim);
+async removeMember(idKelompok, nis) {
+    return await this.kelompokRepository.removeMember(idKelompok, nis);
 }
 
 async saveGrades(idKelompok, grades) {
     return await this.kelompokRepository.updateGrades(idKelompok, grades);
 }
 
-async getAllKelompok(nipDosen) {
-    const kelompokData = await this.kelompokRepository.findAll(nipDosen);
+async getAllKelompok(nipGuru) {
+    const kelompokData = await this.kelompokRepository.findAll(nipGuru);
     
     return kelompokData.map(k => {
         const membersArr = [];
         const nilaiObj = {};
         k.anggota.forEach(ang => {
             membersArr.push({
-                nim: ang.nim,
-                name: ang.mahasiswa?.user?.nama || "Mahasiswa",
-                nomorInduk: ang.mahasiswa?.nomorInduk || ang.nim
+                nis: ang.nis,
+                name: ang.siswa?.user?.nama || "Siswa",
+                nomorInduk: ang.siswa?.nomorInduk || ang.nis
             });
-            nilaiObj[ang.nim] = ang.nilaiTugas ? ang.nilaiTugas.toString() : "";
+            nilaiObj[ang.nis] = ang.nilaiTugas ? ang.nilaiTugas.toString() : "";
         });
 
         const lastSubmission = k.pengumpulan?.[0] || null;
         const totalAnggota = k.anggota.length;
-        const nimSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nim));
-        const sudahSubmit = k.anggota.filter(a => nimSudahSubmit.has(a.nim)).length;
+        const nisSudahSubmit = new Set((k.pengumpulan || []).map(p => p.nis));
+        const sudahSubmit = k.anggota.filter(a => nisSudahSubmit.has(a.nis)).length;
         const progress = totalAnggota > 0 ? Math.round((sudahSubmit / totalAnggota) * 100) : 0;
         return {
             id: k.idKelompok,
@@ -94,12 +94,12 @@ async getAllKelompok(nipDosen) {
     });
 }
 
-async getAllMahasiswa() {
-    const data = await this.kelompokRepository.findAllMahasiswa();
+async getAllSiswa() {
+    const data = await this.kelompokRepository.findAllSiswa();
     return data.map(m => ({
-        nim: m.nim,
-        name: m.user?.nama || "Mahasiswa",
-        nomorInduk: m.user?.nomorInduk || m.nim
+        nis: m.nis,
+        name: m.user?.nama || "Siswa",
+        nomorInduk: m.user?.nomorInduk || m.nis
     }));
 }
 

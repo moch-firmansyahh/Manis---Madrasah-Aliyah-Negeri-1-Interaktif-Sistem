@@ -12,14 +12,14 @@ import presensiRoutes from './src/interfaces/routes/presensiRoutes.js';
 import dashboardRoutes from './src/interfaces/routes/dashboardRoutes.js';
 import forumRoutes from './src/interfaces/routes/forumRoutes.js';
 import kuisRoutes from './src/interfaces/routes/kuisRoutes.js';
-import dashboardDosenRoutes from './src/interfaces/routes/dashboardDosenRoutes.js';
-import dosenForumRoutes from './src/interfaces/routes/dosenForumRoutes.js';
+import dashboardGuruRoutes from './src/interfaces/routes/dashboardGuruRoutes.js';
+import guruForumRoutes from './src/interfaces/routes/guruForumRoutes.js';
 import kelompokRoutes from './src/interfaces/routes/kelompokRoutes.js';
 import modulAjarRoutes from './src/interfaces/routes/modulAjarRoutes.js';
 import materiRoutes from './src/interfaces/routes/materiRoutes.js';
-import presensiDosenRoutes from './src/interfaces/routes/presensiDosenRoutes.js';
-import dosenProfileRoutes from './src/interfaces/routes/dosenProfileRoutes.js';
-import tugasDosenRoutes from './src/interfaces/routes/tugasDosenRoutes.js';
+import presensiGuruRoutes from './src/interfaces/routes/presensiGuruRoutes.js';
+import guruProfileRoutes from './src/interfaces/routes/guruProfileRoutes.js';
+import tugasGuruRoutes from './src/interfaces/routes/tugasGuruRoutes.js';
 import tugasRoutes from './src/interfaces/routes/tugasRoutes.js';
 import profileRoutes from './src/interfaces/routes/profileRoutes.js';
 import notifikasiRoutes from './src/interfaces/routes/notifikasiRoutes.js';
@@ -71,16 +71,16 @@ app.use('/api/presensi', authMiddleware, presensiRoutes);
 app.use('/api/forum', forumRoutes); // forumRoutes handles its own auth per-endpoint
 app.use('/api/kuis', authMiddleware, kuisRoutes);
 app.use('/api/nilai', authMiddleware, nilaiRoutes);
-app.use('/api/dosen/dashboard', authMiddleware, dashboardDosenRoutes);
-app.use('/api/dosen/forum', authMiddleware, dosenForumRoutes);
+app.use('/api/guru/dashboard', authMiddleware, dashboardGuruRoutes);
+app.use('/api/guru/forum', authMiddleware, guruForumRoutes);
 app.use('/api/kelompok', authMiddleware, kelompokRoutes);
 app.use('/api/modul-ajar', authMiddleware, modulAjarRoutes);
 app.use('/api/materi', authMiddleware, materiRoutes);
-app.use('/api/dosen/presensi', authMiddleware, presensiDosenRoutes);
-app.use('/api/dosen/profile', authMiddleware, dosenProfileRoutes);
-app.use('/api/dosen/tugas', authMiddleware, tugasDosenRoutes); // Dosen tugas management
-app.use('/api/tugas', authMiddleware, tugasRoutes);           // Mahasiswa tugas (harus di atas dosen)
-app.use('/api/tugas', authMiddleware, tugasDosenRoutes);      // Fallback dosen routes (/mata-kuliah/:id, dll)
+app.use('/api/guru/presensi', authMiddleware, presensiGuruRoutes);
+app.use('/api/guru/profile', authMiddleware, guruProfileRoutes);
+app.use('/api/guru/tugas', authMiddleware, tugasGuruRoutes); // Guru tugas management
+app.use('/api/tugas', authMiddleware, tugasRoutes);           // Siswa tugas (harus di atas guru)
+app.use('/api/tugas', authMiddleware, tugasGuruRoutes);      // Fallback guru routes (/mata-kuliah/:id, dll)
 app.use('/api/profile', profileRoutes);
 app.use('/api/notifikasi', authMiddleware, notifikasiRoutes);                       // Shared profile (photo + password)
 

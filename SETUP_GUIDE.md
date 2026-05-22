@@ -1,6 +1,6 @@
-# LMS Setup Guide - Menjalankan Frontend & Backend Bersamaan
+# Manis Setup Guide - Menjalankan Frontend & Backend Bersamaan
 
-Panduan lengkap untuk menjalankan Learning Management System (LeMaS) dengan menyambungkan frontend dan backend secara bersamaan, serta panduan pengujian API dan deployment ke cloud.
+Panduan lengkap untuk menjalankan Madrasah Aliyah Negeri 1 Interaktif Sistem (Manis) dengan menyambungkan frontend dan backend secara bersamaan, serta panduan pengujian API dan deployment ke cloud.
 
 ---
 
@@ -99,15 +99,15 @@ Setelah kedua server berjalan:
 
 Gunakan akun-akun di bawah ini untuk mencoba seluruh fitur aplikasi sesuai dengan role masing-masing:
 
-### 👨‍🎓 Mahasiswa (Student)
-*   **Nomor Induk (NIM):** `2026001`
+### 👨‍🎓 Siswa (Student)
+*   **Nomor Induk (NIS):** `2026001`
 *   **Password:** `password123`
-*   **Role:** `Mahasiswa`
+*   **Role:** `Siswa`
 
-### 👨‍🏫 Dosen (Lecturer)
+### 👨‍🏫 Guru (Teacher)
 *   **Nomor Induk (NIP):** `D001`
 *   **Password:** `password123`
-*   **Role:** `Dosen`
+*   **Role:** `Guru`
 
 ### 👑 Admin
 *   **Nomor Induk:** `U001`
@@ -123,7 +123,7 @@ Gunakan akun-akun di bawah ini untuk mencoba seluruh fitur aplikasi sesuai denga
 ```
 Host:     localhost
 Port:     5432
-Database: LMS
+Database: manis
 User:     postgres
 Password: Hilmi17 (sesuaikan dengan setup PostgreSQL lokal Anda)
 ```
@@ -137,7 +137,7 @@ cd lms-be
 npx prisma generate
 
 # Run migrations
-npx prisma migrate dev --name init_lms
+npx prisma migrate dev --name init_manis
 
 # Seed data awal (Penting untuk membuat akun testing)
 npx prisma db seed
@@ -150,7 +150,7 @@ npx prisma db seed
 ### Backend (`lms-be/.env`)
 ```env
 PORT_APP=3000
-DATABASE_URL=postgresql://postgres:Hilmi17@localhost:5432/LMS?schema=public
+DATABASE_URL=postgresql://postgres:Hilmi17@localhost:5432/manis?schema=public
 JWT_SECRET=bG1zLWJlDQo=
 FRONTEND_URL=http://localhost:5173
 ```
@@ -165,24 +165,24 @@ VITE_GEMINI_API_KEY=AIzaSyB4U6nXh6nN8L5D_sBYzNg8fGWtnGIPuf8
 
 ## 🌟 Fitur Unggulan Terbaru (Premium Features)
 
-Aplikasi LeMaS ini telah dilengkapi dengan berbagai fitur premium modern:
+Aplikasi Manis ini telah dilengkapi dengan berbagai fitur premium modern:
 
 1.  **⚡ Tutup-Buka Sidebar (Collapsible Sidebar):**
     *   Pengguna dapat melipat sidebar pada layar desktop untuk mendapatkan ruang baca dan fokus yang lebih luas.
     *   Cukup klik tombol **Hamburger** di bagian navbar atas untuk menyembunyikan/menampilkan sidebar dengan animasi geser yang sangat mulus.
     *   Status sidebar (tertutup/terbuka) disimpan langsung di **`localStorage`**, sehingga tidak akan berubah atau berkedip ketika Anda berpindah-pindah halaman!
-2.  **🎨 Identitas Visual Baru (Branding LeMaS):**
-    *   Menggunakan logo PNG transparan premium di halaman login, sidebar mahasiswa, dan sidebar dosen.
+2.  **🎨 Identitas Visual Baru (Branding Manis):**
+    *   Menggunakan logo PNG transparan premium di halaman login, sidebar siswa, dan sidebar guru.
     *   Dilengkapi dengan sistem **Cache-Busting Favicon** (`/src/assets/logo.png?v=1.0.1`) di `index.html` untuk menghindari *cache* browser agresif, sehingga logo langsung berubah seketika.
     *   Halaman login dibersihkan dari kotak penutup logo yang mengganggu, membuat logo melayang secara estetis.
 3.  **💬 FAQ Komprehensif (Pusat Bantuan):**
-    *   Tersedia halaman pusat bantuan lengkap untuk menjawab permasalahan teknis umum mahasiswa dan dosen.
+    *   Tersedia halaman pusat bantuan lengkap untuk menjawab permasalahan teknis umum siswa dan guru.
 
 ---
 
 ## 🚀 Panduan Deployment ke Cloud
 
-Bagi Anda yang ingin mempublikasikan aplikasi LeMaS agar bisa diakses secara online dari mana saja:
+Bagi Anda yang ingin mempublikasikan aplikasi Manis agar bisa diakses secara online dari mana saja:
 
 ### 1. Database (Cloud PostgreSQL) — Gratis di Supabase / Neon
 *   Daftar di [Supabase](https://supabase.com) atau [Neon.tech](https://neon.tech).
@@ -236,7 +236,7 @@ Dokumentasi API lengkap dan pengujian berpatokan pada DFD (Level 0 dan Level 1) 
 1.  Jalankan script `run-lms.bat`
 2.  Buka http://localhost:5173 di browser Anda
 3.  Login menggunakan kredensial testing di atas
-4.  Coba fitur sidebar tutup-buka baru dan jelajahi dasbor LeMaS!
+4.  Coba fitur sidebar tutup-buka baru dan jelajahi dasbor Manis!
 
 ---
 

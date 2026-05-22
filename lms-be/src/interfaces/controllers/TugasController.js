@@ -9,27 +9,27 @@ export class TugasController {
     try {
       const { idMataKuliah } = req.query;
       
-      // Get nim from user
-      let nim = req.user?.mahasiswa?.nim;
+      // Get nis from user
+      let nis = req.user?.siswa?.nis;
       const nomorInduk = req.user?.nomorInduk;
       
-      if (!nim && nomorInduk) {
-        const mhs = await prisma.mahasiswa.findUnique({ where: { nomorInduk } });
-        if (mhs) nim = mhs.nim;
+      if (!nis && nomorInduk) {
+        const mhs = await prisma.siswa.findUnique({ where: { nomorInduk } });
+        if (mhs) nis = mhs.nis;
       }
       
-      if (!nim) {
-        return res.status(400).json({ error: "NIM tidak ditemukan" });
+      if (!nis) {
+        return res.status(400).json({ error: "NIS tidak ditemukan" });
       }
       
-      // Get courses taken by mahasiswa (same as dashboard)
+      // Get courses taken by siswa (same as dashboard)
       const mataKuliahList = await prisma.mataKuliah.findMany({
         where: {
           OR: [
             { nilai: { some: { nomorInduk: nomorInduk } } },
-            { presensi: { some: { nim: nim } } },
-            { tugas: { some: { nim: nim } } },
-            { kelompok: { some: { anggota: { some: { nim: nim } } } } },
+            { presensi: { some: { nis: nis } } },
+            { tugas: { some: { nis: nis } } },
+            { kelompok: { some: { anggota: { some: { nis: nis } } } } },
           ],
         },
         select: { idMataKuliah: true }
@@ -43,7 +43,7 @@ export class TugasController {
       } else if (idMkList.length > 0) {
         filter.idMataKuliah = { in: idMkList };
       }
-      filter.nim = nim; // Hanya untuk cek status pengumpulan, bukan filter row
+      filter.nis = nis; // Hanya untuk cek status pengumpulan, bukan filter row
       
       const data = await this.tugasUseCase.getDaftarTugas(filter);
       res.status(200).json(data);
@@ -55,9 +55,9 @@ export class TugasController {
   async getDetail(req, res) {
     try {
       const { id } = req.params;
-      const nim = req.user?.mahasiswa?.nim || req.query.nim;
-      if (!nim) return res.status(400).json({ error: "NIM diperlukan" });
-      const data = await this.tugasUseCase.getDetailTugas(id, nim);
+      const nis = req.user?.siswa?.nis || req.query.nis;
+      if (!nis) return res.status(400).json({ error: "NIS diperlukan" });
+      const data = await this.tugasUseCase.getDetailTugas(id, nis);
       res.status(200).json(data);
     } catch (error) {
       res.status(404).json({ error: error.message });
@@ -67,18 +67,18 @@ export class TugasController {
   async submit(req, res) {
     try {
       const idTugas = req.params.idTugas || req.body.idTugas;
-      const nim = req.user?.mahasiswa?.nim || req.body.nim;
+      const nis = req.user?.siswa?.nis || req.body.nis;
       const { judul, detailTugas, fileJawaban } = req.body;
       
-      if (!idTugas || !nim) {
-        return res.status(400).json({ error: "idTugas dan nim wajib diisi" });
+      if (!idTugas || !nis) {
+        return res.status(400).json({ error: "idTugas dan nis wajib diisi" });
       }
       const uploadedFilePath = req.file
         ? `/uploads/${req.file.filename}`
         : fileJawaban || "";
       const result = await this.tugasUseCase.kumpulTugas({
         idTugas: parseInt(idTugas),
-        nim,
+        nis,
         judul,
         detailTugas,
         fileJawaban: uploadedFilePath,
@@ -95,15 +95,15 @@ export class TugasController {
   async getSubmission(req, res) {
     try {
       const { idTugas } = req.params;
-      const nim = req.query.nim;
-      if (!nim) {
+      const nis = req.query.nis;
+      if (!nis) {
         return res
           .status(400)
-          .json({ error: "NIM diperlukan sebagai query parameter" });
+          .json({ error: "NIS diperlukan sebagai query parameter" });
       }
       const data = await this.tugasUseCase.tugasRepository.getSubmission(
         idTugas,
-        nim,
+        nis,
       );
       res.status(200).json(data || {});
     } catch (error) {

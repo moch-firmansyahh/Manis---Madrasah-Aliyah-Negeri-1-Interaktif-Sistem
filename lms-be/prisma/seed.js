@@ -21,8 +21,8 @@ async function main() {
   await prisma.nilai.deleteMany();
   await prisma.modulAjar.deleteMany();
   await prisma.mataKuliah.deleteMany();
-  await prisma.mahasiswa.deleteMany();
-  await prisma.dosen.deleteMany();
+  await prisma.siswa.deleteMany();
+  await prisma.guru.deleteMany();
   await prisma.user.deleteMany();
   await prisma.role.deleteMany();
 
@@ -33,8 +33,8 @@ async function main() {
   // ══════════════════════════════════════════════
   const roles = [
     { id: 1, nama: "ADMIN" },
-    { id: 2, nama: "MAHASISWA" },
-    { id: 3, nama: "DOSEN" },
+    { id: 2, nama: "SISWA" },
+    { id: 3, nama: "GURU" },
   ];
   for (const role of roles) {
     await prisma.role.create({ data: role });
@@ -44,225 +44,224 @@ async function main() {
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   // ══════════════════════════════════════════════
-  // 2. DOSEN (5 Dosen)
+  // 2. GURU (5 Guru)
   // ══════════════════════════════════════════════
-  const dosenList = [
+  const guruList = [
     {
       ni: "D001",
-      nama: "Dr. Budi Santoso, M.Kom",
-      email: "budi.santoso@kampus.ac.id",
+      nama: "Budi Santoso, S.Pd",
+      email: "budi.santoso@sch.id",
       nip: "198001012010011001",
       nidn: "0401018001",
-      bidang: "Rekayasa Perangkat Lunak",
-      ruangKantor: "Gedung A Lt.3 R.301",
+      bidang: "Matematika",
+      ruangKantor: "Ruang Guru Lt.1 R.101",
     },
     {
       ni: "D002",
-      nama: "Prof. Siti Rahayu, Ph.D",
-      email: "siti.rahayu@kampus.ac.id",
+      nama: "Siti Rahayu, M.Pd",
+      email: "siti.rayahu@sch.id",
       nip: "197505152005012001",
       nidn: "0515057501",
-      bidang: "Kecerdasan Buatan",
-      ruangKantor: "Gedung A Lt.3 R.302",
+      bidang: "Fisika",
+      ruangKantor: "Ruang Guru Lt.1 R.102",
     },
     {
       ni: "D003",
-      nama: "Dr. Ahmad Fauzi, M.T",
-      email: "ahmad.fauzi@kampus.ac.id",
+      nama: "Ahmad Fauzi, S.Si",
+      email: "ahmad.fauzi@sch.id",
       nip: "198203102010011002",
       nidn: "1003028201",
-      bidang: "Jaringan Komputer",
-      ruangKantor: "Gedung B Lt.2 R.205",
+      bidang: "Kimia",
+      ruangKantor: "Ruang Guru Lt.2 R.205",
     },
     {
       ni: "D004",
-      nama: "Dr. Dewi Lestari, M.Sc",
-      email: "dewi.lestari@kampus.ac.id",
+      nama: "Dewi Lestari, S.Pd",
+      email: "dewi.lestari@sch.id",
       nip: "198506202012012001",
       nidn: "2006058501",
-      bidang: "Basis Data",
-      ruangKantor: "Gedung A Lt.4 R.401",
+      bidang: "Biologi",
+      ruangKantor: "Ruang Guru Lt.2 R.201",
     },
     {
       ni: "D005",
-      nama: "Dr. Rudi Hermawan, S.Kom, M.Cs",
-      email: "rudi.hermawan@kampus.ac.id",
+      nama: "Rudi Hermawan, M.Si",
+      email: "rudi.hermawan@sch.id",
       nip: "197912252008011001",
       nidn: "2512127901",
-      bidang: "Sistem Informasi",
-      ruangKantor: "Gedung B Lt.3 R.310",
+      bidang: "Sains",
+      ruangKantor: "Ruang Guru Lt.1 R.103",
     },
   ];
 
-  for (const d of dosenList) {
+  for (const g of guruList) {
     await prisma.user.create({
       data: {
-        nomorInduk: d.ni,
-        nama: d.nama,
-        email: d.email,
+        nomorInduk: g.ni,
+        nama: g.nama,
+        email: g.email,
         password: hashedPassword,
-        telepon: `0812${d.ni.slice(-3)}00001`,
+        telepon: `0812${g.ni.slice(-3)}00001`,
         roleId: 3,
-        dosen: {
+        guru: {
           create: {
-            nip: d.nip,
-            nidn: d.nidn,
-            bidang: d.bidang,
-            ruangKantor: d.ruangKantor,
+            nip: g.nip,
+            nidn: g.nidn,
+            bidang: g.bidang,
+            ruangKantor: g.ruangKantor,
           },
         },
       },
     });
   }
-  console.log("5 Dosen berhasil dibuat.");
+  console.log("5 Guru berhasil dibuat.");
 
   // ══════════════════════════════════════════════
-  // 3. MAHASISWA (10 Mahasiswa)
+  // 3. SISWA (10 Siswa)
   // ══════════════════════════════════════════════
-  const mahasiswaList = [
+  const siswaList = [
     {
       ni: "2026001",
-      nim: "2026001",
+      nis: "2026001",
       nama: "Andi Pratama",
-      email: "andi.pratama@kampus.ac.id",
+      email: "andi.pratama@sch.id",
     },
     {
       ni: "2026002",
-      nim: "2026002",
+      nis: "2026002",
       nama: "Bella Safitri",
-      email: "bella.safitri@kampus.ac.id",
+      email: "bella.safitri@sch.id",
     },
     {
       ni: "2026003",
-      nim: "2026003",
+      nis: "2026003",
       nama: "Cahya Nugraha",
-      email: "cahya.nugraha@kampus.ac.id",
+      email: "cahya.nugraha@sch.id",
     },
     {
       ni: "2026004",
-      nim: "2026004",
+      nis: "2026004",
       nama: "Dina Maharani",
-      email: "dina.maharani@kampus.ac.id",
+      email: "dina.maharani@sch.id",
     },
     {
       ni: "2026005",
-      nim: "2026005",
+      nis: "2026005",
       nama: "Eko Saputra",
-      email: "eko.saputra@kampus.ac.id",
+      email: "eko.saputra@sch.id",
     },
     {
       ni: "2026006",
-      nim: "2026006",
+      nis: "2026006",
       nama: "Fitri Handayani",
-      email: "fitri.handayani@kampus.ac.id",
+      email: "fitri.handayani@sch.id",
     },
     {
       ni: "2026007",
-      nim: "2026007",
+      nis: "2026007",
       nama: "Galih Wicaksono",
-      email: "galih.wicaksono@kampus.ac.id",
+      email: "galih.wicaksono@sch.id",
     },
     {
       ni: "2026008",
-      nim: "2026008",
+      nis: "2026008",
       nama: "Hana Permata",
-      email: "hana.permata@kampus.ac.id",
+      email: "hana.permata@sch.id",
     },
     {
       ni: "2026009",
-      nim: "2026009",
+      nis: "2026009",
       nama: "Irfan Maulana",
-      email: "irfan.maulana@kampus.ac.id",
+      email: "irfan.maulana@sch.id",
     },
     {
       ni: "2026010",
-      nim: "2026010",
+      nis: "2026010",
       nama: "Jasmine Putri",
-      email: "jasmine.putri@kampus.ac.id",
+      email: "jasmine.putri@sch.id",
     },
   ];
 
-  for (const m of mahasiswaList) {
+  for (const s of siswaList) {
     await prisma.user.create({
       data: {
-        nomorInduk: m.ni,
-        nama: m.nama,
-        email: m.email,
+        nomorInduk: s.ni,
+        nama: s.nama,
+        email: s.email,
         password: hashedPassword,
-        telepon: `08123${m.ni}`,
+        telepon: `08123${s.ni}`,
         roleId: 2,
-        mahasiswa: { create: { nim: m.ni } },
+        siswa: { create: { nis: s.ni } },
       },
     });
   }
-  console.log("10 Mahasiswa berhasil dibuat.");
+  console.log("10 Siswa berhasil dibuat.");
 
   // ══════════════════════════════════════════════
-  // 4. MATA KULIAH (4 per semester, total 16)
-  // Semester 1, 2, 3: Selesai | Semester 4: Aktif
+  // 4. MATA PELAJARAN (4 per semester, total 16)
   // ══════════════════════════════════════════════
   const matkulList = [
     // Semester 1 (Completed)
     {
-      nama: "Dasar Pemrograman",
-      nipDosen: dosenList[0].nip,
+      nama: "Matematika Dasar I",
+      nipGuru: guruList[0].nip,
       jadwal: "Senin,Rabu",
       waktu: "08:00 - 10:00",
       semester: 1,
       sks: 3,
     },
     {
-      nama: "Matematika Diskrit",
-      nipDosen: dosenList[1].nip,
+      nama: "Fisika Dasar I",
+      nipGuru: guruList[1].nip,
       jadwal: "Selasa,Kamis",
       waktu: "10:30 - 12:00",
       semester: 1,
       sks: 3,
     },
     {
-      nama: "Logika Informatika",
-      nipDosen: dosenList[2].nip,
+      nama: "Kimia Dasar I",
+      nipGuru: guruList[2].nip,
       jadwal: "Rabu,Jumat",
       waktu: "13:00 - 15:00",
       semester: 1,
-      sks: 2,
+      sks: 3,
     },
     {
-      nama: "Pengantar Teknologi Informasi",
-      nipDosen: dosenList[3].nip,
+      nama: "Biologi Umum",
+      nipGuru: guruList[3].nip,
       jadwal: "Senin,Kamis",
       waktu: "15:30 - 17:00",
       semester: 1,
-      sks: 2,
+      sks: 3,
     },
     // Semester 2 (Completed)
     {
-      nama: "Struktur Data",
-      nipDosen: dosenList[0].nip,
+      nama: "Matematika Wajib X",
+      nipGuru: guruList[4].nip,
       jadwal: "Senin,Rabu",
       waktu: "10:30 - 12:30",
       semester: 2,
-      sks: 4,
+      sks: 3,
     },
     {
-      nama: "Algoritma & Kompleksitas",
-      nipDosen: dosenList[1].nip,
+      nama: "Mekanika dan Termodinamika",
+      nipGuru: guruList[1].nip,
       jadwal: "Selasa,Kamis",
       waktu: "08:00 - 10:00",
       semester: 2,
       sks: 3,
     },
     {
-      nama: "Pemrograman Berorientasi Objek",
-      nipDosen: dosenList[2].nip,
+      nama: "Struktur Atom dan Ikatan Kimia",
+      nipGuru: guruList[2].nip,
       jadwal: "Rabu,Jumat",
       waktu: "10:30 - 12:30",
       semester: 2,
       sks: 3,
     },
     {
-      nama: "Arsitektur Komputer",
-      nipDosen: dosenList[3].nip,
+      nama: "Sistem Organ Organisme",
+      nipGuru: guruList[3].nip,
       jadwal: "Senin,Kamis",
       waktu: "13:00 - 15:00",
       semester: 2,
@@ -270,32 +269,32 @@ async function main() {
     },
     // Semester 3 (Completed)
     {
-      nama: "Basis Data",
-      nipDosen: dosenList[0].nip,
+      nama: "Matematika Dasar II",
+      nipGuru: guruList[0].nip,
       jadwal: "Senin,Rabu",
       waktu: "15:30 - 17:30",
       semester: 3,
-      sks: 4,
+      sks: 3,
     },
     {
-      nama: "Jaringan Komputer",
-      nipDosen: dosenList[1].nip,
+      nama: "Gelombang, Optik, dan Listrik Magnet",
+      nipGuru: guruList[1].nip,
       jadwal: "Selasa,Kamis",
       waktu: "13:00 - 15:00",
       semester: 3,
       sks: 3,
     },
     {
-      nama: "Sistem Operasi",
-      nipDosen: dosenList[2].nip,
+      nama: "Termokimia dan Laju Reaksi",
+      nipGuru: guruList[2].nip,
       jadwal: "Rabu,Jumat",
       waktu: "08:00 - 10:00",
       semester: 3,
       sks: 3,
     },
     {
-      nama: "Probabilitas & Statistika",
-      nipDosen: dosenList[3].nip,
+      nama: "Genetika dan Evolusi",
+      nipGuru: guruList[3].nip,
       jadwal: "Senin,Kamis",
       waktu: "10:30 - 12:00",
       semester: 3,
@@ -303,36 +302,36 @@ async function main() {
     },
     // Semester 4 (Active)
     {
-      nama: "Pemrograman Web",
-      nipDosen: dosenList[0].nip,
+      nama: "Matematika Wajib XI",
+      nipGuru: guruList[4].nip,
       jadwal: "Senin,Rabu",
       waktu: "13:00 - 15:00",
       semester: 4,
       sks: 3,
     },
     {
-      nama: "Kecerdasan Buatan",
-      nipDosen: dosenList[1].nip,
+      nama: "Fisika Modern dan Astronomi",
+      nipGuru: guruList[1].nip,
       jadwal: "Selasa,Kamis",
       waktu: "15:30 - 17:30",
       semester: 4,
       sks: 3,
     },
     {
-      nama: "Rekayasa Perangkat Lunak",
-      nipDosen: dosenList[2].nip,
+      nama: "Kimia Organik dan Makromolekul",
+      nipGuru: guruList[2].nip,
       jadwal: "Rabu,Jumat",
       waktu: "08:00 - 10:00",
       semester: 4,
       sks: 3,
     },
     {
-      nama: "Interaksi Manusia Komputer",
-      nipDosen: dosenList[3].nip,
+      nama: "Ekologi dan Lingkungan",
+      nipGuru: guruList[3].nip,
       jadwal: "Senin,Kamis",
       waktu: "10:30 - 12:00",
       semester: 4,
-      sks: 2,
+      sks: 3,
     },
   ];
 
@@ -341,7 +340,7 @@ async function main() {
     const created = await prisma.mataKuliah.create({
       data: {
         namaMataKuliah: mk.nama,
-        nipDosen: mk.nipDosen,
+        nipGuru: mk.nipGuru,
         jadwal: mk.jadwal,
         waktu: mk.waktu,
         semester: mk.semester,
@@ -350,11 +349,10 @@ async function main() {
     });
     createdMatkul.push(created);
   }
-  console.log(`16 Mata Kuliah berhasil dibuat (4 per semester).`);
+  console.log("16 Mata Pelajaran berhasil dibuat (4 per semester).");
 
   // ══════════════════════════════════════════════
-  // 5. PRESENSI — Semua mahasiswa terdaftar di SEMUA mata kuliah
-  //    2 pertemuan per matkul
+  // 5. PRESENSI
   // ══════════════════════════════════════════════
   const today = new Date();
   today.setUTCHours(12, 0, 0, 0);
@@ -376,9 +374,9 @@ async function main() {
 
   const presensiData = [];
   for (const mk of createdMatkul) {
-    for (const m of mahasiswaList) {
+    for (const s of siswaList) {
       presensiData.push({
-        nim: m.ni,
+        nis: s.ni,
         idMataKuliah: mk.idMataKuliah,
         tanggalPertemuan: lastWeek,
         waktuPresensi: new Date(
@@ -388,7 +386,7 @@ async function main() {
           statusOptions[Math.floor(Math.random() * statusOptions.length)],
       });
       presensiData.push({
-        nim: m.ni,
+        nis: s.ni,
         idMataKuliah: mk.idMataKuliah,
         tanggalPertemuan: today,
         statusKehadiran: "Alpha",
@@ -399,38 +397,35 @@ async function main() {
   console.log(`${presensiData.length} data Presensi berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 6. NILAI — Nilai untuk semua mahasiswa
-  // Semester 1-3: Selesai (dengan nilai akhir untuk IPK)
-  // Semester 4: Aktif (nilai akhir null)
+  // 6. NILAI
   // ══════════════════════════════════════════════
-  // Nilai akhir per course untuk user 2026001 (Andi) — IPK target ~3.73
   const nilaiAndi = {
-    "Dasar Pemrograman": 88,
-    "Matematika Diskrit": 82,
-    "Logika Informatika": 90,
-    "Pengantar Teknologi Informasi": 85,
-    "Struktur Data": 78,
-    "Algoritma & Kompleksitas": 85,
-    "Pemrograman Berorientasi Objek": 80,
-    "Arsitektur Komputer": 75,
-    "Basis Data": 86,
-    "Jaringan Komputer": 79,
-    "Sistem Operasi": 83,
-    "Probabilitas & Statistika": 88,
+    "Matematika Dasar I": 88,
+    "Fisika Dasar I": 82,
+    "Kimia Dasar I": 90,
+    "Biologi Umum": 85,
+    "Matematika Wajib X": 78,
+    "Mekanika dan Termodinamika": 85,
+    "Struktur Atom dan Ikatan Kimia": 80,
+    "Sistem Organ Organisme": 75,
+    "Matematika Dasar II": 86,
+    "Gelombang, Optik, dan Listrik Magnet": 79,
+    "Termokimia dan Laju Reaksi": 83,
+    "Genetika dan Evolusi": 88,
   };
 
   const nilaiData = [];
   for (const mk of createdMatkul) {
-    for (const m of mahasiswaList) {
+    for (const s of siswaList) {
       if (mk.semester <= 3) {
         let nilaiAkhir;
-        if (m.ni === "2026001" && nilaiAndi[mk.namaMataKuliah]) {
+        if (s.ni === "2026001" && nilaiAndi[mk.namaMataKuliah]) {
           nilaiAkhir = nilaiAndi[mk.namaMataKuliah];
         } else {
           nilaiAkhir = 65 + Math.floor(Math.random() * 30);
         }
         nilaiData.push({
-          nomorInduk: m.ni,
+          nomorInduk: s.ni,
           idMataKuliah: mk.idMataKuliah,
           nilaiTugas: Math.min(100, nilaiAkhir + Math.floor(Math.random() * 8)),
           nilaiKuis: Math.min(100, nilaiAkhir + Math.floor(Math.random() * 6)),
@@ -440,7 +435,7 @@ async function main() {
       } else {
         const base = 65 + Math.floor(Math.random() * 30);
         nilaiData.push({
-          nomorInduk: m.ni,
+          nomorInduk: s.ni,
           idMataKuliah: mk.idMataKuliah,
           nilaiTugas: base + Math.floor(Math.random() * 10),
           nilaiKuis: base + Math.floor(Math.random() * 8),
@@ -454,7 +449,7 @@ async function main() {
   console.log(`${nilaiData.length} data Nilai berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 7. MODUL AJAR — 2 modul per matkul
+  // 7. MODUL AJAR
   // ══════════════════════════════════════════════
   const modulData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
@@ -463,7 +458,7 @@ async function main() {
       idMataKuliah: mk.idMataKuliah,
       judul: `Pengantar ${matkulList[i].nama}`,
       tipe_modul: "PDF",
-      deskripsi: `Materi pengantar dan silabus untuk mata kuliah ${matkulList[i].nama}.`,
+      deskripsi: `Materi pengantar dan silabus untuk ${matkulList[i].nama}.`,
       fileUrl: `/uploads/modul_pengantar_${mk.idMataKuliah}.pdf`,
       ukuran: "2.5 MB",
       canDownload: true,
@@ -472,7 +467,7 @@ async function main() {
       idMataKuliah: mk.idMataKuliah,
       judul: `Praktikum ${matkulList[i].nama}`,
       tipe_modul: "Video",
-      deskripsi: `Video tutorial praktikum untuk ${matkulList[i].nama}.`,
+      deskripsi: `Video pembelajaran praktikum untuk ${matkulList[i].nama}.`,
       url: "https://www.youtube.com/watch?v=example",
       ukuran: "150 MB",
       canDownload: false,
@@ -482,231 +477,234 @@ async function main() {
   console.log(`${modulData.length} Modul Ajar berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 8. TUGAS — 2 tugas per matkul (setiap mahasiswa punya record)
+  // 8. TUGAS
   // ══════════════════════════════════════════════
   const tugasTemplates = [
     // Semester 1
     [
       {
-        judul: "Membuat Program Input Output",
+        judul: "Latihan Aljabar dan Persamaan Linier",
         detail:
-          "Buat program sederhana menggunakan bahasa C yang menerima input dan menampilkan output.",
+          "Kerjakan latihan soal persamaan linier satu variabel dan dua variabel pada lembar kerja.",
         deadlineDays: 7,
       },
       {
-        judul: "Implementasi Array dan Fungsi",
+        judul: "Penerapan Himpunan dalam Kehidupan Sehari-hari",
         detail:
-          "Buat program yang mengimplementasikan array multidimensi dan fungsi untuk manipulasi data.",
+          "Buat laporan analisis tentang penerapan teori himpunan dalam menyelesaikan masalah sehari-hari.",
         deadlineDays: 21,
       },
     ],
     [
       {
-        judul: "Himpunan dan Logika Matematika",
+        judul: "Pengukuran Fisika dan Ketidakpastian",
         detail:
-          "Kerjakan 10 soal tentang teori himpunan dan logika matematika.",
+          "Lakukan percobaan pengukuran panjang menggunakan jangka sorong dan hitung ketidakpastiannya.",
         deadlineDays: 7,
       },
       {
-        judul: "Relasi dan Fungsi Matematika",
-        detail: "Buat laporan tentang relasi rekursif dan fungsi pembangkit.",
+        judul: "Analisis Gerak Lurus Berubah Beraturan (GLBB)",
+        detail:
+          "Kerjakan 10 soal mengenai analisis grafik dan rumus GLBB pada gerak benda.",
         deadlineDays: 21,
       },
     ],
     [
       {
-        judul: "Tabel Kebenaran dan Gerbang Logika",
+        judul: "Pengenalan Alat Laboratorium Kimia",
         detail:
-          "Buat tabel kebenaran untuk 5 gerbang logika beserta implementasi sirkuitnya.",
+          "Buat rangkuman fungsi dan cara penggunaan alat-alat laboratorium kimia dasar beserta simbol bahaya bahan kimia.",
         deadlineDays: 5,
       },
       {
-        judul: "Penyederhanaan Ekspresi Boolean",
+        judul: "Klasifikasi Materi dan Perubahannya",
         detail:
-          "Sederhanakan 10 ekspresi boolean menggunakan aljabar boolean dan K-map.",
+          "Tentukan tipe perubahan fisika dan kimia pada 10 fenomena alam di sekitar kita.",
         deadlineDays: 18,
       },
     ],
     [
       {
-        judul: "Makalah Perkembangan TI",
+        judul: "Pengamatan Sel Hewan dan Tumbuhan",
         detail:
-          "Buat makalah tentang perkembangan teknologi informasi di era digital.",
+          "Gambarkan struktur sel tumbuhan dan hewan hasil pengamatan mikroskop dan jelaskan perbedaannya.",
         deadlineDays: 10,
       },
       {
-        judul: "Presentasi Inovasi TI",
+        judul: "Klasifikasi Makhluk Hidup 5 Kingdom",
         detail:
-          "Buat slide presentasi tentang inovasi TI terkini di Indonesia.",
+          "Buat kunci determinasi sederhana untuk mengklasifikasikan 5 spesies tumbuhan di lingkungan sekitar.",
         deadlineDays: 24,
       },
     ],
     // Semester 2
     [
       {
-        judul: "Implementasi Linked List",
+        judul: "Penyelesaian Sistem Persamaan Linier Tiga Variabel",
         detail:
-          "Implementasikan singly linked list dan doubly linked list dalam bahasa C++.",
+          "Selesaikan 5 soal SPLTV menggunakan metode eliminasi dan substitusi.",
         deadlineDays: 10,
       },
       {
-        judul: "Binary Search Tree",
+        judul: "Fungsi Kuadrat dan Grafiknya",
         detail:
-          "Implementasikan operasi insert, delete, dan traversal pada BST.",
+          "Gambarkan grafik fungsi kuadrat dan tentukan titik puncak, sumbu simetri, serta pembuat nol fungsi.",
         deadlineDays: 24,
       },
     ],
     [
       {
-        judul: "Analisis Kompleksitas Algoritma",
+        judul: "Hukum Newton tentang Gerak",
         detail:
-          "Analisis kompleksitas waktu dari 5 algoritma sorting menggunakan Big-O notation.",
+          "Selesaikan soal analisis gaya pada bidang miring kasar menggunakan Hukum II Newton.",
         deadlineDays: 7,
       },
       {
-        judul: "Implementasi Divide and Conquer",
+        judul: "Hukum Termodinamika pada Mesin Carnot",
         detail:
-          "Implementasikan algoritma merge sort dan quick sort dengan pendekatan divide and conquer.",
+          "Hitung efisiensi mesin Carnot berdasarkan suhu reservoir tinggi dan rendah pada 5 kasus berbeda.",
         deadlineDays: 20,
       },
     ],
     [
       {
-        judul: "Program OOP Dasar",
+        judul: "Konfigurasi Elektron Bohr dan Kuantum",
         detail:
-          "Buat program Java dengan konsep inheritance, polymorphism, dan encapsulation.",
+          "Tuliskan konfigurasi elektron dan tentukan keempat bilangan kuantum elektron terakhir untuk 10 unsur.",
         deadlineDays: 8,
       },
       {
-        judul: "GUI dengan Java Swing",
+        judul: "Perbandingan Ikatan Ionik dan Kovalen",
         detail:
-          "Buat aplikasi desktop sederhana dengan Java Swing yang terhubung ke database.",
+          "Buat tabel perbandingan sifat fisik senyawa ionik dan senyawa kovalen disertai contoh.",
         deadlineDays: 22,
       },
     ],
     [
       {
-        judul: "Laporan Organisasi Komputer",
-        detail: "Buat laporan analisis arsitektur prosesor modern.",
+        judul: "Analisis Sistem Pencernaan Manusia",
+        detail:
+          "Buat infografis alur pencernaan makanan dan organ pencernaan serta enzim yang berperan.",
         deadlineDays: 6,
       },
       {
-        judul: "Simulasi Manajemen Memori",
+        judul: "Mekanisme Sistem Peredaran Darah",
         detail:
-          "Buat simulasi algoritma manajemen memori (paging, segmentation).",
+          "Gambarkan bagan sistem peredaran darah besar dan kecil pada manusia beserta fungsinya.",
         deadlineDays: 18,
       },
     ],
     // Semester 3
     [
       {
-        judul: "Perancangan Database",
+        judul: "Matriks dan Operasi Dasar",
         detail:
-          "Rancang database untuk sistem akademik menggunakan ERD dan normalisasi hingga 3NF.",
+          "Lakukan operasi penjumlahan, perkalian, dan transpose pada matriks berordo 3x3.",
         deadlineDays: 10,
       },
       {
-        judul: "Implementasi SQL Lanjutan",
-        detail: "Buat 15 query SQL kompleks meliputi JOIN, subquery, dan view.",
+        judul: "Determinan dan Invers Matriks",
+        detail:
+          "Tentukan determinan dan invers dari matriks yang diberikan menggunakan metode adjoin.",
         deadlineDays: 24,
       },
     ],
     [
       {
-        judul: "Konfigurasi Routing",
+        judul: "Sifat-Sifat Gelombang Cahaya",
         detail:
-          "Konfigurasi routing static dan dynamic menggunakan Cisco Packet Tracer.",
+          "Jelaskan fenomena difraksi, interferensi, dan polarisasi cahaya dalam kehidupan sehari-hari.",
         deadlineDays: 5,
       },
       {
-        judul: "Analisis Keamanan Jaringan",
+        judul: "Hukum Ohm dan Rangkaian Listrik",
         detail:
-          "Lakukan analisis keamanan jaringan sederhana dan buat laporan.",
+          "Hitung kuat arus dan tegangan pada rangkaian listrik campuran menggunakan Hukum Ohm dan Kirchhoff.",
         deadlineDays: 16,
       },
     ],
     [
       {
-        judul: "Manajemen Proses di Linux",
+        judul: "Penentuan Entalpi Reaksi",
         detail:
-          "Buat laporan praktikum manajemen proses dan thread di sistem operasi Linux.",
+          "Hitung perubahan entalpi reaksi netralisasi menggunakan kalorimeter sederhana.",
         deadlineDays: 7,
       },
       {
-        judul: "Simulasi Penjadwalan CPU",
+        judul: "Faktor-Faktor yang Mempengaruhi Laju Reaksi",
         detail:
-          "Implementasikan algoritma penjadwalan CPU (FCFS, SJF, Round Robin).",
+          "Buat laporan praktikum pengaruh suhu dan konsentrasi terhadap laju reaksi kimia.",
         deadlineDays: 20,
       },
     ],
     [
       {
-        judul: "Analisis Statistik Deskriptif",
+        judul: "Hukum Mendel tentang Persilangan",
         detail:
-          "Analisis dataset menggunakan ukuran pemusatan dan penyebaran data.",
+          "Selesaikan soal persilangan monohibrid dan dihibrid beserta rasio fenotip dan genotipnya.",
         deadlineDays: 8,
       },
       {
-        judul: "Uji Hipotesis dan Regresi",
+        judul: "Bukti-Bukti Teori Evolusi",
         detail:
-          "Lakukan uji hipotesis dan analisis regresi pada dataset yang diberikan.",
+          "Buat esai analisis komparatif bukti homologi organ tubuh hewan sebagai bukti evolusi.",
         deadlineDays: 22,
       },
     ],
     // Semester 4 (Active)
     [
       {
-        judul: "Website Portfolio dengan HTML & CSS",
+        judul: "Konsep Turunan Fungsi Aljabar",
         detail:
-          "Buat website portfolio pribadi menggunakan HTML5 dan CSS3. Harus responsif dengan minimal 3 halaman.",
+          "Selesaikan 10 soal turunan fungsi aljabar menggunakan aturan rantai dan turunan dasar.",
         deadlineDays: 7,
       },
       {
-        judul: "Aplikasi CRUD dengan ReactJS",
+        judul: "Aplikasi Turunan dalam Masalah Maksimum/Minimum",
         detail:
-          "Buat aplikasi CRUD sederhana menggunakan ReactJS dengan penyimpanan data di REST API.",
+          "Selesaikan masalah optimasi luas bidang tanah menggunakan konsep turunan pertama.",
         deadlineDays: 21,
       },
     ],
     [
       {
-        judul: "Laporan Algoritma Machine Learning",
+        judul: "Efek Fotolistrik dan Teori Kuantum Planck",
         detail:
-          "Analisis dan implementasikan algoritma Decision Tree untuk klasifikasi dataset.",
+          "Jelaskan konsep efek fotolistrik dan hitung energi kinetik elektron yang lepas dari permukaan logam.",
         deadlineDays: 5,
       },
       {
-        judul: "Implementasi Neural Network",
+        judul: "Klasifikasi Bintang dan Hukum Kepler",
         detail:
-          "Implementasikan Neural Network sederhana untuk pengenalan pola menggunakan Python.",
+          "Tentukan periode revolusi planet menggunakan Hukum III Kepler pada sistem tata surya.",
         deadlineDays: 18,
       },
     ],
     [
       {
-        judul: "Dokumen SRS",
+        judul: "Tata Nama Senyawa Hidrokarbon Alkana Alkena Alkuna",
         detail:
-          "Buat dokumen Software Requirements Specification sesuai standar IEEE 830.",
+          "Tuliskan nama IUPAC dan struktur molekul untuk 10 senyawa hidrokarbon.",
         deadlineDays: 12,
       },
       {
-        judul: "Desain UI/UX dengan Figma",
+        judul: "Identifikasi Gugus Fungsi Senyawa Karbon",
         detail:
-          "Buat mockup UI/UX aplikasi mobile dengan Figma. Minimal 8 screen interaktif.",
+          "Lakukan analisis cara membedakan senyawa alkohol dan eter melalui reaksi kimia.",
         deadlineDays: 28,
       },
     ],
     [
       {
-        judul: "Evaluasi Usability",
+        judul: "Analisis Jaring-Jaring Makanan dan Aliran Energi",
         detail:
-          "Lakukan evaluasi usability pada sebuah aplikasi menggunakan metode SUS dan heuristic evaluation.",
+          "Gambarkan diagram jaring-jaring makanan pada ekosistem hutan dan hitung transfer energinya.",
         deadlineDays: 8,
       },
       {
-        judul: "Perancangan Antarmuka Adaptif",
+        judul: "Dampak Pencemaran Lingkungan dan Solusinya",
         detail:
-          "Rancang antarmuka adaptif yang dapat menyesuaikan dengan preferensi pengguna.",
+          "Buat artikel ulasan ilmiah mengenai dampak mikroplastik di ekosistem perairan lokal.",
         deadlineDays: 22,
       },
     ],
@@ -717,13 +715,13 @@ async function main() {
     const mk = createdMatkul[i];
     const templates = tugasTemplates[i];
     for (const tmpl of templates) {
-      for (const m of mahasiswaList) {
+      for (const s of siswaList) {
         const deadlineDate = new Date(
           today.getTime() + tmpl.deadlineDays * 24 * 3600000,
         );
         tugasData.push({
           idMataKuliah: mk.idMataKuliah,
-          nim: m.ni,
+          nis: s.ni,
           judul: tmpl.judul,
           detailTugas: tmpl.detail,
           deadlineTugas: deadlineDate,
@@ -733,11 +731,11 @@ async function main() {
   }
   await prisma.tugas.createMany({ data: tugasData });
   console.log(
-    `${tugasData.length} Tugas berhasil dibuat (2 tugas x 16 matkul x 10 mahasiswa).`,
+    `${tugasData.length} Tugas berhasil dibuat.`
   );
 
   // ══════════════════════════════════════════════
-  // 9. KUIS — 1 kuis per matkul
+  // 9. KUIS
   // ══════════════════════════════════════════════
   const createdKuis = [];
   for (let i = 0; i < createdMatkul.length; i++) {
@@ -753,11 +751,11 @@ async function main() {
     createdKuis.push(kuis);
   }
   console.log(
-    `${createdKuis.length} Kuis berhasil dibuat (1 kuis x 16 matkul).`,
+    `${createdKuis.length} Kuis berhasil dibuat.`
   );
 
   // ══════════════════════════════════════════════
-  // 10. SOAL & PILIHAN JAWABAN — 2 soal per kuis
+  // 10. SOAL & PILIHAN JAWABAN
   // ══════════════════════════════════════════════
   for (const kuis of createdKuis) {
     for (let q = 1; q <= 2; q++) {
@@ -780,11 +778,11 @@ async function main() {
     }
   }
   console.log(
-    "Soal & Pilihan Jawaban berhasil dibuat (2 soal x 4 pilihan per kuis).",
+    "Soal & Pilihan Jawaban berhasil dibuat."
   );
 
   // ══════════════════════════════════════════════
-  // 11. FORUM DISKUSI — 1 forum per mata kuliah semester 4
+  // 11. FORUM DISKUSI
   // ══════════════════════════════════════════════
   const forumCreated = [];
   const matkulSemester4 = matkulList.filter((m) => m.semester === 4);
@@ -798,7 +796,7 @@ async function main() {
         idMataKuliah: mk.idMataKuliah,
         judul: `Diskusi: ${matkulSemester4[i].nama} - Pertemuan 1`,
         isiForum: `Selamat datang di forum diskusi ${matkulSemester4[i].nama}. Silakan bertanya atau berdiskusi mengenai materi pertemuan pertama.`,
-        nomorInduk: dosenList[i].ni,
+        nomorInduk: guruList[i].ni,
       },
     });
     forumCreated.push(forum);
@@ -806,18 +804,18 @@ async function main() {
   console.log(`${forumCreated.length} Forum Diskusi berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 12. KOMENTAR FORUM — 2 komentar per forum
+  // 12. KOMENTAR FORUM
   // ══════════════════════════════════════════════
   const komentarData = [];
   for (let i = 0; i < forumCreated.length; i++) {
     komentarData.push({
-      nomorInduk: mahasiswaList[(i * 2) % 10].ni,
+      nomorInduk: siswaList[(i * 2) % 10].ni,
       idForum: forumCreated[i].idForumDiskusi,
       isiKomentar:
         "Terima kasih Pak/Bu, materinya sangat bermanfaat. Apakah ada referensi tambahan?",
     });
     komentarData.push({
-      nomorInduk: mahasiswaList[(i * 2 + 1) % 10].ni,
+      nomorInduk: siswaList[(i * 2 + 1) % 10].ni,
       idForum: forumCreated[i].idForumDiskusi,
       isiKomentar:
         "Saya ingin bertanya mengenai topik yang dibahas di slide ke-3.",
@@ -833,7 +831,7 @@ async function main() {
   for (let i = 0; i < forumCreated.length; i++) {
     for (let j = 0; j < 3; j++) {
       likeData.push({
-        nomorInduk: mahasiswaList[(i + j) % 10].ni,
+        nomorInduk: siswaList[(i + j) % 10].ni,
         idForum: forumCreated[i].idForumDiskusi,
       });
     }
@@ -842,7 +840,7 @@ async function main() {
   console.log(`${likeData.length} Like Forum berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 14. KELOMPOK — 2 kelompok per matkul
+  // 14. KELOMPOK
   // ══════════════════════════════════════════════
   const kelompokCreated = [];
   const warna = ["#4b53bc", "#2f9696", "#c47f17", "#dc2626", "#059669"];
@@ -875,7 +873,7 @@ async function main() {
   console.log(`${kelompokCreated.length} Kelompok berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 15. ANGGOTA KELOMPOK — 5 mahasiswa per kelompok
+  // 15. ANGGOTA KELOMPOK
   // ══════════════════════════════════════════════
   const anggotaData = [];
   for (let ki = 0; ki < kelompokCreated.length; ki++) {
@@ -884,7 +882,7 @@ async function main() {
     for (let j = 0; j < 5; j++) {
       anggotaData.push({
         idKelompok: k.idKelompok,
-        nim: mahasiswaList[startIdx + j].nim,
+        nis: siswaList[startIdx + j].ni,
         nilaiTugas: 75 + Math.floor(Math.random() * 20),
       });
     }
@@ -904,7 +902,7 @@ async function main() {
     for (let j = 0; j < 5; j++) {
       progressData.push({
         idMataKuliah: mk.idMataKuliah,
-        nim: mahasiswaList[j].nim,
+        nis: siswaList[j].ni,
         judul: `Progress Tugas 1 - ${matkulList[i].nama}`,
         detailTugas: "Sudah mengerjakan 50% bagian teori dan praktikum.",
         deadlineTugas: new Date(today.getTime() + 14 * 24 * 3600000),
@@ -915,7 +913,7 @@ async function main() {
   console.log(`${progressData.length} Progress Tugas berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 17. PENGUMPULAN TUGAS — beberapa mahasiswa sudah mengumpulkan
+  // 17. PENGUMPULAN TUGAS
   // ══════════════════════════════════════════════
   const tugasFromDB = await prisma.tugas.findMany();
   const pengumpulanData = [];
@@ -927,10 +925,10 @@ async function main() {
       const t = mkTugas[j];
       pengumpulanData.push({
         idTugas: t.idTugas,
-        nim: t.nim,
+        nis: t.nis,
         judul: `Submission: ${t.judul}`,
         detailTugas: "Berikut terlampir file jawaban tugas.",
-        fileJawaban: `/uploads/jawaban_${t.nim}_mk${t.idMataKuliah}.pdf`,
+        fileJawaban: `/uploads/jawaban_${t.nis}_mk${t.idMataKuliah}.pdf`,
       });
     }
   }
@@ -938,23 +936,23 @@ async function main() {
   console.log(`${pengumpulanData.length} Pengumpulan Tugas berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 18. NOTIFIKASI — beberapa notifikasi untuk user U001
+  // 18. NOTIFIKASI
   // ══════════════════════════════════════════════
   const sem4Matkul = createdMatkul.filter((m) => m.semester === 4);
   const notifData = [];
   for (const mk of sem4Matkul) {
     notifData.push({
-      nim: "2026001",
+      nis: "2026001",
       judul: "Materi Baru",
-      pesan: `Materi "Pengantar ${mk.namaMataKuliah}" untuk mata kuliah ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
+      pesan: `Materi "Pengantar ${mk.namaMataKuliah}" untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
       tipe: "materi",
       isRead: false,
       tipeRef: "materi",
     });
     notifData.push({
-      nim: "2026001",
+      nis: "2026001",
       judul: "Tugas Baru",
-      pesan: `Tugas baru telah tersedia untuk mata kuliah ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
+      pesan: `Tugas baru telah tersedia untuk mata pelajaran ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
       tipe: "tugas",
       isRead: false,
       tipeRef: "tugas",
@@ -972,16 +970,14 @@ async function main() {
   console.log("═══════════════════════════════════════════");
   console.log("");
   console.log("Ringkasan Data:");
-  console.log("  - 3 Role (Admin, Mahasiswa, Dosen)");
-  console.log("  - 5 Dosen");
-  console.log("  - 10 Mahasiswa");
-  console.log("  - 16 Mata Kuliah (4 per semester)");
-  console.log("  - 2 Tugas + 1 Kuis per matkul = 3 total per matkul");
-  console.log("  - IPK Andi (2026001) ~3.73 berdasarkan nilai sebenarnya");
+  console.log("  - 3 Role (Admin, Siswa, Guru)");
+  console.log("  - 5 Guru");
+  console.log("  - 10 Siswa");
+  console.log("  - 16 Mata Pelajaran (4 per semester)");
   console.log("");
   console.log("Akun Login:");
-  console.log("  Dosen    -> D001 / password123");
-  console.log("  Mahasiswa -> 2026001 / password123");
+  console.log("  Guru  -> D001 / password123");
+  console.log("  Siswa -> 2026001 / password123");
   console.log("");
 }
 

@@ -1,6 +1,6 @@
 import { prisma } from "../../prismaClient.js";
 export class PrismaModulAjarRepository {
-async findAllByDosen(filterMatkul, filterTipe, nipDosen) {
+async findAllByGuru(filterMatkul, filterTipe, nipGuru) {
     const where = {};
     if (filterMatkul && filterMatkul !== "Semua") {
         where.idMataKuliah = parseInt(filterMatkul);
@@ -8,8 +8,8 @@ async findAllByDosen(filterMatkul, filterTipe, nipDosen) {
     if (filterTipe && filterTipe !== "Semua") {
         where.tipe_modul = filterTipe;
     }
-    if (nipDosen) {
-        where.mataKuliah = { nipDosen: nipDosen };
+    if (nipGuru) {
+        where.mataKuliah = { nipGuru: nipGuru };
     }
 
     return await prisma.modulAjar.findMany({
@@ -34,7 +34,7 @@ async create(data) {
         }
     });
 
-    // Kirim notifikasi ke semua mahasiswa yang terkait
+    // Kirim notifikasi ke semua siswa yang terkait
     try {
         const relatedData = await prisma.nilai.findMany({
             where: { idMataKuliah: parseInt(data.idMataKuliah) },
@@ -42,18 +42,18 @@ async create(data) {
         });
         const relatedNomorInduk = [...new Set(relatedData.map(r => r.nomorInduk))];
         if (relatedNomorInduk.length > 0) {
-            const mahasiswas = await prisma.mahasiswa.findMany({
+            const siswas = await prisma.siswa.findMany({
                 where: { nomorInduk: { in: relatedNomorInduk } },
-                select: { nim: true }
+                select: { nis: true }
             });
-            const relatedNIMs = mahasiswas.map(m => m.nim);
-            if (relatedNIMs.length > 0) {
+            const relatedNISs = siswas.map(m => m.nis);
+            if (relatedNISs.length > 0) {
                 const mataKuliah = await prisma.mataKuliah.findUnique({
                     where: { idMataKuliah: parseInt(data.idMataKuliah) }
                 });
                 await prisma.notifikasi.createMany({
-                    data: relatedNIMs.map(nim => ({
-                        nim,
+                    data: relatedNISs.map(nis => ({
+                        nis,
                         judul: 'Materi Baru',
                         pesan: `Materi "${data.judul}" untuk mata kuliah ${mataKuliah?.namaMataKuliah || 'ini'} telah tersedia. Silakan dipelajari!`,
                         tipe: 'materi',
@@ -61,7 +61,7 @@ async create(data) {
                         tipeRef: 'materi'
                     }))
                 });
-                console.log(`Notifikasi Materi dikirim ke ${relatedNIMs.length} mahasiswa`);
+                console.log(`Notifikasi Materi dikirim ke ${relatedNISs.length} siswa`);
             }
         }
     } catch (e) {

@@ -12,9 +12,9 @@ export class PrismaUserRepository {
     });
   }
 
-  // Menghitung jumlah mahasiswa untuk menentukan urutan NIM
-  async countMahasiswa() {
-    return await prisma.mahasiswa.count();
+  // Menghitung jumlah siswa untuk menentukan urutan NIS
+  async countSiswa() {
+    return await prisma.siswa.count();
   }
 
   async createWithProfile(userData, profileData, roleType) {
@@ -24,15 +24,15 @@ export class PrismaUserRepository {
         const user = await tx.user.create({ data: userData });
 
         // 2. Buat Profil berdasarkan Role
-        if (roleType === 'MAHASISWA') {
-          await tx.mahasiswa.create({
+        if (roleType === 'SISWA') {
+          await tx.siswa.create({
             data: {
-              nim: profileData.nim,
+              nis: profileData.nis,
               nomorInduk: user.nomorInduk
             }
           });
-        } else if (roleType === 'DOSEN') {
-          await tx.dosen.create({
+        } else if (roleType === 'GURU') {
+          await tx.guru.create({
             data: {
               nip: profileData.nip,
               nomorInduk: user.nomorInduk
@@ -72,31 +72,31 @@ export class PrismaUserRepository {
   async findByNomorInduk(nomorInduk) {
     return await prisma.user.findUnique({
       where: { nomorInduk },
-      include: { role: true, dosen: true, mahasiswa: true }
+      include: { role: true, guru: true, siswa: true }
     });
   }
 
   async findByEmail(email) {
     return await prisma.user.findUnique({
       where: { email },
-      include: { role: true, dosen: true, mahasiswa: true }
+      include: { role: true, guru: true, siswa: true }
     });
   }
 
-  async findByNim(nim) {
-    const mahasiswa = await prisma.mahasiswa.findUnique({
-      where: { nim },
+  async findByNis(nis) {
+    const siswa = await prisma.siswa.findUnique({
+      where: { nis },
       include: {
         user: {
           include: { role: true }
         }
       }
     });
-    return mahasiswa ? mahasiswa.user : null;
+    return siswa ? siswa.user : null;
   }
 
   async findByNip(nip) {
-    const dosen = await prisma.dosen.findUnique({
+    const guru = await prisma.guru.findUnique({
       where: { nip },
       include: {
         user: {
@@ -104,7 +104,7 @@ export class PrismaUserRepository {
         }
       }
     });
-    return dosen ? dosen.user : null;
+    return guru ? guru.user : null;
   }
 
   async update(nomorInduk, data) {
@@ -113,8 +113,8 @@ export class PrismaUserRepository {
       data: data,
       include: {
         role: true, // Kembalikan info role setelah update
-        mahasiswa: true,
-        dosen: true
+        siswa: true,
+        guru: true
       }
     });
   }

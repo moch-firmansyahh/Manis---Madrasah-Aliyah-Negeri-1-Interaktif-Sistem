@@ -8,11 +8,11 @@ const FAQ_DATA = {
     items: [
       {
         icon: "school",
-        question: "Apa itu LeMaS (Learning Management System)?",
+        question: "Apa itu Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)?",
         answer: (
           <>
             <p>
-              LeMaS adalah platform pengelolaan pembelajaran digital yang digunakan oleh dosen dan mahasiswa untuk
+              Manis adalah platform pengelolaan pembelajaran digital yang digunakan oleh guru dan siswa untuk
               mendukung kegiatan akademik, meliputi:
             </p>
             <ul>
@@ -27,24 +27,24 @@ const FAQ_DATA = {
       },
       {
         icon: "person",
-        question: "Siapa saja yang bisa menggunakan LeMaS?",
+        question: "Siapa saja yang bisa menggunakan Manis?",
         answer: (
           <p>
-            LeMaS dapat digunakan oleh <strong>Dosen</strong> dan <strong>Mahasiswa</strong> yang terdaftar di
+            Manis dapat digunakan oleh <strong>Guru</strong> dan <strong>Siswa</strong> yang terdaftar di
             sistem akademik kampus. Akun dibuat oleh administrator dan tidak dapat didaftarkan sendiri.
           </p>
         ),
       },
       {
         icon: "lock",
-        question: "Bagaimana cara login ke LeMaS?",
+        question: "Bagaimana cara login ke Manis?",
         answer: (
           <>
-            <p>Untuk login ke LeMaS:</p>
+            <p>Untuk login ke Manis:</p>
             <ol>
-              <li>Buka halaman login LeMaS.</li>
-              <li>Pilih peran: <strong>Mahasiswa</strong> atau <strong>Dosen</strong>.</li>
-              <li>Masukkan <strong>Nomor Induk</strong> (NIM untuk mahasiswa / NIP/ID untuk dosen).</li>
+              <li>Buka halaman login Manis.</li>
+              <li>Pilih peran: <strong>Siswa</strong> atau <strong>Guru</strong>.</li>
+              <li>Masukkan <strong>Nomor Induk</strong> (NIS untuk siswa / NIP/ID untuk guru).</li>
               <li>Masukkan <strong>Kata Sandi</strong> yang diberikan oleh administrator.</li>
               <li>Klik tombol <strong>Masuk</strong>.</li>
             </ol>
@@ -53,8 +53,8 @@ const FAQ_DATA = {
       },
     ],
   },
-  mahasiswa: {
-    label: "Mahasiswa",
+  siswa: {
+    label: "Siswa",
     icon: "menu_book",
     items: [
       {
@@ -83,7 +83,7 @@ const FAQ_DATA = {
               <li>Masuk ke menu <strong>Presensi</strong>.</li>
               <li>Pilih mata kuliah yang sedang berlangsung.</li>
               <li>Klik <strong>Pindai QR Code</strong> dan izinkan akses kamera.</li>
-              <li>Arahkan kamera ke QR Code yang ditampilkan dosen.</li>
+              <li>Arahkan kamera ke QR Code yang ditampilkan guru.</li>
               <li>Atau masukkan kode secara manual jika tidak bisa memindai.</li>
             </ol>
             <p>
@@ -100,7 +100,7 @@ const FAQ_DATA = {
           <>
             <p>
               Nilai dapat dilihat di menu <strong>Nilai</strong> pada sidebar. Di sana kamu bisa melihat
-              rincian nilai tugas, UTS, UAS, dan nilai akhir per mata kuliah yang sudah diinputkan dosen.
+              rincian nilai tugas, UTS, UAS, dan nilai akhir per mata kuliah yang sudah diinputkan guru.
             </p>
             <p>
               Tersedia juga fitur <strong>Unduh Transkrip</strong> untuk mencetak atau menyimpan rekap nilai
@@ -128,7 +128,7 @@ const FAQ_DATA = {
         question: "Bagaimana cara mengerjakan Kuis Online?",
         answer: (
           <>
-            <p>Untuk mengerjakan kuis online yang ditugaskan dosen:</p>
+            <p>Untuk mengerjakan kuis online yang ditugaskan guru:</p>
             <ol>
               <li>Masuk ke menu <strong>Tugas</strong>.</li>
               <li>Pilih kuis di tab <strong>Belum Dikerjakan</strong>.</li>
@@ -142,8 +142,8 @@ const FAQ_DATA = {
       },
     ],
   },
-  dosen: {
-    label: "Dosen",
+  guru: {
+    label: "Guru",
     icon: "co_present",
     items: [
       {
@@ -171,19 +171,19 @@ const FAQ_DATA = {
               <li>Pilih mata kuliah.</li>
               <li>Klik <strong>Buka Sesi</strong> atau <strong>Pilih Tanggal</strong> untuk tanggal tertentu.</li>
               <li>QR Code akan otomatis muncul dan berlaku selama <strong>15 menit</strong>.</li>
-              <li>Tampilkan QR Code kepada mahasiswa untuk dipindai.</li>
+              <li>Tampilkan QR Code kepada siswa untuk dipindai.</li>
             </ol>
-            <p>Status kehadiran mahasiswa akan diperbarui secara real-time setelah mereka memindai.</p>
+            <p>Status kehadiran siswa akan diperbarui secara real-time setelah mereka memindai.</p>
           </>
         ),
       },
       {
         icon: "fact_check",
-        question: "Bagaimana cara mengubah status kehadiran mahasiswa secara manual?",
+        question: "Bagaimana cara mengubah status kehadiran siswa secara manual?",
         answer: (
           <>
             <p>
-              Di halaman Presensi, pada tabel daftar hadir, setiap baris mahasiswa memiliki
+              Di halaman Presensi, pada tabel daftar hadir, setiap baris siswa memiliki
               dropdown <strong>Status</strong>. Klik dropdown tersebut dan pilih status yang sesuai:
               <strong> Hadir, Sakit, Izin, atau Alpa</strong>. Perubahan langsung tersimpan.
             </p>
@@ -192,18 +192,18 @@ const FAQ_DATA = {
       },
       {
         icon: "assignment_turned_in",
-        question: "Bagaimana cara memberi nilai tugas individu mahasiswa?",
+        question: "Bagaimana cara memberi nilai tugas individu siswa?",
         answer: (
           <>
             <ol>
               <li>Masuk ke menu <strong>Nilai Individu</strong> di sidebar.</li>
               <li>Pilih <strong>Mata Kuliah</strong> dari dropdown.</li>
               <li>Pilih <strong>Tugas</strong> spesifik yang ingin dinilai.</li>
-              <li>Daftar seluruh mahasiswa akan tampil beserta status pengumpulan (Sudah Kumpul / Belum Kumpul).</li>
-              <li>Klik tombol <strong>Nilai</strong> di baris mahasiswa yang sudah mengumpulkan.</li>
+              <li>Daftar seluruh siswa akan tampil beserta status pengumpulan (Sudah Kumpul / Belum Kumpul).</li>
+              <li>Klik tombol <strong>Nilai</strong> di baris siswa yang sudah mengumpulkan.</li>
               <li>Masukkan nilai (0–100) lalu klik <strong>Simpan</strong>.</li>
             </ol>
-            <p>Kamu bisa filter mahasiswa berdasarkan status: <strong>Semua</strong>, <strong>Sudah Kumpul</strong>, atau <strong>Belum Kumpul</strong>. Tombol nilai hanya aktif untuk mahasiswa yang sudah mengumpulkan.</p>
+            <p>Kamu bisa filter siswa berdasarkan status: <strong>Semua</strong>, <strong>Sudah Kumpul</strong>, atau <strong>Belum Kumpul</strong>. Tombol nilai hanya aktif untuk siswa yang sudah mengumpulkan.</p>
           </>
         ),
       },
@@ -220,23 +220,23 @@ const FAQ_DATA = {
               <li>Klik ikon <strong>Tong Sampah Merah (Hapus Kelompok)</strong> di sebelah kanan status kelompok pada header kartu kelompok.</li>
               <li>Akan muncul modal konfirmasi danger berwarna merah lembut. Konfirmasi tindakan dengan mengklik <strong>Hapus Kelompok</strong>.</li>
             </ol>
-            <p><strong>Peringatan:</strong> Menghapus kelompok bersifat permanen dan akan menghapus seluruh data keanggotaan mahasiswa di dalam kelompok tersebut (Cascade Delete) secara bersih dari database.</p>
+            <p><strong>Peringatan:</strong> Menghapus kelompok bersifat permanen dan akan menghapus seluruh data keanggotaan siswa di dalam kelompok tersebut (Cascade Delete) secara bersih dari database.</p>
           </>
         ),
       },
       {
         icon: "quiz",
-        question: "Bagaimana cara melihat nilai kuis online mahasiswa?",
+        question: "Bagaimana cara melihat nilai kuis online siswa?",
         answer: (
           <>
-            <p>Untuk memantau skor kuis online mahasiswa:</p>
+            <p>Untuk memantau skor kuis online siswa:</p>
             <ol>
               <li>Masuk ke menu <strong>Tugas</strong>.</li>
               <li>Cari tugas kuis yang ingin dipantau.</li>
-              <li>Klik tombol <strong>Lihat Nilai</strong> (tombol ini khusus tampil untuk tipe tugas kuis setelah mahasiswa mengerjakan).</li>
-              <li>Anda akan langsung diarahkan ke halaman <strong>Nilai Individu</strong> yang menyajikan rekap skor kuis mahasiswa secara otomatis.</li>
+              <li>Klik tombol <strong>Lihat Nilai</strong> (tombol ini khusus tampil untuk tipe tugas kuis setelah siswa mengerjakan).</li>
+              <li>Anda akan langsung diarahkan ke halaman <strong>Nilai Individu</strong> yang menyajikan rekap skor kuis siswa secara otomatis.</li>
             </ol>
-            <p><strong>Catatan:</strong> Nilai kuis ini dihitung otomatis oleh sistem berdasarkan jawaban pilihan ganda yang benar, dan bersifat 🔒 <strong>Permanen / Read-only</strong> (tidak dapat diedit secara manual oleh dosen demi menjaga keaslian nilai kuis).</p>
+            <p><strong>Catatan:</strong> Nilai kuis ini dihitung otomatis oleh sistem berdasarkan jawaban pilihan ganda yang benar, dan bersifat 🔒 <strong>Permanen / Read-only</strong> (tidak dapat diedit secara manual oleh guru demi menjaga keaslian nilai kuis).</p>
           </>
         ),
       },
@@ -258,10 +258,10 @@ const FAQ_DATA = {
       },
       {
         icon: "browser_not_supported",
-        question: "Browser apa yang direkomendasikan untuk LeMaS?",
+        question: "Browser apa yang direkomendasikan untuk Manis?",
         answer: (
           <p>
-            LeMaS direkomendasikan menggunakan browser versi terbaru dari <strong>Google Chrome</strong>,
+            Manis direkomendasikan menggunakan browser versi terbaru dari <strong>Google Chrome</strong>,
             <strong> Mozilla Firefox</strong>, atau <strong>Microsoft Edge</strong>. Izinkan akses kamera
             di browser untuk menggunakan fitur presensi QR Code.
           </p>
@@ -269,11 +269,11 @@ const FAQ_DATA = {
       },
       {
         icon: "phone_android",
-        question: "Apakah LeMaS bisa diakses melalui ponsel?",
+        question: "Apakah Manis bisa diakses melalui ponsel?",
         answer: (
           <p>
-            Ya, LeMaS dapat diakses melalui browser di ponsel. Fitur pemindaian QR Code pada halaman presensi
-            mahasiswa membutuhkan izin kamera di browser.
+            Ya, Manis dapat diakses melalui browser di ponsel. Fitur pemindaian QR Code pada halaman presensi
+            siswa membutuhkan izin kamera di browser.
           </p>
         ),
       },
@@ -305,7 +305,7 @@ export default function FAQ() {
           </div>
           <h1 className="faq-title">Pertanyaan yang Sering Diajukan</h1>
           <p className="faq-subtitle">
-            Temukan jawaban atas pertanyaan umum seputar penggunaan LeMaS.
+            Temukan jawaban atas pertanyaan umum seputar penggunaan Manis.
           </p>
         </div>
 

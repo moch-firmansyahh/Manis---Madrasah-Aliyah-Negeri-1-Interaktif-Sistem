@@ -14,19 +14,19 @@ function getEndOfDayUTC() {
 export class PrismaPresensiRepository {
   
   /**
-   * Mengambil daftar hadir mahasiswa untuk ditampilkan di Dashboard Dosen (presensi.jsx)
-   * Mengembalikan daftar mahasiswa UNIK yang terdaftar di mata kuliah tersebut
+   * Mengambil daftar hadir siswa untuk ditampilkan di Dashboard Guru (presensi.jsx)
+   * Mengembalikan daftar siswa UNIK yang terdaftar di mata kuliah tersebut
    * @param {number} idMataKuliah 
    */
-  async getDaftarHadirMahasiswa(idMataKuliah) {
-    // 1. Ambil daftar mahasiswa UNIK yang terdaftar di mata kuliah ini
+  async getDaftarHadirSiswa(idMataKuliah) {
+    // 1. Ambil daftar siswa UNIK yang terdaftar di mata kuliah ini
     // dari berbagai sumber: nilai, presensi, kelompok, tugas
     const mataKuliah = await prisma.mataKuliah.findUnique({
       where: { idMataKuliah: idMataKuliah },
       include: {
         nilai: {
           include: {
-            mahasiswa: {
+            siswa: {
               include: {
                 user: { select: { nama: true } }
               }
@@ -35,7 +35,7 @@ export class PrismaPresensiRepository {
         },
         presensi: {
           include: {
-            mahasiswa: {
+            siswa: {
               include: {
                 user: { select: { nama: true } }
               }
@@ -46,7 +46,7 @@ export class PrismaPresensiRepository {
           include: {
             anggota: {
               include: {
-                mahasiswa: {
+                siswa: {
                   include: {
                     user: { select: { nama: true } }
                   }
@@ -58,56 +58,56 @@ export class PrismaPresensiRepository {
       }
     });
 
-    // 2. Kumpulkan semua mahasiswa unik dalam Map (key: nim)
-    const mahasiswaMap = new Map();
+    // 2. Kumpulkan semua siswa unik dalam Map (key: nis)
+    const siswaMap = new Map();
     
     // Dari nilai
     mataKuliah?.nilai?.forEach(n => {
-      if (n.mahasiswa) {
-        mahasiswaMap.set(n.mahasiswa.nim, n.mahasiswa);
+      if (n.siswa) {
+        siswaMap.set(n.siswa.nis, n.siswa);
       }
     });
     
     // Dari presensi
     mataKuliah?.presensi?.forEach(p => {
-      if (p.mahasiswa) {
-        mahasiswaMap.set(p.mahasiswa.nim, p.mahasiswa);
+      if (p.siswa) {
+        siswaMap.set(p.siswa.nis, p.siswa);
       }
     });
     
     // Dari kelompok
     mataKuliah?.kelompok?.forEach(k => {
       k.anggota?.forEach(a => {
-        if (a.mahasiswa) {
-          mahasiswaMap.set(a.mahasiswa.nim, a.mahasiswa);
+        if (a.siswa) {
+          siswaMap.set(a.siswa.nis, a.siswa);
         }
       });
     });
 
-    // 3. Jika belum ada mahasiswa terdaftar, ambil semua mahasiswa dari sistem
+    // 3. Jika belum ada siswa terdaftar, ambil semua siswa dari sistem
     // sebagai fallback (untuk presensi pertama kali)
-    if (mahasiswaMap.size === 0) {
-      const allMahasiswa = await prisma.mahasiswa.findMany({
+    if (siswaMap.size === 0) {
+      const allSiswa = await prisma.siswa.findMany({
         include: { user: { select: { nama: true } } }
       });
-      allMahasiswa.forEach(m => {
-        mahasiswaMap.set(m.nim, m);
+      allSiswa.forEach(m => {
+        siswaMap.set(m.nis, m);
       });
     }
 
-    // 4. Ambil presensi terbaru untuk setiap mahasiswa di mata kuliah ini
+    // 4. Ambil presensi terbaru untuk setiap siswa di mata kuliah ini
     const today = getStartOfDayUTC();
     const tomorrow = getEndOfDayUTC();
 
-    const mahasiswaList = Array.from(mahasiswaMap.values());
+    const siswaList = Array.from(siswaMap.values());
     
-    // 4. Untuk setiap mahasiswa, ambil presensi terbaru (hari ini atau terakhir)
+    // 4. Untuk setiap siswa, ambil presensi terbaru (hari ini atau terakhir)
     const result = await Promise.all(
-      mahasiswaList.map(async (mhs, index) => {
+      siswaList.map(async (mhs, index) => {
         // Cari presensi untuk HARI INI (sama seperti logic scan QR)
         const presensiTerbaru = await prisma.presensi.findFirst({
           where: {
-            nim: mhs.nim,
+            nis: mhs.nis,
             idMataKuliah: idMataKuliah,
             tanggalPertemuan: {
               gte: today,
@@ -125,8 +125,8 @@ export class PrismaPresensiRepository {
         const randomColor = colors[index % colors.length];
 
         return {
-          id: presensiTerbaru?.idPresensi || `${mhs.nim}-${Date.now()}`,
-          nim: mhs.nim,
+          id: presensiTerbaru?.idPresensi || `${mhs.nis}-${Date.now()}`,
+          nis: mhs.nis,
           name: mhs.user?.nama || 'Unknown',
           initials: initials,
           color: randomColor,
@@ -137,12 +137,12 @@ export class PrismaPresensiRepository {
       })
     );
 
-    // 5. Urutkan berdasarkan NIM
-    return result.sort((a, b) => a.nim.localeCompare(b.nim));
+    // 5. Urutkan berdasarkan NIS
+    return result.sort((a, b) => a.nis.localeCompare(b.nis));
   }
 
   /**
-   * Mengubah status absensi mahasiswa secara manual (Dosen mengubah lewat UI)
+   * Mengubah status absensi siswa secara manual (Guru mengubah lewat UI)
    * @param {number} idPresensi 
    * @param {string} statusKehadiran ('Hadir', 'Izin', 'Sakit', 'Alpha')
    */
@@ -154,20 +154,20 @@ export class PrismaPresensiRepository {
   }
 
   /**
-   * Update atau buat presensi untuk mahasiswa berdasarkan NIM dan mata kuliah
+   * Update atau buat presensi untuk siswa berdasarkan NIS dan mata kuliah
    * Jika belum ada presensi hari ini, buat baru
-   * @param {string} nim 
+   * @param {string} nis 
    * @param {number} idMataKuliah 
    * @param {string} statusKehadiran 
    */
-  async updateStatusByNim(nim, idMataKuliah, statusKehadiran) {
-    // Cari presensi hari ini untuk mahasiswa ini (pakai UTC helper)
+  async updateStatusByNis(nis, idMataKuliah, statusKehadiran) {
+    // Cari presensi hari ini untuk siswa ini (pakai UTC helper)
     const today = getStartOfDayUTC();
     const tomorrow = getEndOfDayUTC();
 
     let presensiHariIni = await prisma.presensi.findFirst({
       where: {
-        nim: nim,
+        nis: nis,
         idMataKuliah: idMataKuliah,
         tanggalPertemuan: {
           gte: today,
@@ -189,7 +189,7 @@ export class PrismaPresensiRepository {
       // Buat presensi baru untuk hari ini dengan tanggal UTC yang konsisten
       return await prisma.presensi.create({
         data: {
-          nim: nim,
+          nis: nis,
           idMataKuliah: idMataKuliah,
           tanggalPertemuan: today,  // Pakai today UTC yang sama
           waktuPresensi: new Date(),
@@ -200,27 +200,27 @@ export class PrismaPresensiRepository {
   }
 
   /**
-   * Menandai status kehadiran menjadi "Hadir" saat Mahasiswa melakukan Scan QR Code
-   * @param {string} nim 
+   * Menandai status kehadiran menjadi "Hadir" saat Siswa melakukan Scan QR Code
+   * @param {string} nis 
    * @param {number} idMataKuliah 
    */
-  async markAsHadir(nim, idMataKuliah, tokenScan) {
-    // Validasi nim ada di tabel mahasiswa
-    const mahasiswa = await prisma.mahasiswa.findUnique({
-      where: { nim: nim }
+  async markAsHadir(nis, idMataKuliah, tokenScan) {
+    // Validasi nis ada di tabel siswa
+    const siswa = await prisma.siswa.findUnique({
+      where: { nis: nis }
     });
 
-    if (!mahasiswa) {
-      throw new Error('Data mahasiswa tidak ditemukan. Silakan login ulang.');
+    if (!siswa) {
+      throw new Error('Data siswa tidak ditemukan. Silakan login ulang.');
     }
 
-    // Cari record presensi HARI INI untuk mahasiswa ini di mata kuliah ini
+    // Cari record presensi HARI INI untuk siswa ini di mata kuliah ini
     const today = getStartOfDayUTC();
     const tomorrow = getEndOfDayUTC();
 
     let presensiSesiIni = await prisma.presensi.findFirst({
       where: {
-        nim: nim,
+        nis: nis,
         idMataKuliah: idMataKuliah,
         tanggalPertemuan: {
           gte: today,
@@ -236,7 +236,7 @@ export class PrismaPresensiRepository {
     if (!presensiSesiIni) {
       presensiSesiIni = await prisma.presensi.create({
         data: {
-          nim: nim,
+          nis: nis,
           idMataKuliah: idMataKuliah,
           tanggalPertemuan: today,  // Pakai today UTC yang sama
           waktuPresensi: new Date(),
@@ -257,18 +257,18 @@ export class PrismaPresensiRepository {
     return updated;
   }
 
-  async getRiwayatKehadiran(nim, idMataKuliah) {
+  async getRiwayatKehadiran(nis, idMataKuliah) {
     return await prisma.presensi.findMany({
-      where: { nim, idMataKuliah },
+      where: { nis, idMataKuliah },
       orderBy: { tanggalPertemuan: 'desc' }
     });
   }
 
   async buatSesiPresensi(idMataKuliah) {
-    const semuaMahasiswa = await prisma.mahasiswa.findMany();
+    const semuaSiswa = await prisma.siswa.findMany();
     
-    if (semuaMahasiswa.length === 0) {
-      throw new Error('Tidak ada mahasiswa yang terdaftar');
+    if (semuaSiswa.length === 0) {
+      throw new Error('Tidak ada siswa yang terdaftar');
     }
 
     const today = new Date();
@@ -290,8 +290,8 @@ export class PrismaPresensiRepository {
       return { message: 'Sesi sudah ada untuk hari ini' };
     }
 
-    const createMany = semuaMahasiswa.map(m => ({
-      nim: m.nim,
+    const createMany = semuaSiswa.map(m => ({
+      nis: m.nis,
       idMataKuliah: idMataKuliah,
       tanggalPertemuan: new Date(),
       statusKehadiran: 'Alpha'
@@ -301,6 +301,6 @@ export class PrismaPresensiRepository {
       data: createMany
     });
 
-    return { message: 'Sesi presensi berhasil dibuat', count: semuaMahasiswa.length };
+    return { message: 'Sesi presensi berhasil dibuat', count: semuaSiswa.length };
   }
 }

@@ -14,11 +14,11 @@ export class NilaiController {
     }
   }
 
-  async getByMahasiswa(req, res) {
+  async getBySiswa(req, res) {
     try {
-      const nim = req.user?.nomorInduk || req.query.nim;
+      const nis = req.user?.nomorInduk || req.query.nis;
       const { idMataKuliah } = req.params;
-      const result = await this.nilaiUseCase.getNilaiMahasiswa(nim, idMataKuliah);
+      const result = await this.nilaiUseCase.getNilaiSiswa(nis, idMataKuliah);
       res.json(result);
     } catch (error) {
       res.status(404).json({ error: error.message });

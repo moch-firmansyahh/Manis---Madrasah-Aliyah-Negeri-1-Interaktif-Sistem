@@ -2,7 +2,7 @@ import logoImg from "../assets/logo.png";
 import "./shared.css";
 
 export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogout, mobileOpen, onClose }) {
-  var presRoute = presensiRoute || "presensiMahasiswa";
+  var presRoute = presensiRoute || "presensiSiswa";
 
   function nav(page) {
     if (onNavigate) onNavigate(page);
@@ -13,7 +13,7 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
     if (key === "daftarMataKuliah" && activePage === "mataKuliah") return true;
     if (
       key === "presensi" &&
-      (activePage === "presensi" || activePage === "presensiMahasiswa")
+      (activePage === "presensi" || activePage === "presensiSiswa")
     )
       return true;
     return activePage === key;
@@ -38,11 +38,11 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
 
         <div className="sidebar__brand">
           <div className="sidebar__logo" style={{ background: 'transparent', boxShadow: 'none', width: 'auto', height: 'auto' }}>
-            <img src={logoImg} alt="LeMaS" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+            <img src={logoImg} alt="Manis" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
           </div>
           <div>
-            <p className="sidebar__app-name">LeMaS</p>
-            <p className="sidebar__app-sub">Learning Management System</p>
+            <p className="sidebar__app-name">Manis</p>
+            <p className="sidebar__app-sub">Madrasah Aliyah Negeri 1 Interaktif Sistem</p>
           </div>
         </div>
 

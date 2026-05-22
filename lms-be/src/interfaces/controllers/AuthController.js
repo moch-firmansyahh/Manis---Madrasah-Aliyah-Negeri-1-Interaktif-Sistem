@@ -5,15 +5,15 @@ export class AuthController {
 
   async login(req, res) {
     try {
-      // 1. Accept multiple identifier types: email, nim, nip, or nomorInduk
-      const { email, nim, nip, nomorInduk, password, role } = req.body;
+      // 1. Accept multiple identifier types: email, nis, nip, or nomorInduk
+      const { email, nis, nip, nomorInduk, password, role } = req.body;
 
-      // 2. Validasi input kosong - support email, nim, nip, atau nomorInduk
-      const identifier = email || nim || nip || nomorInduk;
+      // 2. Validasi input kosong - support email, nis, nip, atau nomorInduk
+      const identifier = email || nis || nip || nomorInduk;
       if (!identifier || !password) {
         return res.status(400).json({
           status: 'error',
-          message: 'Email, NIM, NIP, atau Nomor Induk dan Password harus diisi.'
+          message: 'Email, NIS, NIP, atau Nomor Induk dan Password harus diisi.'
         });
       }
 

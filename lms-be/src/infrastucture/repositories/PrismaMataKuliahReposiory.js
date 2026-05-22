@@ -10,7 +10,7 @@ export class PrismaMataKuliahRepository {
   async findAll() {
     return await prisma.mataKuliah.findMany({
       include: {
-        dosen: {
+        guru: {
           include: { user: { select: { nama: true } } }
         }
       },
@@ -18,11 +18,11 @@ export class PrismaMataKuliahRepository {
     });
   }
 
-  async findByDosen(nipDosen) {
+  async findByGuru(nipGuru) {
     return await prisma.mataKuliah.findMany({
-      where: { nipDosen },
+      where: { nipGuru },
       include: {
-        dosen: {
+        guru: {
           include: { user: { select: { nama: true } } }
         }
       },
@@ -30,19 +30,19 @@ export class PrismaMataKuliahRepository {
     });
   }
 
-  async findByNim(nim) {
-    // Mata kuliah yang diikuti mahasiswa, melalui relasi Nilai, Presensi, Tugas, atau Kelompok
+  async findByNis(nis) {
+    // Mata kuliah yang diikuti siswa, melalui relasi Nilai, Presensi, Tugas, atau Kelompok
     const courses = await prisma.mataKuliah.findMany({
       where: {
         OR: [
-          { nilai: { some: { nomorInduk: nim } } },
-          { presensi: { some: { nim: nim } } },
-          { tugas: { some: { nim: nim } } },
-          { kelompok: { some: { anggota: { some: { nim: nim } } } } }
+          { nilai: { some: { nomorInduk: nis } } },
+          { presensi: { some: { nis: nis } } },
+          { tugas: { some: { nis: nis } } },
+          { kelompok: { some: { anggota: { some: { nis: nis } } } } }
         ],
       },
       include: {
-        dosen: {
+        guru: {
           include: { user: { select: { nama: true } } }
         }
       },
@@ -60,7 +60,7 @@ export class PrismaMataKuliahRepository {
     return await prisma.mataKuliah.findUnique({
       where: { idMataKuliah: parseInt(id) },
       include: {
-        dosen: {
+        guru: {
           include: { user: { select: { nama: true, email: true } } }
         }
       }

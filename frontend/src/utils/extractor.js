@@ -66,7 +66,7 @@ export async function generateQuizFromText(text, apiKey) {
     "gemini-2.5-pro",
   ];
 
-  const prompt = `Anda adalah asisten dosen yang ahli dalam membuat kuis. 
+  const prompt = `Anda adalah asisten guru yang ahli dalam membuat kuis. 
 Tugas Anda adalah mengekstrak teks berikut yang berasal dari dokumen materi/soal ujian, dan mengubahnya menjadi array JSON soal pilihan ganda.
 Aturan:
 1. Analisis teks dan buat pertanyaan yang masuk akal berdasarkan informasi tersebut. Jika teks sudah berisi soal, format ulang soal tersebut.

@@ -14,7 +14,7 @@ export class AuthUseCase {
     } else if (identifier.match(/^U\d+$/)) {
       user = await this.userRepository.findByNomorInduk(identifier);
     } else if (identifier.match(/^\d{7}$/)) {
-      user = await this.userRepository.findByNim(identifier);
+      user = await this.userRepository.findByNis(identifier);
     } else if (identifier.match(/^\d{18}$/)) {
       user = await this.userRepository.findByNip(identifier);
     } else {
@@ -37,8 +37,8 @@ export class AuthUseCase {
       role: user.role.nama 
     };
     
-    if (user.dosen) payload.dosen = { nip: user.dosen.nip };
-    if (user.mahasiswa) payload.mahasiswa = { nim: user.mahasiswa.nim };
+    if (user.guru) payload.guru = { nip: user.guru.nip };
+    if (user.siswa) payload.siswa = { nis: user.siswa.nis };
 
     // 4. Generate Token JWT
     const token = jwt.sign(
@@ -56,8 +56,8 @@ export class AuthUseCase {
         telepon: user.telepon,
         fotoUrl: user.fotoUrl,
         role: user.role.nama,
-        dosen: user.dosen,
-        mahasiswa: user.mahasiswa
+        guru: user.guru,
+        siswa: user.siswa
       }
     };
   }

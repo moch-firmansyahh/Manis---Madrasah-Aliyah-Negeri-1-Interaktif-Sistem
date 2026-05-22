@@ -4,7 +4,7 @@ import { apiClient } from "../../../utils/apiClient";
 import logoImg from "../../../assets/logo.png";
 
 function Login({ onLogin, onFaq }) {
-  const [role, setRole] = useState("Mahasiswa");
+  const [role, setRole] = useState("Siswa");
   const [showPassword, setShowPassword] = useState(false);
   const [nomorInduk, setNomorInduk] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +49,7 @@ function Login({ onLogin, onFaq }) {
       sections: [
         {
           heading: "Data yang Kami Kumpulkan",
-          body: "Kami mengumpulkan data yang diperlukan untuk keperluan akademik, meliputi: nama lengkap, nomor induk (NIM/NIP), alamat email, nomor telepon, serta data aktivitas pembelajaran seperti catatan presensi, nilai, dan pengumpulan tugas.",
+          body: "Kami mengumpulkan data yang diperlukan untuk keperluan akademik, meliputi: nama lengkap, nomor induk (NIS/NIP), alamat email, nomor telepon, serta data aktivitas pembelajaran seperti catatan presensi, nilai, dan pengumpulan tugas.",
         },
         {
           heading: "Tujuan Penggunaan Data",
@@ -71,7 +71,7 @@ function Login({ onLogin, onFaq }) {
       sections: [
         {
           heading: "Kepemilikan Akun",
-          body: "Akun LeMaS bersifat pribadi dan tidak boleh dipinjamkan, dibagikan, atau digunakan oleh orang lain. Pengguna bertanggung jawab penuh atas seluruh aktivitas yang dilakukan menggunakan akunnya.",
+          body: "Akun Manis bersifat pribadi dan tidak boleh dipinjamkan, dibagikan, atau digunakan oleh orang lain. Pengguna bertanggung jawab penuh atas seluruh aktivitas yang dilakukan menggunakan akunnya.",
         },
         {
           heading: "Penggunaan yang Dilarang",
@@ -83,7 +83,7 @@ function Login({ onLogin, onFaq }) {
         },
         {
           heading: "Konten & Hak Cipta",
-          body: "Seluruh materi perkuliahan yang diunggah oleh dosen merupakan hak cipta institusi dan/atau pengajar yang bersangkutan. Dilarang mendistribusikan materi di luar platform tanpa izin tertulis.",
+          body: "Seluruh materi perkuliahan yang diunggah oleh guru merupakan hak cipta institusi dan/atau pengajar yang bersangkutan. Dilarang mendistribusikan materi di luar platform tanpa izin tertulis.",
         },
         {
           heading: "Sanksi Pelanggaran",
@@ -106,27 +106,27 @@ function Login({ onLogin, onFaq }) {
           {/* Logo & Branding */}
           <div className="brand-header">
             <div className="logo-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
-              <img src={logoImg} alt="LeMaS Logo" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
+              <img src={logoImg} alt="Manis Logo" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
             </div>
-            <h2 className="welcome-text">LeMaS</h2>
+            <h2 className="welcome-text">Manis</h2>
             <p className="welcome-subtext">
-              Learning Management System
+              Madrasah Aliyah Negeri 1 Interaktif Sistem
             </p>
           </div>
 
           {/* Role Toggle */}
           <div className="role-toggle">
             <button
-              onClick={() => setRole("Mahasiswa")}
-              className={`role-button ${role === "Mahasiswa" ? "active" : ""}`}
+              onClick={() => setRole("Siswa")}
+              className={`role-button ${role === "Siswa" ? "active" : ""}`}
             >
-              Mahasiswa
+              Siswa
             </button>
             <button
-              onClick={() => setRole("Dosen")}
-              className={`role-button ${role === "Dosen" ? "active" : ""}`}
+              onClick={() => setRole("Guru")}
+              className={`role-button ${role === "Guru" ? "active" : ""}`}
             >
-              Dosen
+              Guru
             </button>
           </div>
 
@@ -246,7 +246,7 @@ function Login({ onLogin, onFaq }) {
                 ))}
               </div>
               <div className="lm-modal-footer">
-                <p>© {new Date().getFullYear()} LeMaS – Learning Management System Kelompok 8</p>
+                <p>© {new Date().getFullYear()} Manis – Madrasah Aliyah Negeri 1 Interaktif Sistem Kelompok 8</p>
               </div>
             </div>
           </div>

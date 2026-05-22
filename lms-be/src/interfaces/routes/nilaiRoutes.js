@@ -14,8 +14,8 @@ const controller = new NilaiController(nilaiUseCase, transkripUseCase);
 router.post('/', (req, res) => controller.create(req, res));
 router.get('/', authMiddleware, (req, res) => controller.getAll(req, res));
 router.get('/mata-kuliah/:idMataKuliah', authMiddleware, (req, res) => controller.getByMataKuliah(req, res));
-router.get('/transkrip/mahasiswa', authMiddleware, (req, res) => controller.getTranskrip(req, res));
-router.get('/mahasiswa/:idMataKuliah', (req, res) => controller.getByMahasiswa(req, res));
+router.get('/transkrip/siswa', authMiddleware, (req, res) => controller.getTranskrip(req, res));
+router.get('/siswa/:idMataKuliah', (req, res) => controller.getBySiswa(req, res));
 router.patch('/:id', (req, res) => controller.update(req, res));
 
 router.get('/submissions/individu/:idMataKuliah', authMiddleware, (req, res) => controller.getPengumpulanIndividu(req, res));

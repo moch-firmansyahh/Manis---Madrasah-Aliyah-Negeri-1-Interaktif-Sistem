@@ -1,9 +1,9 @@
 import { prisma } from "../../../lib/prisma.ts";
 
 export class PrismaKelompokRepository {
-  async findAll(nipDosen) {
-      const whereClause = nipDosen ? {
-          mataKuliah: { nipDosen: nipDosen }
+  async findAll(nipGuru) {
+      const whereClause = nipGuru ? {
+          mataKuliah: { nipGuru: nipGuru }
       } : {};
       return await prisma.kelompok.findMany({
           where: whereClause,
@@ -11,7 +11,7 @@ export class PrismaKelompokRepository {
               mataKuliah: { select: { namaMataKuliah: true } },
               anggota: {
                   include: {
-                      mahasiswa: {
+                      siswa: {
                           include: { user: true }
                       }
                   }
@@ -29,7 +29,7 @@ export class PrismaKelompokRepository {
           include: {
               anggota: {
                   include: {
-                      mahasiswa: {
+                      siswa: {
                           include: { user: true }
                       }
                   }
@@ -55,7 +55,7 @@ export class PrismaKelompokRepository {
       });
   }
 
-  async addMember(idKelompok, nim) {
+  async addMember(idKelompok, nis) {
       try {
           const targetKelompok = await prisma.kelompok.findUnique({
               where: { idKelompok: parseInt(idKelompok) },
@@ -64,20 +64,20 @@ export class PrismaKelompokRepository {
           if (targetKelompok) {
               const existingKelompok = await prisma.anggotaKelompok.findFirst({
                   where: {
-                      nim: nim,
+                      nis: nis,
                       kelompok: { idMataKuliah: targetKelompok.idMataKuliah }
                   },
                   include: { kelompok: { select: { namaKelompok: true } } }
               });
               if (existingKelompok) {
-                  throw new Error(`Mahasiswa sudah tergabung di kelompok "${existingKelompok.kelompok.namaKelompok}" untuk mata kuliah ini`);
+                  throw new Error(`Siswa sudah tergabung di kelompok "${existingKelompok.kelompok.namaKelompok}" untuk mata kuliah ini`);
               }
           }
 
           return await prisma.anggotaKelompok.create({
               data: {
                   idKelompok: parseInt(idKelompok),
-                  nim: nim
+                  nis: nis
               }
           });
       } catch (error) {
@@ -88,27 +88,27 @@ export class PrismaKelompokRepository {
       }
   }
 
-  async removeMember(idKelompok, nim) {
+  async removeMember(idKelompok, nis) {
       return await prisma.anggotaKelompok.delete({
           where: {
-              idKelompok_nim: {
+              idKelompok_nis: {
                   idKelompok: parseInt(idKelompok),
-                  nim: nim
+                  nis: nis
               }
           }
       });
   }
 
-  async findAllMahasiswa() {
-      return await prisma.mahasiswa.findMany({
+  async findAllSiswa() {
+      return await prisma.siswa.findMany({
           include: { user: { select: { nama: true, nomorInduk: true } } }
       });
   }
 
   async updateGrades(idKelompok, gradesObj) {
-      const updates = Object.entries(gradesObj).map(([nim, nilai]) => {
+      const updates = Object.entries(gradesObj).map(([nis, nilai]) => {
           return prisma.anggotaKelompok.update({
-              where: { idKelompok_nim: { idKelompok: parseInt(idKelompok), nim: nim } },
+              where: { idKelompok_nis: { idKelompok: parseInt(idKelompok), nis: nis } },
               data: { nilaiTugas: nilai === "" ? null : parseFloat(nilai) }
           });
       });

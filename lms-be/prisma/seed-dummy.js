@@ -1,7 +1,7 @@
 // Seed file untuk dummy data Materi dan Kuis
 // Jalankan: node prisma/seed-dummy.js
 
-import { prisma } from '../src/prismaClient.js';
+import { prisma } from "../lib/prisma.ts";
 
 async function main() {
   console.log('🌱 Membuat dummy data...');
@@ -14,35 +14,35 @@ async function main() {
   
   const pdfMaterials = [
     {
-      idMataKuliah: 13, // Pemrograman Web
-      judul: 'Pengenalan HTML & CSS',
+      idMataKuliah: 13, // Matematika Wajib XI
+      judul: 'Konsep Turunan Fungsi Aljabar',
       tipe_modul: 'PDF',
-      deskripsi: 'Modul dasar pembelajaran HTML dan CSS untuk pemula',
-      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Dummy PDF dari W3C
+      deskripsi: 'Modul dasar turunan fungsi aljabar beserta rumus-rumus dasarnya.',
+      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
       ukuran: '12 KB',
     },
     {
       idMataKuliah: 13,
-      judul: 'JavaScript Fundamental',
+      judul: 'Aplikasi Turunan Fungsi',
       tipe_modul: 'PDF',
-      deskripsi: 'Konsep dasar JavaScript modern (ES6+)',
-      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      deskripsi: 'Panduan pemecahan masalah optimasi dan nilai ekstrem menggunakan turunan.',
+      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf#deriv',
       ukuran: '12 KB',
     },
     {
-      idMataKuliah: 15, // Rekayasa Perangkat Lunak
-      judul: 'UML Diagram Lengkap',
+      idMataKuliah: 15, // Kimia Organik dan Makromolekul
+      judul: 'Tata Nama Senyawa Hidrokarbon',
       tipe_modul: 'PDF',
-      deskripsi: 'Panduan lengkap membuat diagram UML',
-      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      deskripsi: 'Panduan tata nama IUPAC untuk Alkana, Alkena, dan Alkuna.',
+      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf#kimia',
       ukuran: '12 KB',
     },
     {
-      idMataKuliah: 14, // Kecerdasan Buatan
-      judul: 'Machine Learning Basics',
+      idMataKuliah: 14, // Fisika Modern dan Astronomi
+      judul: 'Teori Relativitas Khusus',
       tipe_modul: 'PDF',
-      deskripsi: 'Pengenalan konsep machine learning',
-      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      deskripsi: 'Modul pembahasan dilatasi waktu, kontraksi panjang, dan kesetaraan massa-energi Einstein.',
+      url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf#fisika',
       ukuran: '12 KB',
     },
   ];
@@ -62,34 +62,34 @@ async function main() {
   
   const videoMaterials = [
     {
-      idMataKuliah: 13,
-      judul: 'Tutorial React.js Dasar',
+      idMataKuliah: 13, // Matematika Wajib XI
+      judul: 'Tutorial Turunan Fungsi Aljabar',
       tipe_modul: 'Video',
-      deskripsi: 'Video tutorial membuat aplikasi React dari nol',
+      deskripsi: 'Video pembahasan contoh soal turunan fungsi aljabar.',
       url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 15,
-      judul: 'Cara Membuat Use Case Diagram',
+      idMataKuliah: 15, // Kimia Organik
+      judul: 'Identifikasi Gugus Fungsi Karbon',
       tipe_modul: 'Video',
-      deskripsi: 'Penjelasan lengkap use case diagram dengan contoh',
+      deskripsi: 'Video eksperimen reaksi identifikasi alkohol, aldehida, dan keton.',
       url: 'https://www.youtube.com/embed/OkC7i2Xqx8o',
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 14,
-      judul: 'Neural Networks Explained',
+      idMataKuliah: 14, // Fisika Modern
+      judul: 'Penjelasan Efek Fotolistrik',
       tipe_modul: 'Video',
-      deskripsi: 'Penjelasan konsep neural network dengan animasi',
+      deskripsi: 'Animasi konsep pelepasan elektron akibat radiasi elektromagnetik.',
       url: 'https://www.youtube.com/embed/aircAruvnKk',
       ukuran: 'N/A (Streaming)',
     },
     {
-      idMataKuliah: 16, // IMK
-      judul: 'User Experience Design Principles',
+      idMataKuliah: 16, // Ekologi
+      judul: 'Dinamika Ekosistem dan Aliran Energi',
       tipe_modul: 'Video',
-      deskripsi: 'Prinsip dasar desain UX untuk aplikasi mobile',
+      deskripsi: 'Video penjelasan interaksi biotik-abiotik dan piramida ekologi.',
       url: 'https://www.youtube.com/embed/QbTBoR7v9gg',
       ukuran: 'N/A (Streaming)',
     },
@@ -108,14 +108,14 @@ async function main() {
   // ====== DUMMY KUIS DENGAN SOAL ======
   console.log('📝 Membuat Kuis dan Soal...');
 
-  // Kuis 1: Pemrograman Web
+  // Kuis 1: Matematika Wajib XI
   const kuis1 = await prisma.kuis.upsert({
     where: { idKuis: 1 },
     update: {},
     create: {
       idKuis: 1,
       idMataKuliah: 13,
-      judul: 'Kuis HTML & CSS Dasar',
+      judul: 'Kuis Turunan Fungsi Aljabar',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
     },
@@ -124,47 +124,47 @@ async function main() {
   // Soal untuk Kuis 1
   const soalKuis1 = [
     {
-      pertanyaan: 'Tag HTML apa yang digunakan untuk membuat heading terbesar?',
-      kunciJawaban: 'A',
-      skor: 25,
-      pilihanJawaban: [
-        { teksJawaban: '<h1>' },
-        { teksJawaban: '<h6>' },
-        { teksJawaban: '<head>' },
-        { teksJawaban: '<header>' },
-      ],
-    },
-    {
-      pertanyaan: 'Property CSS apa yang digunakan untuk mengubah warna teks?',
+      pertanyaan: 'Turunan pertama dari f(x) = 3x^2 + 5x - 2 adalah?',
       kunciJawaban: 'B',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'text-color' },
-        { teksJawaban: 'color' },
-        { teksJawaban: 'font-color' },
-        { teksJawaban: 'background-color' },
+        { teksJawaban: '3x + 5' },
+        { teksJawaban: '6x + 5' },
+        { teksJawaban: '6x - 2' },
+        { teksJawaban: '3x^2 + 5' },
       ],
     },
     {
-      pertanyaan: 'Tag HTML untuk membuat link adalah?',
+      pertanyaan: 'Nilai turunan f(x) = x^3 di titik x = 2 adalah?',
       kunciJawaban: 'C',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: '<link>' },
-        { teksJawaban: '<url>' },
-        { teksJawaban: '<a>' },
-        { teksJawaban: '<href>' },
+        { teksJawaban: '4' },
+        { teksJawaban: '8' },
+        { teksJawaban: '12' },
+        { teksJawaban: '6' },
       ],
     },
     {
-      pertanyaan: 'Apa kepanjangan dari CSS?',
+      pertanyaan: 'Turunan dari f(x) = sin(x) adalah?',
       kunciJawaban: 'A',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Cascading Style Sheets' },
-        { teksJawaban: 'Computer Style Sheets' },
-        { teksJawaban: 'Creative Style System' },
-        { teksJawaban: 'Colorful Style Sheets' },
+        { teksJawaban: 'cos(x)' },
+        { teksJawaban: '-cos(x)' },
+        { teksJawaban: 'tan(x)' },
+        { teksJawaban: 'sec(x)' },
+      ],
+    },
+    {
+      pertanyaan: 'Jika f(x) = 5, maka f\'(x) adalah?',
+      kunciJawaban: 'D',
+      skor: 25,
+      pilihanJawaban: [
+        { teksJawaban: '5' },
+        { teksJawaban: '1' },
+        { teksJawaban: 'x' },
+        { teksJawaban: '0' },
       ],
     },
   ];
@@ -189,14 +189,14 @@ async function main() {
     }
   }
 
-  // Kuis 2: RPL
+  // Kuis 2: Kimia Organik dan Makromolekul
   const kuis2 = await prisma.kuis.upsert({
     where: { idKuis: 2 },
     update: {},
     create: {
       idKuis: 2,
       idMataKuliah: 15,
-      judul: 'Kuis UML Diagram',
+      judul: 'Kuis Senyawa Hidrokarbon',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
     },
@@ -204,47 +204,47 @@ async function main() {
 
   const soalKuis2 = [
     {
-      pertanyaan: 'Diagram UML apa yang menggambarkan interaksi aktor dengan sistem?',
+      pertanyaan: 'Rumus umum untuk senyawa golongan alkana adalah?',
       kunciJawaban: 'B',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Class Diagram' },
-        { teksJawaban: 'Use Case Diagram' },
-        { teksJawaban: 'Sequence Diagram' },
-        { teksJawaban: 'Activity Diagram' },
+        { teksJawaban: 'CnH2n' },
+        { teksJawaban: 'CnH2n+2' },
+        { teksJawaban: 'CnH2n-2' },
+        { teksJawaban: 'CnHn' },
       ],
     },
     {
-      pertanyaan: 'Simbol aktor dalam Use Case Diagram digambarkan sebagai?',
+      pertanyaan: 'Senyawa hidrokarbon paling sederhana adalah?',
       kunciJawaban: 'A',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Orang stick figure' },
-        { teksJawaban: 'Kotak persegi' },
-        { teksJawaban: 'Lingkaran' },
-        { teksJawaban: 'Panah' },
+        { teksJawaban: 'Metana' },
+        { teksJawaban: 'Etana' },
+        { teksJawaban: 'Propana' },
+        { teksJawaban: 'Butana' },
       ],
     },
     {
-      pertanyaan: 'Relasi <<include>> dalam Use Case Diagram berarti?',
+      pertanyaan: 'Gugus fungsi -OH merupakan penanda untuk golongan senyawa?',
       kunciJawaban: 'C',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Use case opsional' },
-        { teksJawaban: 'Use case alternatif' },
-        { teksJawaban: 'Use case wajib dipanggil' },
-        { teksJawaban: 'Use case tidak berhubungan' },
+        { teksJawaban: 'Eter' },
+        { teksJawaban: 'Alkanal' },
+        { teksJawaban: 'Alkohol (Alkanol)' },
+        { teksJawaban: 'Asam karboksilat' },
       ],
     },
     {
-      pertanyaan: 'Diagram apa yang menggambarkan alur aktivitas dalam sistem?',
+      pertanyaan: 'Reaksi antara alkana dengan halogen disebut reaksi?',
       kunciJawaban: 'D',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Class Diagram' },
-        { teksJawaban: 'Component Diagram' },
-        { teksJawaban: 'Deployment Diagram' },
-        { teksJawaban: 'Activity Diagram' },
+        { teksJawaban: 'Adisi' },
+        { teksJawaban: 'Eliminasi' },
+        { teksJawaban: 'Oksidasi' },
+        { teksJawaban: 'Substitusi' },
       ],
     },
   ];
@@ -269,14 +269,14 @@ async function main() {
     }
   }
 
-  // Kuis 3: Kecerdasan Buatan
+  // Kuis 3: Fisika Modern dan Astronomi
   const kuis3 = await prisma.kuis.upsert({
     where: { idKuis: 3 },
     update: {},
     create: {
       idKuis: 3,
       idMataKuliah: 14,
-      judul: 'Kuis Machine Learning Basics',
+      judul: 'Kuis Teori Relativitas dan Kuantum',
       deadlineKuis: new Date('2025-12-31T23:59:59'),
       skor: 100,
     },
@@ -284,47 +284,47 @@ async function main() {
 
   const soalKuis3 = [
     {
-      pertanyaan: 'Apa perbedaan utama supervised dan unsupervised learning?',
+      pertanyaan: 'Postulat pertama relativitas khusus Einstein menyatakan bahwa?',
       kunciJawaban: 'B',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Jumlah data' },
-        { teksJawaban: 'Ada/tidaknya label target' },
-        { teksJawaban: 'Kecepatan komputer' },
-        { teksJawaban: 'Bahasa pemrograman' },
+        { teksJawaban: 'Kecepatan cahaya selalu berubah' },
+        { teksJawaban: 'Hukum fisika adalah sama dalam semua kerangka acuan inersia' },
+        { teksJawaban: 'Massa benda selalu tetap' },
+        { teksJawaban: 'Waktu mutlak bagi semua pengamat' },
       ],
     },
     {
-      pertanyaan: 'Algoritma apa yang cocok untuk klasifikasi binary?',
+      pertanyaan: 'Tokoh yang mengemukakan bahwa cahaya terdiri dari paket-paket energi (foton) adalah?',
       kunciJawaban: 'A',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Logistic Regression' },
-        { teksJawaban: 'K-Means' },
-        { teksJawaban: 'Apriori' },
-        { teksJawaban: 'PCA' },
+        { teksJawaban: 'Max Planck / Albert Einstein' },
+        { teksJawaban: 'Isaac Newton' },
+        { teksJawaban: 'Niels Bohr' },
+        { teksJawaban: 'Ernest Rutherford' },
       ],
     },
     {
-      pertanyaan: 'Overfitting terjadi ketika?',
+      pertanyaan: 'Dalam efek fotolistrik, elektron dapat keluar dari logam jika?',
       kunciJawaban: 'C',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Data terlalu sedikit' },
-        { teksJawaban: 'Model terlalu sederhana' },
-        { teksJawaban: 'Model terlalu kompleks untuk data training' },
-        { teksJawaban: 'Tidak ada feature selection' },
+        { teksJawaban: 'Intensitas cahaya sangat besar' },
+        { teksJawaban: 'Tegangan listrik sangat tinggi' },
+        { teksJawaban: 'Frekuensi cahaya lebih besar dari frekuensi ambang' },
+        { teksJawaban: 'Suhu logam sangat tinggi' },
       ],
     },
     {
-      pertanyaan: 'Neural Network terdiri dari layer apa saja?',
+      pertanyaan: 'Rumus kesetaraan massa dan energi yang terkenal dari Einstein adalah?',
       kunciJawaban: 'B',
       skor: 25,
       pilihanJawaban: [
-        { teksJawaban: 'Input dan Output saja' },
-        { teksJawaban: 'Input, Hidden, dan Output' },
-        { teksJawaban: 'Hidden dan Output saja' },
-        { teksJawaban: 'Input, Hidden, Output, dan Feedback' },
+        { teksJawaban: 'E = mc' },
+        { teksJawaban: 'E = mc^2' },
+        { teksJawaban: 'E = hf' },
+        { teksJawaban: 'F = ma' },
       ],
     },
   ];
@@ -349,7 +349,7 @@ async function main() {
     }
   }
 
-  console.log('✅ Dummy data berhasil dibuat!');
+    console.log('✅ Dummy data berhasil dibuat!');
   console.log(`📄 ${pdfMaterials.length} Materi PDF`);
   console.log(`🎥 ${videoMaterials.length} Materi Video`);
   console.log(`📝 3 Kuis dengan 12 Soal total`);

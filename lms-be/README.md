@@ -1,15 +1,15 @@
-# LMS Backend - Clean Architecture
+# Manis Backend - Clean Architecture
 
-Sistem Backend untuk Learning Management System (LMS) yang dibangun menggunakan **Node.js**, **Express**, dan **Prisma ORM** dengan database **PostgreSQL**. Proyek ini menerapkan **Clean Architecture** untuk memastikan kode mudah dikelola, diuji, dan dikembangkan.
+Sistem Backend untuk Madrasah Aliyah Negeri 1 Interaktif Sistem (Manis) yang dibangun menggunakan **Node.js**, **Express**, dan **Prisma ORM** dengan database **PostgreSQL**. Proyek ini menerapkan **Clean Architecture** untuk memastikan kode mudah dikelola, diuji, dan dikembangkan.
 
 ## 🚀 Fitur Utama
 
 - **Clean Architecture**: Pemisahan lapisan Domain, Use Cases, Interfaces, dan Infrastructure.
 - **Authentication**: JWT (JSON Web Token) & Hashing Password dengan Bcrypt.
-- **Role-Based Access**: Pembedaan profil antara Admin, Mahasiswa, dan Dosen.
+- **Role-Based Access**: Pembedaan profil antara Admin, Siswa, dan Guru.
 - **Automated ID Generation**:
   - User: `U001`, `D001`, `P001` (otomatis berdasarkan Role).
-  - Mahasiswa: NIM otomatis (contoh: `2026001`).
+  - Siswa: NIS otomatis (contoh: `2026001`).
 - **Database Relations**: Integrasi relasi tabel dengan fitur _Cascade Delete_.
 
 ---
@@ -29,8 +29,8 @@ Sebelum memulai, pastikan kamu sudah menginstal:
 1. **Clone repositori:**
 
    ```bash
-   git clone https://github.com/ListiantoHilmi/lms-be.git
-   cd lms-be
+   git clone https://github.com/ListiantoHilmi/manis-be.git
+   cd manis-be
 
    ```
 
@@ -65,11 +65,11 @@ Jalankan perintah berikut secara berurutan untuk menyiapkan database:
    (Ini akan membuat tabel-tabel di database kamu)
 
    ```bash
-   npx prisma migrate dev --name init_lms
+   npx prisma migrate dev --name init_manis
    ```
 
 3. Seed Data (Sangat Penting):
-   Isi tabel Role (Admin, Mahasiswa, Dosen) secara otomatis:
+   Isi tabel Role (Admin, Siswa, Guru) secara otomatis:
 
    ```bash
    npx prisma db seed
@@ -114,7 +114,7 @@ prisma/ # Skema Database dan Script Seeding
 2. Protected Routes (Membutuhkan Header Authorization: Bearer <token>)
 
    ```text
-   POST /api/users - Registrasi User baru (ID & NIM otomatis).
+   POST /api/users - Registrasi User baru (ID & NIS otomatis).
    GET /api/users - List semua user.
    PATCH /api/users/:nomorInduk - Update data user.
    DELETE /api/users/:nomorInduk - Hapus user (Cascade delete profil).
@@ -128,21 +128,21 @@ Kirim POST ke /api/users dengan JSON body:
 
 ```json
 {
-  "nama": "Budi Mahasiswa",
-  "email": "budi@univ.ac.id",
+  "nama": "Budi Siswa",
+  "email": "budi@man1.sch.id",
   "password": "password123",
   "roleId": 2,
-  "nim": "" // Kosongkan, sistem akan generate otomatis 2026xxx
+  "nis": "" // Kosongkan, sistem akan generate otomatis 2026xxx
 }
 ```
 
 ```json
 {
-  "nama": "Dr. Subiakto",
-  "email": "biakto@univ.ac.id",
+  "nama": "Dr. Subiakto, M.Pd",
+  "email": "subiakto@man1.sch.id",
   "password": "password123",
   "roleId": 3,
-  "nip": "09.123.456.7-890.000" // Gunakan NIP Dosen
+  "nip": "09.123.456.7-890.000" // Gunakan NIP Guru
 }
 ```
 

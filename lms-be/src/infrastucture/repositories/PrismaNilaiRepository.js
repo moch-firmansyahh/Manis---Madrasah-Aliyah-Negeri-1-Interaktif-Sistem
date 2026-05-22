@@ -15,14 +15,14 @@ export class PrismaNilaiRepository {
     });
   }
 
-  async findByMahasiswa(nomorInduk) {
+  async findBySiswa(nomorInduk) {
     return await prisma.nilai.findMany({
       where: { nomorInduk },
       include: { mataKuliah: true }
     });
   }
 
-  async findByMahasiswaAndMataKuliah(nomorInduk, idMataKuliah) {
+  async findBySiswaAndMataKuliah(nomorInduk, idMataKuliah) {
     return await prisma.nilai.findFirst({
       where: { nomorInduk, idMataKuliah },
       include: { mataKuliah: true }
@@ -69,7 +69,7 @@ export class PrismaNilaiRepository {
           }
         },
         include: { 
-          mahasiswa: {
+          siswa: {
             include: { 
               user: {
                 select: { nama: true, nomorInduk: true }
@@ -114,7 +114,7 @@ export class PrismaNilaiRepository {
   }
 
   async getPengumpulanPerTugas(idTugas) {
-    // Karena tugas dibuat per mahasiswa (1 row per mahasiswa per tugas),
+    // Karena tugas dibuat per siswa (1 row per siswa per tugas),
     // cari semua idTugas yang punya judul+idMataKuliah+deadline yang sama
     const tugasRef = await prisma.tugas.findUnique({
       where: { idTugas: parseInt(idTugas) }
@@ -136,7 +136,7 @@ export class PrismaNilaiRepository {
         idTugas: { in: idTugasList }
       },
       include: {
-        mahasiswa: {
+        siswa: {
           include: { user: { select: { nama: true, nomorInduk: true } } }
         }
       },
@@ -144,19 +144,19 @@ export class PrismaNilaiRepository {
     });
   }
 
-  async getMahasiswaByMataKuliah(idMataKuliah) {
+  async getSiswaByMataKuliah(idMataKuliah) {
     const intIdMk = parseInt(idMataKuliah);
     // Kumpulkan dari presensi, kelompok, dan nilai
-    const nimSet = new Set();
-    const presensi = await prisma.presensi.findMany({ where: { idMataKuliah: intIdMk }, select: { nim: true } });
-    presensi.forEach(p => nimSet.add(p.nim));
-    const kelompok = await prisma.kelompok.findMany({ where: { idMataKuliah: intIdMk }, include: { anggota: { select: { nim: true } } } });
-    kelompok.forEach(k => k.anggota.forEach(a => nimSet.add(a.nim)));
-    const tugas = await prisma.tugas.findMany({ where: { idMataKuliah: intIdMk }, select: { nim: true } });
-    tugas.forEach(t => nimSet.add(t.nim));
-    if (nimSet.size === 0) return [];
-    return await prisma.mahasiswa.findMany({
-      where: { nim: { in: Array.from(nimSet) } },
+    const nisSet = new Set();
+    const presensi = await prisma.presensi.findMany({ where: { idMataKuliah: intIdMk }, select: { nis: true } });
+    presensi.forEach(p => nisSet.add(p.nis));
+    const kelompok = await prisma.kelompok.findMany({ where: { idMataKuliah: intIdMk }, include: { anggota: { select: { nis: true } } } });
+    kelompok.forEach(k => k.anggota.forEach(a => nisSet.add(a.nis)));
+    const tugas = await prisma.tugas.findMany({ where: { idMataKuliah: intIdMk }, select: { nis: true } });
+    tugas.forEach(t => nisSet.add(t.nis));
+    if (nisSet.size === 0) return [];
+    return await prisma.siswa.findMany({
+      where: { nis: { in: Array.from(nisSet) } },
       include: { user: { select: { nama: true, nomorInduk: true } } }
     });
   }
@@ -194,7 +194,7 @@ export class PrismaNilaiRepository {
     return await prisma.jawabanKuis.findMany({
       where: { idKuis: parseInt(idKuis) },
       include: {
-        mahasiswa: {
+        siswa: {
           include: { user: { select: { nama: true, nomorInduk: true } } }
         }
       },

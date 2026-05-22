@@ -28,11 +28,11 @@ export class NilaiUseCase {
     });
   }
 
-  async getNilaiMahasiswa(nomorInduk, idMataKuliah) {
+  async getNilaiSiswa(nomorInduk, idMataKuliah) {
     if (idMataKuliah) {
-      return await this.repository.findByMahasiswaAndMataKuliah(nomorInduk, parseInt(idMataKuliah));
+      return await this.repository.findBySiswaAndMataKuliah(nomorInduk, parseInt(idMataKuliah));
     }
-    return await this.repository.findByMahasiswa(nomorInduk);
+    return await this.repository.findBySiswa(nomorInduk);
   }
 
   async getAllNilai() {
@@ -74,19 +74,19 @@ export class NilaiUseCase {
       // Skip yang punya idKelompok (itu tugas kelompok)
       if (p.idKelompok) return null;
       
-      const nomorIndukMahasiswa = p.mahasiswa?.user?.nomorInduk;
+      const nomorIndukSiswa = p.siswa?.user?.nomorInduk;
       const idMkTugas = p.tugas?.idMataKuliah;
       
       let nilai = null;
-      if (nomorIndukMahasiswa) {
-        nilai = await this.repository.getNilaiTugas(nomorIndukMahasiswa, idMkTugas || idMataKuliah);
+      if (nomorIndukSiswa) {
+        nilai = await this.repository.getNilaiTugas(nomorIndukSiswa, idMkTugas || idMataKuliah);
       }
       
       return {
         idPengumpulan: p.idPengumpulan,
-        nim: p.nim,
-        nama: p.mahasiswa?.user?.nama || "Mahasiswa",
-        nomorInduk: nomorIndukMahasiswa,
+        nis: p.nis,
+        nama: p.siswa?.user?.nama || "Siswa",
+        nomorInduk: nomorIndukSiswa,
         idMataKuliah: idMkTugas || idMataKuliah,
         tugas: {
           id: p.tugas?.idTugas,
@@ -132,20 +132,20 @@ export class NilaiUseCase {
   }
 
   async getPengumpulanPerTugas(idTugas, idMataKuliah, tipe) {
-    // Ambil semua mahasiswa di matkul ini
-    const semuaMahasiswa = await this.repository.getMahasiswaByMataKuliah(idMataKuliah);
+    // Ambil semua siswa di matkul ini
+    const semuaSiswa = await this.repository.getSiswaByMataKuliah(idMataKuliah);
     
     if (tipe === 'Kuis') {
       // Ambil dari jawabanKuis untuk idKuis ini
       const submissions = await this.repository.getJawabanKuisPerKuis(parseInt(idTugas));
-      const submissionMap = new Map(submissions.map(s => [s.nim, s]));
+      const submissionMap = new Map(submissions.map(s => [s.nis, s]));
       
-      return semuaMahasiswa.map(mhs => {
-        const sub = submissionMap.get(mhs.nim);
+      return semuaSiswa.map(mhs => {
+        const sub = submissionMap.get(mhs.nis);
         return {
-          nim: mhs.nim,
-          nomorInduk: mhs.user?.nomorInduk || mhs.nim,
-          nama: mhs.user?.nama || 'Mahasiswa',
+          nis: mhs.nis,
+          nomorInduk: mhs.user?.nomorInduk || mhs.nis,
+          nama: mhs.user?.nama || 'Siswa',
           sudahKumpul: !!sub,
           idPengumpulan: sub?.idJawabanKuis || null,
           fileJawaban: null,
@@ -157,21 +157,21 @@ export class NilaiUseCase {
     } else {
       // Ambil yang sudah submit tugas
       const submissions = await this.repository.getPengumpulanPerTugas(idTugas);
-      const submissionMap = new Map(submissions.map(s => [s.nim, s]));
+      const submissionMap = new Map(submissions.map(s => [s.nis, s]));
 
-      // Ambil semua nilai di matkul ini untuk dimap ke mahasiswa
+      // Ambil semua nilai di matkul ini untuk dimap ke siswa
       const allNilai = await this.repository.findAll();
       const nilaiMap = new Map(allNilai.filter(n => n.idMataKuliah === parseInt(idMataKuliah)).map(n => [n.nomorInduk, n]));
 
-      return semuaMahasiswa.map(mhs => {
-        const sub = submissionMap.get(mhs.nim);
+      return semuaSiswa.map(mhs => {
+        const sub = submissionMap.get(mhs.nis);
         const nilaiObj = mhs.user?.nomorInduk ? nilaiMap.get(mhs.user.nomorInduk) : null;
         const nilaiVal = nilaiObj?.nilaiTugas !== undefined && nilaiObj?.nilaiTugas !== null ? parseFloat(nilaiObj.nilaiTugas) : null;
         
         return {
-          nim: mhs.nim,
-          nomorInduk: mhs.user?.nomorInduk || mhs.nim,
-          nama: mhs.user?.nama || 'Mahasiswa',
+          nis: mhs.nis,
+          nomorInduk: mhs.user?.nomorInduk || mhs.nis,
+          nama: mhs.user?.nama || 'Siswa',
           sudahKumpul: !!sub,
           idPengumpulan: sub?.idPengumpulan || null,
           fileJawaban: sub?.fileJawaban || null,

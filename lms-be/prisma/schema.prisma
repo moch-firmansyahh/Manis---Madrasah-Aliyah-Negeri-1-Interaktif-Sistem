@@ -13,7 +13,7 @@ datasource db {
 
 model Role {
   id    Int    @id @default(autoincrement())
-  nama  String @unique @db.VarChar(50) // 'ADMIN', 'MAHASISWA', 'DOSEN' 
+  nama  String @unique @db.VarChar(50) // 'ADMIN', 'SISWA', 'GURU' 
   users User[]
 }
 
@@ -28,17 +28,17 @@ model User {
   roleId Int 
   role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade) 
 
-  mahasiswa      Mahasiswa? 
-  dosen          Dosen? 
+  siswa          Siswa? 
+  guru           Guru? 
   nilai          Nilai[] 
   komentarForum  KomentarForum[] 
   forumDiskusi   ForumDiskusi[]
   likesForum LikeForum[]
 }
 
-// 2. TABEL MAHASISWA
-model Mahasiswa {
-  nim        String @id @db.VarChar(20) 
+// 2. TABEL SISWA
+model Siswa {
+  nis        String @id @db.VarChar(20) 
   nomorInduk String @unique @db.VarChar(20) 
   user       User   @relation(fields: [nomorInduk], references: [nomorInduk], onDelete: Cascade) 
   
@@ -52,8 +52,8 @@ model Mahasiswa {
   progressMateri   ProgressMateri[]
 }
 
-// 3. TABEL DOSEN
-model Dosen {
+// 3. TABEL GURU
+model Guru {
   nip        String @id @db.VarChar(20) 
   nomorInduk String @unique @db.VarChar(20) 
   user       User   @relation(fields: [nomorInduk], references: [nomorInduk], onDelete: Cascade) 
@@ -67,13 +67,13 @@ model Dosen {
 model MataKuliah {
   idMataKuliah   Int    @id @default(autoincrement())
   namaMataKuliah String @db.VarChar(150)
-  nipDosen       String?  @db.VarChar(20)
+  nipGuru        String?  @db.VarChar(20)
   semester       Int     @default(1)
   jadwal         String?  @db.VarChar(100)
   waktu          String?  @db.VarChar(100)
   sks            Int     @default(3)
 
-  dosen          Dosen?   @relation(fields: [nipDosen], references: [nip])
+  guru           Guru?    @relation(fields: [nipGuru], references: [nip])
   nilai         Nilai[]
   kuis          Kuis[]
   forumDiskusi  ForumDiskusi[]
@@ -115,15 +115,15 @@ model Kuis {
 model JawabanKuis {
   idJawabanKuis Int        @id @default(autoincrement())
   idKuis        Int
-  nim           String     @db.VarChar(20)
+  nis           String     @db.VarChar(20)
   skor          Int?
   jawaban       String?    @db.Text // JSON array jawaban: [0,2,1,3]
   tanggalKerja  DateTime   @default(now())
 
   kuis          Kuis       @relation(fields: [idKuis], references: [idKuis], onDelete: Cascade)
-  mahasiswa     Mahasiswa  @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa         Siswa      @relation(fields: [nis], references: [nis], onDelete: Cascade)
 
-  @@unique([idKuis, nim])
+  @@unique([idKuis, nis])
 }
 
 // 7. TABEL SOAL
@@ -209,18 +209,17 @@ model ModulAjar {
 model ProgressMateri {
   idProgress   Int        @id @default(autoincrement())
   idModulAjar  Int
-  nim          String     @db.VarChar(20)
+  nis          String     @db.VarChar(20)
   status       String     @default("belum") @db.VarChar(20) // "belum" atau "sudah"
   tanggalAkses DateTime?  @default(now())
 
   modulAjar    ModulAjar  @relation(fields: [idModulAjar], references: [idModulAjar], onDelete: Cascade)
-  mahasiswa    Mahasiswa  @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa        Siswa      @relation(fields: [nis], references: [nis], onDelete: Cascade)
 
-  @@unique([idModulAjar, nim])
+  @@unique([idModulAjar, nis])
 }
 
 // 12. TABEL KELOMPOK
-// Update pada tabel Kelompok
 model Kelompok {
   idKelompok     Int       @id @default(autoincrement())
   idMataKuliah   Int       
@@ -240,20 +239,20 @@ model Kelompok {
 model AnggotaKelompok {
   idAnggota      Int       @id @default(autoincrement())
   idKelompok     Int
-  nim            String    @db.VarChar(20)
+  nis            String    @db.VarChar(20)
   nilaiTugas     Decimal?  @db.Decimal(5, 2) // Nilai khusus untuk tugas kelompok ini
 
   kelompok       Kelompok  @relation(fields: [idKelompok], references: [idKelompok], onDelete: Cascade)
-  mahasiswa      Mahasiswa @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa          Siswa     @relation(fields: [nis], references: [nis], onDelete: Cascade)
 
-  @@unique([idKelompok, nim])
+  @@unique([idKelompok, nis])
 }
 
 // 13. TABEL TUGAS
 model Tugas {
   idTugas       Int        @id @default(autoincrement())
   idMataKuliah  Int
-  nim           String     @db.VarChar(20)
+  nis           String     @db.VarChar(20)
   judul         String     @db.VarChar(200)
   tipeTugas     String     @default("Individu") @db.VarChar(20)
   detailTugas   String?    @db.Text
@@ -266,20 +265,20 @@ model Tugas {
   ukuranFile    String?    @db.VarChar(50)
 
   mataKuliah    MataKuliah @relation(fields: [idMataKuliah], references: [idMataKuliah], onDelete: Cascade)
-  mahasiswa     Mahasiswa  @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa         Siswa      @relation(fields: [nis], references: [nis], onDelete: Cascade)
   pengumpulanTugas PengumpulanTugas[]
 }
 
 // 14. TABEL PRESENSI
 model Presensi {
   idPresensi      Int @id @default(autoincrement()) 
-  nim             String @db.VarChar(20) 
+  nis             String @db.VarChar(20) 
   idMataKuliah    Int 
   tanggalPertemuan DateTime? @db.Date 
   waktuPresensi   DateTime?
   statusKehadiran StatusKehadiran? @default(Hadir) 
   
-  mahasiswa  Mahasiswa @relation(fields: [nim], references: [nim], onDelete: Cascade) 
+  siswa      Siswa     @relation(fields: [nis], references: [nis], onDelete: Cascade) 
   mataKuliah MataKuliah @relation(fields: [idMataKuliah], references: [idMataKuliah], onDelete: Cascade) 
 }
 
@@ -294,14 +293,14 @@ enum StatusKehadiran {
 model ProgressTugas {
   idTugas       Int        @id @default(autoincrement())
   idMataKuliah  Int
-  nim           String     @db.VarChar(20)
+  nis           String     @db.VarChar(20)
   judul         String?    @db.VarChar(200)
   detailTugas   String?    @db.Text
   deadlineTugas DateTime?
   fileJawaban   String?    @db.VarChar(255)
   
   mataKuliah    MataKuliah @relation(fields: [idMataKuliah], references: [idMataKuliah], onDelete: Cascade)
-  mahasiswa     Mahasiswa  @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa         Siswa      @relation(fields: [nis], references: [nis], onDelete: Cascade)
 }
 
 // 16. TABEL PENGUMPULAN TUGAS
@@ -309,7 +308,7 @@ model PengumpulanTugas {
   idPengumpulan Int       @id @default(autoincrement())
   idKelompok    Int?
   idTugas       Int
-  nim           String    @db.VarChar(20)
+  nis           String    @db.VarChar(20)
   judul         String?   @db.VarChar(200)
   detailTugas   String?   @db.Text
   deadlineTugas DateTime?
@@ -317,13 +316,13 @@ model PengumpulanTugas {
   
   kelompok      Kelompok? @relation(fields: [idKelompok], references: [idKelompok], onDelete: Cascade)
   tugas         Tugas     @relation(fields: [idTugas], references: [idTugas], onDelete: Cascade)
-  mahasiswa     Mahasiswa @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa         Siswa     @relation(fields: [nis], references: [nis], onDelete: Cascade)
 }
 
 // 17. TABEL NOTIFIKASI
 model Notifikasi {
   idNotifikasi Int       @id @default(autoincrement())
-  nim          String    @db.VarChar(20)
+  nis          String    @db.VarChar(20)
   judul        String    @db.VarChar(200)
   pesan        String?   @db.Text
   tipe         String    @default("info") @db.VarChar(50) // kuis, tugas, forum, presensi, umum
@@ -332,5 +331,5 @@ model Notifikasi {
   idRef        Int?      // ID referensi (misal: idKuis, idTugas)
   tipeRef      String?   @db.VarChar(50) // kuis, tugas
   
-  mahasiswa    Mahasiswa @relation(fields: [nim], references: [nim], onDelete: Cascade)
+  siswa        Siswa     @relation(fields: [nis], references: [nis], onDelete: Cascade)
 }

@@ -6,7 +6,7 @@ export class MataKuliah {
 
   validate() {
     if (!this.namaMataKuliah || this.namaMataKuliah.length < 3) {
-      throw new Error("Nama Mata Kuliah minimal 3 karakter");
+      throw new Error("Nama Mata Kuliah minisal 3 karakter");
     }
   }
 }

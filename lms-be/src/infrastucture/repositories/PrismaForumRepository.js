@@ -18,7 +18,7 @@ export class PrismaForumRepository {
           select: {
             nama: true,
             role: {
-              select: { nama: true } // Mengambil role (Misal: 'DOSEN', 'MAHASISWA')
+              select: { nama: true } // Mengambil role (Misal: 'GURU', 'SISWA')
             }
           }
         },
@@ -40,7 +40,7 @@ export class PrismaForumRepository {
 
   /**
    * Mengambil beberapa diskusi terbaru (Global) untuk ditampilkan di Dashboard.
-   * Digunakan oleh halaman dashboard.jsx (Dashboard Mahasiswa).
+   * Digunakan oleh halaman dashboard.jsx (Dashboard Siswa).
    * @param {number} limit Batas jumlah diskusi yang diambil (misal: 3)
    */
   async getRecentThreads(limit = 3) {

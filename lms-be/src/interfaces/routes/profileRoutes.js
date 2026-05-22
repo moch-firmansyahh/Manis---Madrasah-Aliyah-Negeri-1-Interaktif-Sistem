@@ -59,7 +59,7 @@ router.post('/photo', upload.single('photo'), async (req, res) => {
   }
 });
 
-// Get current user profile (works for both dosen & mahasiswa)
+// Get current user profile (works for both guru & siswa)
 router.get('/me', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -94,9 +94,9 @@ router.patch('/me', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Format email tidak valid' });
     }
     
-    // Validasi telepon (minimal 10 digit)
+    // Validasi telepon (minisal 10 digit)
     if (telepon && telepon.length < 10) {
-      return res.status(400).json({ status: 'error', message: 'Nomor telepon minimal 10 digit' });
+      return res.status(400).json({ status: 'error', message: 'Nomor telepon minisal 10 digit' });
     }
 
     const updatedUser = await prisma.user.update({
@@ -122,7 +122,7 @@ router.patch('/me', async (req, res) => {
   }
 });
 
-// Change password (works for both dosen & mahasiswa)
+// Change password (works for both guru & siswa)
 router.post('/change-password', async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -132,7 +132,7 @@ router.post('/change-password', async (req, res) => {
     }
     
     if (newPassword.length < 6) {
-      return res.status(400).json({ status: 'error', message: 'Password baru minimal 6 karakter' });
+      return res.status(400).json({ status: 'error', message: 'Password baru minisal 6 karakter' });
     }
 
     const user = await prisma.user.findUnique({

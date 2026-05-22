@@ -1,6 +1,6 @@
-# 🎓 LeMas — Learning Machine System
+# 🎓 Manis — Madrasah Aliyah Negeri 1 Interaktif Sistem
 
-> Platform pembelajaran berbasis web yang memudahkan dosen dalam mengelola kelompok dan memantau progress mahasiswa secara real-time.
+> Platform pembelajaran berbasis web yang memudahkan guru dalam mengelola kelompok dan memantau progress siswa secara real-time.
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## 📖 Tentang Proyek
 
-**LeMas (Learning Machine System)** adalah platform pembelajaran yang memberi akses kepada dosen untuk mengelola kelompok dan memantau progress mahasiswa dengan mudah dan efisien.
+**Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)** adalah platform pembelajaran yang memberi akses kepada guru untuk mengelola kelompok dan memantau progress siswa dengan mudah dan efisien.
 
 ---
 
@@ -71,5 +71,6 @@ Pastikan path folder `assets` berada di root repository kamu. Jika folder `asset
 
 ### 1. Clone Repository
 ```bash
-git clone [https://github.com/username/lemas.git](https://github.com/username/lemas.git)
-cd lemas
+git clone [https://github.com/username/manis.git](https://github.com/username/manis.git)
+cd manis
+```
