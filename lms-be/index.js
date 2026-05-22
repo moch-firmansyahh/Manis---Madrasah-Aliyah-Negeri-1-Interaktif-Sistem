@@ -32,7 +32,21 @@ const authUseCase = new AuthUseCase(userRepository);
 
 // CORS Configuration
 app.use(cors({
-  origin: [process.env["FRONTEND_URL"] || "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const allowed = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:3000",
+      "https://manis-madrasah-aliyah-negeri-1-inte.vercel.app"
+    ].filter(Boolean);
+    if (allowed.includes(origin) || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
