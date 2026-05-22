@@ -151,7 +151,7 @@ function AppContent() {
   return (
     <>
       {/* Overlay loading for API calls */}
-      {isLoading && <LoadingScreen overlay />}
+      {isLoading && <LoadingScreen />}
       <Suspense fallback={<LoadingScreen />}>
         {renderPage()}
       </Suspense>

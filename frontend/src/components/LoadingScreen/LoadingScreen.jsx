@@ -2,9 +2,9 @@ import React from 'react';
 import './LoadingScreen.css';
 import logoImg from '../../assets/logo.png';
 
-const LoadingScreen = ({ overlay = false }) => {
+const LoadingScreen = () => {
   return (
-    <div className={`loading-screen-container${overlay ? ' loading-overlay' : ''}`}>
+    <div className="loading-screen-container">
       <div className="loading-orbit-wrapper">
         <div className="orbit orbit-1">
           <div className="orbit-dot dot-1"></div>
@@ -12,7 +12,7 @@ const LoadingScreen = ({ overlay = false }) => {
         <div className="orbit orbit-2">
           <div className="orbit-dot dot-2"></div>
         </div>
-        <img src={logoImg} alt="MAN 1 Sumedang Logo" className="loading-logo-static" />
+        <img src={logoImg} alt="Logo" className="loading-logo-static" />
       </div>
     </div>
   );

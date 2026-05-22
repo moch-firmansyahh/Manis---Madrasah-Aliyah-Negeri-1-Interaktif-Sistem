@@ -11,41 +11,32 @@
   z-index: 9999;
 }
 
-/* Overlay variant — sits on top of existing page content */
-.loading-screen-container.loading-overlay {
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
 .loading-orbit-wrapper {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Logo — rounded with white bg so it looks clean inside the orbit */
+/* Logo — rounded, snug inside orbits */
 .loading-logo-static {
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   object-fit: cover;
   z-index: 10;
   border-radius: 50%;
-  background-color: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Outer Orbit */
+/* Outer Orbit — tight around logo */
 .orbit-1 {
   position: absolute;
   top: 0;
   left: 0;
-  width: 160px;
-  height: 160px;
-  border: 1.5px solid rgba(19, 116, 184, 0.25);
+  width: 100px;
+  height: 100px;
+  border: 1.5px solid rgba(19, 116, 184, 0.22);
   border-radius: 50%;
   animation: spin-orbit 3s linear infinite;
 }
@@ -53,41 +44,38 @@
 /* Inner Orbit */
 .orbit-2 {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  width: 130px;
-  height: 130px;
-  border: 1.5px solid rgba(19, 116, 184, 0.20);
+  top: 10px;
+  left: 10px;
+  width: 80px;
+  height: 80px;
+  border: 1.5px solid rgba(19, 116, 184, 0.18);
   border-radius: 50%;
   animation: spin-orbit-reverse 2s linear infinite;
 }
 
-/* Dots on orbits — BLUE */
 .orbit-dot {
   position: absolute;
   border-radius: 50%;
 }
 
-/* Dot on Outer Orbit */
 .dot-1 {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background-color: #1374B8;
-  top: -5px;
+  top: -4px;
   left: 50%;
   transform: translateX(-50%);
-  box-shadow: 0 0 6px rgba(19, 116, 184, 0.5);
+  box-shadow: 0 0 5px rgba(19, 116, 184, 0.45);
 }
 
-/* Dot on Inner Orbit */
 .dot-2 {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   background-color: #74B8E1;
   top: 50%;
-  left: -3.5px;
+  left: -3px;
   transform: translateY(-50%);
-  box-shadow: 0 0 6px rgba(116, 184, 225, 0.5);
+  box-shadow: 0 0 5px rgba(116, 184, 225, 0.45);
 }
 
 @keyframes spin-orbit {
