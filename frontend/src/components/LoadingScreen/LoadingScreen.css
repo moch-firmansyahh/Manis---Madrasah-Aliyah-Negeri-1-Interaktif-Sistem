@@ -4,7 +4,18 @@
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background-color: var(--color-background, #ffffff); /* Match standard background */
+  background-color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+/* Overlay variant — sits on top of existing page content */
+.loading-screen-container.loading-overlay {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .loading-orbit-wrapper {
@@ -16,11 +27,15 @@
   justify-content: center;
 }
 
+/* Logo — rounded with white bg so it looks clean inside the orbit */
 .loading-logo-static {
-  width: 70px;
-  height: auto;
-  object-fit: contain;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
   z-index: 10;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Outer Orbit */
@@ -30,7 +45,7 @@
   left: 0;
   width: 160px;
   height: 160px;
-  border: 1px solid rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(19, 116, 184, 0.25);
   border-radius: 50%;
   animation: spin-orbit 3s linear infinite;
 }
@@ -42,50 +57,45 @@
   left: 15px;
   width: 130px;
   height: 130px;
-  border: 1px solid rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(19, 116, 184, 0.20);
   border-radius: 50%;
   animation: spin-orbit-reverse 2s linear infinite;
 }
 
-/* Dots on orbits */
+/* Dots on orbits — BLUE */
 .orbit-dot {
   position: absolute;
-  background-color: #e52929; /* Red dot like in the image */
   border-radius: 50%;
 }
 
 /* Dot on Outer Orbit */
 .dot-1 {
-  width: 8px;
-  height: 8px;
-  top: -4px;
+  width: 10px;
+  height: 10px;
+  background-color: #1374B8;
+  top: -5px;
   left: 50%;
   transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(19, 116, 184, 0.5);
 }
 
 /* Dot on Inner Orbit */
 .dot-2 {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
+  background-color: #74B8E1;
   top: 50%;
-  left: -3px;
+  left: -3.5px;
   transform: translateY(-50%);
+  box-shadow: 0 0 6px rgba(116, 184, 225, 0.5);
 }
 
 @keyframes spin-orbit {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @keyframes spin-orbit-reverse {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
 }

@@ -13,6 +13,15 @@ const normalizeApiUrl = (url) => {
 export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || "https://lms-manis-hfaabdfbfbeqhagw.eastasia-01.azurewebsites.net");
 console.log("LMS Frontend API URL:", API_URL);
 
+// Global loading callbacks — set by LoadingContext via setApiLoadingHooks()
+let _startLoading = null;
+let _stopLoading = null;
+
+export const setApiLoadingHooks = (start, stop) => {
+  _startLoading = start;
+  _stopLoading = stop;
+};
+
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("token");
   const headers = {};
@@ -45,49 +54,69 @@ const handleResponse = async (response, skipAuthRedirect = false) => {
   return data;
 };
 
+// Wrapper: show loading during API call, hide when done
+const withLoading = async (fn) => {
+  _startLoading?.();
+  try {
+    return await fn();
+  } finally {
+    _stopLoading?.();
+  }
+};
+
 export const apiClient = {
   get: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: "GET",
-      headers: getAuthHeaders(),
+    return withLoading(async () => {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+      return handleResponse(response);
     });
-    return handleResponse(response);
   },
   
   post: async (endpoint, body, options = {}) => {
-    const isFormData = body instanceof FormData;
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: "POST",
-      headers: getAuthHeaders(isFormData),
-      body: isFormData ? body : JSON.stringify(body),
+    return withLoading(async () => {
+      const isFormData = body instanceof FormData;
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: getAuthHeaders(isFormData),
+        body: isFormData ? body : JSON.stringify(body),
+      });
+      return handleResponse(response, options.skipAuthRedirect);
     });
-    return handleResponse(response, options.skipAuthRedirect);
   },
   
   put: async (endpoint, body) => {
-    const isFormData = body instanceof FormData;
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: "PUT",
-      headers: getAuthHeaders(isFormData),
-      body: isFormData ? body : JSON.stringify(body),
+    return withLoading(async () => {
+      const isFormData = body instanceof FormData;
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "PUT",
+        headers: getAuthHeaders(isFormData),
+        body: isFormData ? body : JSON.stringify(body),
+      });
+      return handleResponse(response);
     });
-    return handleResponse(response);
   },
   
   patch: async (endpoint, body) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: "PATCH",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(body),
+    return withLoading(async () => {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(body),
+      });
+      return handleResponse(response);
     });
-    return handleResponse(response);
   },
   
   delete: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
+    return withLoading(async () => {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      return handleResponse(response);
     });
-    return handleResponse(response);
   }
 };

@@ -1,6 +1,8 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useEffect } from "react";
 import Login from "./pages/auth/login/login";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen";
+import { LoadingProvider, useLoading } from "./utils/LoadingContext";
+import { setApiLoadingHooks } from "./utils/apiClient";
 
 // Lazy Loaded Pages
 const Dashboard = lazy(() => import("./pages/siswa/dashboard/dashboard"));
@@ -26,11 +28,17 @@ const GuruProfile = lazy(() => import("./pages/guru/guruProfile/guruProfile"));
 const GuruMateri = lazy(() => import("./pages/guru/guruMateri/guruMateri"));
 const FAQ = lazy(() => import("./pages/faq/faq"));
 
-function App() {
+function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [currentPage, setCurrentPage] = useState({ page: "dashboard" });
   const [showFaq, setShowFaq] = useState(false);
+  const { isLoading, startLoading, stopLoading } = useLoading();
+
+  // Wire apiClient to loading context
+  useEffect(() => {
+    setApiLoadingHooks(startLoading, stopLoading);
+  }, [startLoading, stopLoading]);
 
   const handleLogin = (role) => {
     setIsLoggedIn(true);
@@ -141,9 +149,21 @@ function App() {
   };
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
-      {renderPage()}
-    </Suspense>
+    <>
+      {/* Overlay loading for API calls */}
+      {isLoading && <LoadingScreen overlay />}
+      <Suspense fallback={<LoadingScreen />}>
+        {renderPage()}
+      </Suspense>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <LoadingProvider>
+      <AppContent />
+    </LoadingProvider>
   );
 }
 
