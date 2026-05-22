@@ -10,7 +10,8 @@ const normalizeApiUrl = (url) => {
   return trimmed;
 };
 
-export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || "");
+export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || "https://lms-manis-hfaabdfbfbeqhagw.eastasia-01.azurewebsites.net");
+console.log("LMS Frontend API URL:", API_URL);
 
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("token");
