@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node ./node_modules/prisma/build/index.js generate",
+    "postinstall": "prisma generate",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"No tests specified\" && exit 0"

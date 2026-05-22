@@ -26,7 +26,6 @@ jobs:
           cd lms-be
           npm install
           npx prisma generate
-          npm run build
 
       - name: Login ke Azure
         uses: azure/login@v2
