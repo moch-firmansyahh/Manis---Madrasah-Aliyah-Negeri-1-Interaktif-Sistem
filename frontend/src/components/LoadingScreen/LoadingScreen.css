@@ -1,73 +1,91 @@
 .loading-screen-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background-color: var(--color-background, #f7f9fb);
+  background-color: var(--color-background, #ffffff); /* Match standard background */
 }
 
-.loading-spinner-wrapper {
+.loading-orbit-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 160px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
 }
 
-/* Pulsing effect behind the logo */
-.loading-spinner-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  right: -10%;
-  bottom: -10%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(116, 184, 225, 0.4) 0%, rgba(116, 184, 225, 0) 70%);
-  animation: pulse-ring 2s infinite ease-out;
-  z-index: 1;
-}
-
-.loading-logo-spin {
-  width: 80px;
-  height: 80px;
+.loading-logo-static {
+  width: 70px;
+  height: auto;
   object-fit: contain;
-  z-index: 2;
-  /* Flip rotation (spinning like a coin) or a gentle breathe */
-  animation: logo-spin 3s infinite ease-in-out;
+  z-index: 10;
 }
 
-.loading-text {
-  font-family: var(--font-heading, "Manrope", sans-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary, #1374B8);
-  letter-spacing: 0.05em;
-  animation: fade-text 1.5s infinite alternate ease-in-out;
+/* Outer Orbit */
+.orbit-1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 160px;
+  height: 160px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  animation: spin-orbit 3s linear infinite;
 }
 
-@keyframes logo-spin {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+/* Inner Orbit */
+.orbit-2 {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  width: 130px;
+  height: 130px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  animation: spin-orbit-reverse 2s linear infinite;
 }
 
-@keyframes pulse-ring {
+/* Dots on orbits */
+.orbit-dot {
+  position: absolute;
+  background-color: #e52929; /* Red dot like in the image */
+  border-radius: 50%;
+}
+
+/* Dot on Outer Orbit */
+.dot-1 {
+  width: 8px;
+  height: 8px;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Dot on Inner Orbit */
+.dot-2 {
+  width: 6px;
+  height: 6px;
+  top: 50%;
+  left: -3px;
+  transform: translateY(-50%);
+}
+
+@keyframes spin-orbit {
   0% {
-    transform: scale(0.8);
-    opacity: 0.8;
+    transform: rotate(0deg);
   }
   100% {
-    transform: scale(1.5);
-    opacity: 0;
+    transform: rotate(360deg);
   }
 }
 
-@keyframes fade-text {
-  0% { opacity: 0.6; }
-  100% { opacity: 1; }
+@keyframes spin-orbit-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
 }

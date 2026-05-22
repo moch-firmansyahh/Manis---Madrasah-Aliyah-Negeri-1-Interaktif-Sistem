@@ -5,10 +5,15 @@ import logoImg from '../../assets/logo.png';
 const LoadingScreen = () => {
   return (
     <div className="loading-screen-container">
-      <div className="loading-spinner-wrapper">
-        <img src={logoImg} alt="MAN 1 Sumedang Logo" className="loading-logo-spin" />
+      <div className="loading-orbit-wrapper">
+        <div className="orbit orbit-1">
+          <div className="orbit-dot dot-1"></div>
+        </div>
+        <div className="orbit orbit-2">
+          <div className="orbit-dot dot-2"></div>
+        </div>
+        <img src={logoImg} alt="MAN 1 Sumedang Logo" className="loading-logo-static" />
       </div>
-      <h2 className="loading-text">Memuat...</h2>
     </div>
   );
 };
