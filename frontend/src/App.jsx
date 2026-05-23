@@ -1,8 +1,9 @@
-import { useState, lazy, Suspense, useEffect } from "react";
+import { useState, lazy, Suspense, useEffect, useRef } from "react";
 import Login from "./pages/auth/login/login";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen";
 import { LoadingProvider, useLoading } from "./utils/LoadingContext";
 import { setApiLoadingHooks } from "./utils/apiClient";
+import "./App.css";
 
 // Lazy Loaded Pages
 const Dashboard = lazy(() => import("./pages/siswa/dashboard/dashboard"));
@@ -34,6 +35,7 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState({ page: "dashboard" });
   const [showFaq, setShowFaq] = useState(false);
   const { isLoading, startLoading, stopLoading } = useLoading();
+  const pageKey = useRef(0);
 
   // Wire apiClient to loading context
   useEffect(() => {
@@ -44,12 +46,14 @@ function AppContent() {
     setIsLoggedIn(true);
     setUserRole(role);
     setCurrentPage({ page: role === "Guru" ? "guruDashboard" : "dashboard" });
+    pageKey.current += 1;
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole("");
     setCurrentPage({ page: "dashboard" });
+    pageKey.current += 1;
   };
 
   const navigateTo = (target) => {
@@ -58,6 +62,7 @@ function AppContent() {
     } else {
       setCurrentPage(target);
     }
+    pageKey.current += 1;
   };
 
   const renderPage = () => {
@@ -83,7 +88,6 @@ function AppContent() {
       };
       const pageName = currentPage.page;
 
-      // ── SISWA pages ──
       if (pageName === "daftarMataKuliah") return <DaftarMataKuliah {...sharedProps} />;
       if (pageName === "mataKuliah") return <MataKuliah {...sharedProps} />;
       if (pageName === "daftarTugas") return <DaftarTugas {...sharedProps} />;
@@ -95,7 +99,6 @@ function AppContent() {
       if (pageName === "nilai") return <Nilai {...sharedProps} />;
       if (pageName === "pengumpulanTugas") return <PengumpulanTugas {...sharedProps} taskId={currentPage.taskId} />;
 
-      // ── GURU-specific pages ──
       if (pageName === "guruPresensi") return <GuruPresensi {...sharedProps} />;
       if (pageName === "guruTugas") return <GuruTugas {...sharedProps} />;
       if (pageName === "guruKelompok") return <GuruKelompok {...sharedProps} />;
@@ -115,7 +118,6 @@ function AppContent() {
         </div>
       );
 
-      // Default dashboard per role
       if (userRole === "Siswa") {
         return <Dashboard {...sharedProps} />;
       } else if (userRole === "Guru") {
@@ -124,18 +126,7 @@ function AppContent() {
         return (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh" }}>
             <h2>Akses role tidak ditemukan.</h2>
-            <button
-              onClick={handleLogout}
-              style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1rem",
-                backgroundColor: "#1374B8",
-                color: "white",
-                borderRadius: "8px",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleLogout} style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1374B8", color: "white", borderRadius: "8px", border: "none", cursor: "pointer" }}>
               Kembali ke Login
             </button>
           </div>
@@ -143,17 +134,16 @@ function AppContent() {
       }
     }
 
-    return (
-      <Login onLogin={handleLogin} onFaq={() => setShowFaq(true)} />
-    );
+    return <Login onLogin={handleLogin} onFaq={() => setShowFaq(true)} />;
   };
 
   return (
     <>
-      {/* Overlay loading for API calls */}
       {isLoading && <LoadingScreen />}
       <Suspense fallback={<LoadingScreen />}>
-        {renderPage()}
+        <div className="page-fade-in" key={pageKey.current}>
+          {renderPage()}
+        </div>
       </Suspense>
     </>
   );
