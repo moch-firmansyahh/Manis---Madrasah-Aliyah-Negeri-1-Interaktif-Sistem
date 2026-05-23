@@ -270,7 +270,7 @@ const allKuis = [];
                 value={selectedCourse}
                 onChange={(e) => setSelectedCourse(e.target.value)}
               >
-                <option value="all">Semua Mata Kuliah</option>
+                <option value="all">Semua Mata Pelajaran</option>
                 {courses.map(c => (
                   <option key={c.idMataKuliah} value={c.idMataKuliah}>{c.namaMataKuliah}</option>
                 ))}

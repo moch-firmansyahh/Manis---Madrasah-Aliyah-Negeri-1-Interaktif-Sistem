@@ -244,7 +244,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                 </div>
               ) : (
                 <div className="db-class-card" style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
-                  <p style={{ color: 'var(--slate-500)' }}>Belum ada mata kuliah yang diambil.</p>
+                  <p style={{ color: 'var(--slate-500)' }}>Belum ada mata pelajaran yang diambil.</p>
                 </div>
               )}
 

@@ -32,13 +32,12 @@ export default function GuruProfile({ onNavigate, onLogout }) {
   });
   const [profileData, setProfileData] = useState({
     nama: storedUser.nama || "Guru",
-    nidn: storedUser.nomorInduk || "-",
   });
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [stats, setStats] = useState({
     totalSiswa: 0,
     tugasDiberikan: 0,
-    rataPresensi: "0%"
+    rataPresensi: "0%",
   });
   const [pwForm, setPwForm] = useState({ old: "", newPw: "", confirm: "" });
 
@@ -61,7 +60,7 @@ export default function GuruProfile({ onNavigate, onLogout }) {
     const fetchProfile = async () => {
       try {
         // Fetch profile data
-        const res = await apiClient.get('/api/guru/profile/profile');
+        const res = await apiClient.get("/api/guru/profile/profile");
         if (res && res.data) {
           const d = res.data;
           setProfileData({
@@ -76,23 +75,23 @@ export default function GuruProfile({ onNavigate, onLogout }) {
           });
         }
         // Fetch photo
-        const meRes = await apiClient.get('/api/profile/me');
+        const meRes = await apiClient.get("/api/profile/me");
         if (meRes?.data?.fotoUrl) {
           setAvatarUrl(`${API_BASE}${meRes.data.fotoUrl}`);
         }
-        
+
         // Fetch courses taught by this guru
-        const mkRes = await apiClient.get('/api/mata-kuliah');
-        setMataKuliahList(Array.isArray(mkRes) ? mkRes : (mkRes.data || []));
+        const mkRes = await apiClient.get("/api/mata-kuliah");
+        setMataKuliahList(Array.isArray(mkRes) ? mkRes : mkRes.data || []);
 
         // Fetch stats from dashboard
-        const dashRes = await apiClient.get('/api/guru/dashboard');
+        const dashRes = await apiClient.get("/api/guru/dashboard");
         if (dashRes?.stats) {
           setStats({
             totalSiswa: dashRes.stats.totalSiswa || 0,
             // You can use tugasPending or another metric here, we'll use tugasPending
             tugasDiberikan: dashRes.stats.tugasPending || 0,
-            rataPresensi: dashRes.stats.rataPresensi || "0%"
+            rataPresensi: dashRes.stats.rataPresensi || "0%",
           });
         }
       } catch (error) {
@@ -107,8 +106,12 @@ export default function GuruProfile({ onNavigate, onLogout }) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await apiClient.put('/api/guru/profile/profile', formData);
-      const updatedUser = { ...storedUser, email: formData.email, telepon: formData.telepon };
+      await apiClient.put("/api/guru/profile/profile", formData);
+      const updatedUser = {
+        ...storedUser,
+        email: formData.email,
+        telepon: formData.telepon,
+      };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setEditMode(false);
       showToast("success", "Data profil berhasil diperbarui.");
@@ -134,7 +137,7 @@ export default function GuruProfile({ onNavigate, onLogout }) {
       return;
     }
     try {
-      await apiClient.post('/api/profile/change-password', {
+      await apiClient.post("/api/profile/change-password", {
         oldPassword: pwForm.old,
         newPassword: pwForm.newPw,
       });
@@ -156,20 +159,23 @@ export default function GuruProfile({ onNavigate, onLogout }) {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 640, height: 480 }
+        video: { facingMode: "user", width: 640, height: 480 },
       });
       streamRef.current = stream;
       setCameraActive(true);
       setPhotoPreview(null);
       setPhotoFile(null);
     } catch (error) {
-      showToast("error", "Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.");
+      showToast(
+        "error",
+        "Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.",
+      );
     }
   };
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setCameraActive(false);
@@ -181,14 +187,20 @@ export default function GuruProfile({ onNavigate, onLogout }) {
     if (!video || !canvas) return;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0);
-    canvas.toBlob((blob) => {
-      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(blob));
-      stopCamera();
-    }, 'image/jpeg', 0.9);
+    canvas.toBlob(
+      (blob) => {
+        const file = new File([blob], `photo_${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+        setPhotoFile(file);
+        setPhotoPreview(URL.createObjectURL(blob));
+        stopCamera();
+      },
+      "image/jpeg",
+      0.9,
+    );
   };
 
   const handleFileSelect = (e) => {
@@ -204,8 +216,8 @@ export default function GuruProfile({ onNavigate, onLogout }) {
     setUploadingPhoto(true);
     try {
       const fd = new FormData();
-      fd.append('photo', photoFile);
-      const res = await apiClient.post('/api/profile/photo', fd);
+      fd.append("photo", photoFile);
+      const res = await apiClient.post("/api/profile/photo", fd);
       if (res?.data?.fotoUrl) {
         setAvatarUrl(`${API_BASE}${res.data.fotoUrl}`);
         const u = JSON.parse(localStorage.getItem("user") || "{}");
@@ -231,7 +243,10 @@ export default function GuruProfile({ onNavigate, onLogout }) {
   };
 
   return (
-    <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+    <div
+      className="page-shell"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       {toast && (
         <div className={`prf-toast prf-toast--${toast.type}`}>
           <span className="material-symbols-outlined">
@@ -243,11 +258,17 @@ export default function GuruProfile({ onNavigate, onLogout }) {
 
       {/* Password Modal */}
       {showPasswordModal && (
-        <div className="prf-modal-overlay" onClick={() => setShowPasswordModal(false)}>
+        <div
+          className="prf-modal-overlay"
+          onClick={() => setShowPasswordModal(false)}
+        >
           <div className="prf-modal" onClick={(e) => e.stopPropagation()}>
             <div className="prf-modal-header">
               <h3>Ubah Kata Sandi</h3>
-              <button className="prf-modal-close" onClick={() => setShowPasswordModal(false)}>
+              <button
+                className="prf-modal-close"
+                onClick={() => setShowPasswordModal(false)}
+              >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -264,15 +285,23 @@ export default function GuruProfile({ onNavigate, onLogout }) {
                     type="password"
                     placeholder="••••••••"
                     value={pwForm[key]}
-                    onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })}
+                    onChange={(e) =>
+                      setPwForm({ ...pwForm, [key]: e.target.value })
+                    }
                   />
                 </div>
               ))}
               <div className="prf-modal-actions">
-                <button type="button" className="prf-btn-cancel" onClick={() => setShowPasswordModal(false)}>
+                <button
+                  type="button"
+                  className="prf-btn-cancel"
+                  onClick={() => setShowPasswordModal(false)}
+                >
                   Batal
                 </button>
-                <button type="submit" className="prf-btn-save">Simpan</button>
+                <button type="submit" className="prf-btn-save">
+                  Simpan
+                </button>
               </div>
             </form>
           </div>
@@ -282,7 +311,10 @@ export default function GuruProfile({ onNavigate, onLogout }) {
       {/* Photo Upload Modal */}
       {showPhotoModal && (
         <div className="prf-modal-overlay" onClick={closePhotoModal}>
-          <div className="prf-modal prf-photo-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="prf-modal prf-photo-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="prf-modal-header">
               <h3>Ganti Foto Profil</h3>
               <button className="prf-modal-close" onClick={closePhotoModal}>
@@ -292,44 +324,77 @@ export default function GuruProfile({ onNavigate, onLogout }) {
             <div className="prf-modal-body prf-photo-body">
               <div className="prf-photo-preview-area">
                 {cameraActive ? (
-                  <video ref={videoRef} autoPlay playsInline muted className="prf-camera-video" />
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="prf-camera-video"
+                  />
                 ) : photoPreview ? (
-                  <img src={photoPreview} alt="Preview" className="prf-photo-preview-img" />
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    className="prf-photo-preview-img"
+                  />
                 ) : (
                   <div className="prf-photo-placeholder">
-                    <span className="material-symbols-outlined" style={{ fontSize: "4rem", color: "#94a3b8" }}>person</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "4rem", color: "#94a3b8" }}
+                    >
+                      person
+                    </span>
                     <p>Pilih foto dari file atau ambil dari kamera</p>
                   </div>
                 )}
               </div>
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
+              <canvas ref={canvasRef} style={{ display: "none" }} />
               <div className="prf-photo-actions">
                 {cameraActive ? (
                   <>
-                    <button className="prf-photo-btn prf-photo-btn--capture" onClick={capturePhoto}>
-                      <span className="material-symbols-outlined">photo_camera</span>
+                    <button
+                      className="prf-photo-btn prf-photo-btn--capture"
+                      onClick={capturePhoto}
+                    >
+                      <span className="material-symbols-outlined">
+                        photo_camera
+                      </span>
                       Ambil Foto
                     </button>
-                    <button className="prf-photo-btn prf-photo-btn--cancel" onClick={stopCamera}>
+                    <button
+                      className="prf-photo-btn prf-photo-btn--cancel"
+                      onClick={stopCamera}
+                    >
                       <span className="material-symbols-outlined">close</span>
                       Batal
                     </button>
                   </>
                 ) : (
                   <>
-                    <button className="prf-photo-btn prf-photo-btn--camera" onClick={startCamera}>
-                      <span className="material-symbols-outlined">photo_camera</span>
+                    <button
+                      className="prf-photo-btn prf-photo-btn--camera"
+                      onClick={startCamera}
+                    >
+                      <span className="material-symbols-outlined">
+                        photo_camera
+                      </span>
                       Buka Kamera
                     </button>
-                    <button className="prf-photo-btn prf-photo-btn--file" onClick={() => fileInputRef.current?.click()}>
-                      <span className="material-symbols-outlined">folder_open</span>
+                    <button
+                      className="prf-photo-btn prf-photo-btn--file"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span className="material-symbols-outlined">
+                        folder_open
+                      </span>
                       Pilih dari File
                     </button>
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       onChange={handleFileSelect}
                     />
                   </>
@@ -337,11 +402,24 @@ export default function GuruProfile({ onNavigate, onLogout }) {
               </div>
             </div>
             {photoPreview && !cameraActive && (
-              <div className="prf-modal-actions" style={{ padding: "0 1.5rem 1.5rem" }}>
-                <button className="prf-btn-cancel" onClick={() => { setPhotoPreview(null); setPhotoFile(null); }}>
+              <div
+                className="prf-modal-actions"
+                style={{ padding: "0 1.5rem 1.5rem" }}
+              >
+                <button
+                  className="prf-btn-cancel"
+                  onClick={() => {
+                    setPhotoPreview(null);
+                    setPhotoFile(null);
+                  }}
+                >
                   Hapus
                 </button>
-                <button className="prf-btn-save" onClick={uploadPhoto} disabled={uploadingPhoto}>
+                <button
+                  className="prf-btn-save"
+                  onClick={uploadPhoto}
+                  disabled={uploadingPhoto}
+                >
                   {uploadingPhoto ? "Mengunggah..." : "Simpan Foto"}
                 </button>
               </div>
@@ -350,17 +428,41 @@ export default function GuruProfile({ onNavigate, onLogout }) {
         </div>
       )}
 
-      <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruProfile" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+      <SidebarGuru
+        onNavigate={onNavigate}
+        onLogout={onLogout}
+        activePage="guruProfile"
+        mobileOpen={sidebarOpen}
+        onClose={closeSidebar}
+      />
 
-      <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+      <main
+        className="page-main"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
+        <Navbar
+          role="Guru"
+          onOpenSidebar={openSidebar}
+          onNavigate={onNavigate}
+        />
 
         <div className="page-content">
           {/* Identity Card */}
           <div className="prf-identity-card dprf-identity-card">
             <div className="prf-avatar-wrap">
-              <img src={avatarUrl} alt="Foto Profil Guru" className="prf-avatar" onError={(e) => { e.target.src = DEFAULT_AVATAR; }} />
-              <button className="prf-avatar-edit" title="Ganti foto" onClick={() => setShowPhotoModal(true)}>
+              <img
+                src={avatarUrl}
+                alt="Foto Profil Guru"
+                className="prf-avatar"
+                onError={(e) => {
+                  e.target.src = DEFAULT_AVATAR;
+                }}
+              />
+              <button
+                className="prf-avatar-edit"
+                title="Ganti foto"
+                onClick={() => setShowPhotoModal(true)}
+              >
                 <span className="material-symbols-outlined">photo_camera</span>
               </button>
             </div>
@@ -371,13 +473,17 @@ export default function GuruProfile({ onNavigate, onLogout }) {
                   NIDN: {profileData.nidn}
                 </span>
                 <span className="prf-verified">
-                  <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#059669" }}>verified</span>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "1rem", color: "#059669" }}
+                  >
+                    verified
+                  </span>
                   Akun Terverifikasi
                 </span>
               </div>
               <div className="dprf-tags">
                 <span className="dprf-tag">Guru Tetap</span>
-                <span className="dprf-tag dprf-tag--teal">S3 Informatika</span>
               </div>
             </div>
           </div>
@@ -387,7 +493,15 @@ export default function GuruProfile({ onNavigate, onLogout }) {
             <div className="prf-data-card">
               <div className="prf-data-header">
                 <div className="prf-data-title">
-                  <span className="material-symbols-outlined" style={{ color: "var(--color-secondary)", fontSize: "1.25rem" }}>id_card</span>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      color: "var(--color-secondary)",
+                      fontSize: "1.25rem",
+                    }}
+                  >
+                    id_card
+                  </span>
                   <h2>Data Pribadi</h2>
                 </div>
               </div>
@@ -419,20 +533,34 @@ export default function GuruProfile({ onNavigate, onLogout }) {
                 </div>
               </div>
               <div className="prf-admin-notice">
-                <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#7c5800" }}>info</span>
-                <p>Untuk mengubah data pribadi, ajukan permintaan ke <strong>administrator akademik</strong>.</p>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "1rem", color: "#7c5800" }}
+                >
+                  info
+                </span>
+                <p>
+                  Untuk mengubah data pribadi, ajukan permintaan ke{" "}
+                  <strong>administrator akademik</strong>.
+                </p>
               </div>
             </div>
 
             <div className="prf-security-card">
               <div className="prf-security-header">
-                <span className="material-symbols-outlined prf-shield-icon">security</span>
+                <span className="material-symbols-outlined prf-shield-icon">
+                  security
+                </span>
                 <h2>Keamanan</h2>
               </div>
               <p className="prf-security-desc">
-                Jaga keamanan akun Anda dengan memperbarui kata sandi secara berkala.
+                Jaga keamanan akun Anda dengan memperbarui kata sandi secara
+                berkala.
               </p>
-              <button className="prf-pw-btn" onClick={() => setShowPasswordModal(true)}>
+              <button
+                className="prf-pw-btn"
+                onClick={() => setShowPasswordModal(true)}
+              >
                 <span className="material-symbols-outlined">lock_reset</span>
                 Ubah Kata Sandi
               </button>
@@ -452,17 +580,22 @@ export default function GuruProfile({ onNavigate, onLogout }) {
                     <div key={mk.idMataKuliah} className="dprf-matkul-row">
                       <div>
                         <p className="dprf-mk-name">{mk.namaMataKuliah}</p>
-                        <p className="dprf-mk-code">MK-{mk.idMataKuliah} · 3 SKS</p>
+                        <p className="dprf-mk-code">
+                          MK-{mk.idMataKuliah} · 3 SKS
+                        </p>
                       </div>
                       <span className="dprf-mk-badge">Aktif</span>
                     </div>
                   ))
                 ) : (
-                  <p style={{ color: "var(--slate-500)", fontSize: "0.875rem" }}>Belum ada mata kuliah yang diampu.</p>
+                  <p
+                    style={{ color: "var(--slate-500)", fontSize: "0.875rem" }}
+                  >
+                    Belum ada mata kuliah yang diampu.
+                  </p>
                 )}
               </div>
             </div>
-
           </div>
         </div>
       </main>

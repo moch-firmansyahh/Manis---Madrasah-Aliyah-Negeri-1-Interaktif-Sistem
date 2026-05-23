@@ -240,7 +240,7 @@ export default function GuruNilaiIndividu({ onNavigate, onLogout, idMataKuliah, 
               <p className="dni-subtitle">
                 {selectedTugas?.tipe === 'Kuis' 
                   ? 'Hasil dan nilai kuis siswa yang bersifat permanen' 
-                  : 'Pilih mata kuliah dan tugas untuk memberi penilaian'}
+                  : 'Pilih mata pelajaran dan tugas untuk memberi penilaian'}
               </p>
             </div>
           </div>

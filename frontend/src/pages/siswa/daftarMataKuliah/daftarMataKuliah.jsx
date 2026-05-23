@@ -18,22 +18,25 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
     const fetchCourses = async () => {
       try {
         const res = await apiClient.get("/api/mata-kuliah/siswa/me");
-        const data = Array.isArray(res) ? res : (res.data || []);
-        
+        const data = Array.isArray(res) ? res : res.data || [];
+
         // Fetch progress untuk setiap mata kuliah
         const coursesWithProgress = await Promise.all(
           data.map(async (course) => {
             let progress = 0;
             try {
               const progressRes = await apiClient.get(
-                `/api/materi/mata-kuliah/${course.idMataKuliah}/progress?nis=${nis}`
+                `/api/materi/mata-kuliah/${course.idMataKuliah}/progress?nis=${nis}`,
               );
               const progressData = progressRes.data || progressRes;
               progress = progressData.percentage || 0;
             } catch (e) {
-              console.error(`Error fetching progress for ${course.idMataKuliah}:`, e);
+              console.error(
+                `Error fetching progress for ${course.idMataKuliah}:`,
+                e,
+              );
             }
-            
+
             return {
               id: course.idMataKuliah,
               name: course.namaMataKuliah,
@@ -41,12 +44,13 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
               icon: "menu_book",
               guru: course.guru?.user?.nama || "Belum ditentukan",
               jadwal: course.jadwal || "-",
-              desc: "Materi dan tugas untuk mata kuliah " + course.namaMataKuliah,
-              progress: progress
+              desc:
+                "Materi dan tugas untuk mata kuliah " + course.namaMataKuliah,
+              progress: progress,
             };
-          })
+          }),
         );
-        
+
         setCourses(coursesWithProgress);
       } catch (error) {
         console.error("Gagal memuat mata kuliah", error);
@@ -59,16 +63,30 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
 
   if (loading) {
     return (
-      <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
-        <main className="page-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          Memuat daftar mata kuliah...
+      <div
+        className="page-shell"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
+        <main
+          className="page-main"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          Memuat daftar mata pelajaran...
         </main>
       </div>
     );
   }
 
   return (
-    <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+    <div
+      className="page-shell"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       {/* ─── Sidebar ─── */}
       <Sidebar
         onNavigate={onNavigate}
@@ -79,9 +97,22 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
       />
 
       {/* ─── Main ─── */}
-      <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
+      <main
+        className="page-main"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
         {/* Navbar */}
-        <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
+        <Navbar
+          role="Siswa"
+          onOpenSidebar={openSidebar}
+          onNavigate={
+            typeof nav !== "undefined"
+              ? nav
+              : typeof onNavigate !== "undefined"
+                ? onNavigate
+                : undefined
+          }
+        />
 
         {/* Hero Banner */}
         <div className="dm-hero">
@@ -92,7 +123,7 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
           />
           <div className="dm-hero-overlay"></div>
           <div className="dm-hero-content">
-            <h2 className="dm-hero-title">Daftar Mata Kuliah Saya</h2>
+            <h2 className="dm-hero-title">Daftar Mata Pelajaran Saya</h2>
             <p className="dm-hero-subtitle">Selamat Belajar</p>
           </div>
         </div>
@@ -100,43 +131,93 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
         {/* Course Grid */}
         <div className="dm-grid-wrap">
           <div className="dm-course-grid">
-            {courses.length > 0 ? courses.map((c) => (
-              <div key={c.id} className="dm-course-card">
-                <div className="dm-card-top">
-                  <div className="dm-course-icon">
-                    <span className="material-symbols-outlined">{c.icon}</span>
+            {courses.length > 0 ? (
+              courses.map((c) => (
+                <div key={c.id} className="dm-course-card">
+                  <div className="dm-card-top">
+                    <div className="dm-course-icon">
+                      <span className="material-symbols-outlined">
+                        {c.icon}
+                      </span>
+                    </div>
+                    <span className="dm-cat-badge">{c.category}</span>
                   </div>
-                  <span className="dm-cat-badge">{c.category}</span>
+                  <h3 className="dm-course-name">{c.name}</h3>
+                  <p className="dm-course-desc">{c.desc}</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      margin: "8px 0",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--slate-500)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "16px" }}
+                      >
+                        person
+                      </span>
+                      {c.guru}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--slate-500)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "16px" }}
+                      >
+                        schedule
+                      </span>
+                      {c.jadwal}
+                    </span>
+                  </div>
+                  <div className="dm-progress-row">
+                    <p className="dm-prog-label">Progress Belajar</p>
+                    <p className="dm-prog-pct">{c.progress}% Selesai</p>
+                  </div>
+                  <div className="dm-prog-track">
+                    <div
+                      className="dm-prog-fill"
+                      style={{ width: `${c.progress}%` }}
+                    ></div>
+                  </div>
+                  <button
+                    className="dm-lihat-btn"
+                    onClick={() =>
+                      onNavigate &&
+                      onNavigate({ page: "mataKuliah", idMataKuliah: c.id })
+                    }
+                  >
+                    Lihat Materi →
+                  </button>
                 </div>
-                <h3 className="dm-course-name">{c.name}</h3>
-                <p className="dm-course-desc">{c.desc}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: '8px 0' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person</span>
-                    {c.guru}
-                  </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
-                    {c.jadwal}
-                  </span>
-                </div>
-                <div className="dm-progress-row">
-                  <p className="dm-prog-label">Progress Belajar</p>
-                  <p className="dm-prog-pct">{c.progress}% Selesai</p>
-                </div>
-                <div className="dm-prog-track">
-                  <div className="dm-prog-fill" style={{ width: `${c.progress}%` }}></div>
-                </div>
-                <button
-                  className="dm-lihat-btn"
-                  onClick={() => onNavigate && onNavigate({ page: "mataKuliah", idMataKuliah: c.id })}
-                >
-                  Lihat Materi →
-                </button>
-              </div>
-            )) : (
-              <div style={{ padding: "2rem", textAlign: "center", gridColumn: "1 / -1", color: "var(--slate-500)" }}>
-                Belum ada mata kuliah yang tersedia.
+              ))
+            ) : (
+              <div
+                style={{
+                  padding: "2rem",
+                  textAlign: "center",
+                  gridColumn: "1 / -1",
+                  color: "var(--slate-500)",
+                }}
+              >
+                Belum ada mata pelajaran yang tersedia.
               </div>
             )}
           </div>
