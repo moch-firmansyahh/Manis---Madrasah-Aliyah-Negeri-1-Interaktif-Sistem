@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useRef } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Login from "./pages/auth/login/login";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen";
 import "./App.css";
@@ -28,24 +28,82 @@ const GuruMateri = lazy(() => import("./pages/guru/guruMateri/guruMateri"));
 const FAQ = lazy(() => import("./pages/faq/faq"));
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState("");
-  const [currentPage, setCurrentPage] = useState({ page: "dashboard" });
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    if (sessionStorage.getItem("isF5") === "true") return false;
+    return !!localStorage.getItem("token");
+  });
+  const [userRole, setUserRole] = useState(() => {
+    if (sessionStorage.getItem("isF5") === "true") return "";
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        return user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : "";
+      } catch { /* ignore */ }
+    }
+    return "";
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (sessionStorage.getItem("isF5") === "true") return { page: "dashboard" };
+    const savedPage = sessionStorage.getItem("currentPage");
+    if (savedPage) {
+      try { return JSON.parse(savedPage); } catch { /* ignore */ }
+    }
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const role = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : "";
+        return { page: role === "Guru" ? "guruDashboard" : "dashboard" };
+      } catch { /* ignore */ }
+    }
+    return { page: "dashboard" };
+  });
   const [showFaq, setShowFaq] = useState(false);
-  const pageKey = useRef(0);
+  const [pageKey, setPageKey] = useState(0);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Deteksi F5 atau Ctrl+R
+      if (e.key === "F5" || (e.ctrlKey && (e.key === "r" || e.key === "R"))) {
+        sessionStorage.setItem("isF5", "true");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("isF5") === "true") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("isF5");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      sessionStorage.setItem("currentPage", JSON.stringify(currentPage));
+    } else {
+      sessionStorage.removeItem("currentPage");
+    }
+  }, [currentPage, isLoggedIn]);
 
   const handleLogin = (role) => {
     setIsLoggedIn(true);
     setUserRole(role);
     setCurrentPage({ page: role === "Guru" ? "guruDashboard" : "dashboard" });
-    pageKey.current += 1;
+    setPageKey((k) => k + 1);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("currentPage");
     setIsLoggedIn(false);
     setUserRole("");
     setCurrentPage({ page: "dashboard" });
-    pageKey.current += 1;
+    setPageKey((k) => k + 1);
   };
 
   const navigateTo = (target) => {
@@ -54,7 +112,7 @@ function App() {
     } else {
       setCurrentPage(target);
     }
-    pageKey.current += 1;
+    setPageKey((k) => k + 1);
   };
 
   const renderPage = () => {
@@ -131,7 +189,7 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <div className="page-fade-in" key={pageKey.current}>
+      <div className="page-fade-in" key={pageKey}>
         {renderPage()}
       </div>
     </Suspense>
