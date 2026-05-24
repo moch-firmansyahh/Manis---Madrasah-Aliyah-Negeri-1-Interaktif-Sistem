@@ -324,7 +324,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
 
               {loadingCourses ? (
                 <div style={{ textAlign: "center", padding: "3rem" }}>
-                  Memuat daftar mata kuliah...
+                  Memuat daftar mata pelajaran...
                 </div>
               ) : mataKuliahList.length === 0 ? (
                 <div
@@ -347,9 +347,9 @@ export default function GuruForum({ onNavigate, onLogout }) {
                   >
                     school
                   </span>
-                  <h3>Tidak Ada Mata Kuliah</h3>
+                  <h3>Tidak Ada Mata Pelajaran</h3>
                   <p style={{ color: "#64748b", marginTop: "0.5rem" }}>
-                    Belum ada mata kuliah yang tersedia.
+                    Belum ada mata pelajaran yang tersedia.
                   </p>
                 </div>
               ) : (
@@ -479,7 +479,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
                   </span>
                   <h3>Belum Ada Diskusi</h3>
                   <p style={{ color: "#64748b", marginTop: "0.5rem" }}>
-                    Belum ada yang memulai diskusi di mata kuliah ini.
+                    Belum ada yang memulai diskusi di mata pelajaran ini.
                   </p>
                 </div>
               ) : (
@@ -681,7 +681,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
               <div className="fd-topbar">
                 <div>
                   <nav className="fd-breadcrumb">
-                    <span>Mata Kuliah</span>
+                    <span>Mata Pelajaran</span>
                     <span className="material-symbols-outlined">
                       chevron_right
                     </span>

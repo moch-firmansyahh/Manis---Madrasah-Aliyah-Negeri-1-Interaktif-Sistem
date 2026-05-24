@@ -267,7 +267,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
                       <span className="pmh-class-tab-name">{c.name}</span>
                     </button>
                   )) : (
-                    <p style={{ color: "var(--slate-500)" }}>Belum terdaftar di mata kuliah manapun</p>
+                    <p style={{ color: "var(--slate-500)" }}>Belum terdaftar di mata pelajaran manapun</p>
                   )}
                 </div>
               </div>

@@ -226,7 +226,7 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
               <span className="material-symbols-outlined">school</span>
               FAKULTAS INFORMATIKA
             </span>
-            <h2 className="mk-course-title">Mata Kuliah: {course?.namaMataKuliah || course?.nama || "Mata Kuliah"}</h2>
+            <h2 className="mk-course-title">Mata Pelajaran: {course?.namaMataKuliah || course?.nama || "Mata Kuliah"}</h2>
             <p className="mk-course-desc">
               Silakan pelajari materi dan kerjakan tugas yang tersedia.
             </p>

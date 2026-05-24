@@ -443,7 +443,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 <thead>
                   <tr>
                     <th>Kode MK</th>
-                    <th>Mata Kuliah</th>
+                    <th>Mata Pelajaran</th>
                     <th className="nlai-th-center">SKS</th>
                     <th className="nlai-th-center">Tugas</th>
                     <th className="nlai-th-center">UTS</th>

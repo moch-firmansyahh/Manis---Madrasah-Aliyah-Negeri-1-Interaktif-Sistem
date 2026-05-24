@@ -463,13 +463,13 @@ export default function GuruMateri({ onNavigate, onLogout }) {
               {/* Filters */}
               <div className="dm-filter-row" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
                 <div className="dm-filter-group--select">
-                  <label className="dm-filter-label">Mata Kuliah:</label>
+                  <label className="dm-filter-label">Mata Pelajaran:</label>
                   <select
                     className="dm-filter-select"
                     value={filterMatkul}
                     onChange={(e) => setFilterMatkul(e.target.value)}
                   >
-                    <option value="Semua">Semua Mata Kuliah</option>
+                    <option value="Semua">Semua Mata Pelajaran</option>
                     {matkulList.map((m) => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
@@ -693,7 +693,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
 
                     {/* Mata Kuliah */}
                     <div className="dm-field">
-                      <label className="dm-label">Mata Kuliah</label>
+                      <label className="dm-label">Mata Pelajaran</label>
                       <select
                         className="dm-select"
                         value={form.matkul}

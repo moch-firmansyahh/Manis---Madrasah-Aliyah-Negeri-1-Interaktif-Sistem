@@ -253,7 +253,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
 
   const handleStatusChange = async (nis, newStatus) => {
     if (!selectedMatkul?.id) {
-      showToast("Pilih mata kuliah terlebih dahulu", "error");
+      showToast("Pilih mata pelajaran terlebih dahulu", "error");
       return;
     }
     setStudents((prev) =>
@@ -531,7 +531,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   className="dp-btn-primary"
                   onClick={async () => {
                     if (!selectedMatkul?.id) {
-                      showToast("Pilih mata kuliah terlebih dahulu", "error");
+                      showToast("Pilih mata pelajaran terlebih dahulu", "error");
                       return;
                     }
                     try {

@@ -282,7 +282,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                   className="db-class-card"
                   style={{ cursor: "pointer" }}
                   onClick={() => onNavigate && onNavigate("daftarMataKuliah")}
-                  title="Lihat Mata Kuliah"
+                  title="Lihat Mata Pelajaran"
                 >
                   <div className="db-class-img">
                     <img

@@ -12,8 +12,9 @@ const FAQ_DATA = {
         answer: (
           <>
             <p>
-              Manis adalah platform pengelolaan pembelajaran digital yang digunakan oleh guru dan siswa untuk
-              mendukung kegiatan akademik, meliputi:
+              Manis adalah platform pengelolaan pembelajaran digital yang
+              digunakan oleh guru dan siswa untuk mendukung kegiatan akademik,
+              meliputi:
             </p>
             <ul>
               <li>Pengelolaan materi perkuliahan</li>
@@ -30,8 +31,9 @@ const FAQ_DATA = {
         question: "Siapa saja yang bisa menggunakan Manis?",
         answer: (
           <p>
-            Manis dapat digunakan oleh <strong>Guru</strong> dan <strong>Siswa</strong> yang terdaftar di
-            sistem akademik kampus. Akun dibuat oleh administrator dan tidak dapat didaftarkan sendiri.
+            Manis dapat digunakan oleh <strong>Guru</strong> dan{" "}
+            <strong>Siswa</strong> yang terdaftar di sistem akademik kampus.
+            Akun dibuat oleh administrator dan tidak dapat didaftarkan sendiri.
           </p>
         ),
       },
@@ -43,10 +45,20 @@ const FAQ_DATA = {
             <p>Untuk login ke Manis:</p>
             <ol>
               <li>Buka halaman login Manis.</li>
-              <li>Pilih peran: <strong>Siswa</strong> atau <strong>Guru</strong>.</li>
-              <li>Masukkan <strong>Nomor Induk</strong> (NIS untuk siswa / NIP/ID untuk guru).</li>
-              <li>Masukkan <strong>Kata Sandi</strong> yang diberikan oleh administrator.</li>
-              <li>Klik tombol <strong>Masuk</strong>.</li>
+              <li>
+                Pilih peran: <strong>Siswa</strong> atau <strong>Guru</strong>.
+              </li>
+              <li>
+                Masukkan <strong>Nomor Induk</strong> (NIS untuk siswa / NIP/ID
+                untuk guru).
+              </li>
+              <li>
+                Masukkan <strong>Kata Sandi</strong> yang diberikan oleh
+                administrator.
+              </li>
+              <li>
+                Klik tombol <strong>Masuk</strong>.
+              </li>
             </ol>
           </>
         ),
@@ -64,13 +76,27 @@ const FAQ_DATA = {
           <>
             <p>Langkah-langkah mengumpulkan tugas:</p>
             <ol>
-              <li>Masuk ke menu <strong>Tugas</strong> di sidebar.</li>
-              <li>Semua tugas dari seluruh mata kuliah akan tampil. Pilih tugas yang ingin dikumpulkan.</li>
-              <li>Klik tombol <strong>Kumpulkan</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Tugas</strong> di sidebar.
+              </li>
+              <li>
+                Semua tugas dari seluruh mata pelajaran akan tampil. Pilih tugas
+                yang ingin dikumpulkan.
+              </li>
+              <li>
+                Klik tombol <strong>Kumpulkan</strong>.
+              </li>
               <li>Unggah file jawaban (PDF, Word, Zip, dll).</li>
-              <li>Klik <strong>Kirim</strong> untuk mengonfirmasi pengumpulan.</li>
+              <li>
+                Klik <strong>Kirim</strong> untuk mengonfirmasi pengumpulan.
+              </li>
             </ol>
-            <p>Jika sudah pernah mengumpulkan, nama file sebelumnya akan tampil sebagai <strong>link biru</strong> yang bisa diklik untuk membuka file. Kamu bisa memperbarui pengumpulan selama deadline belum lewat.</p>
+            <p>
+              Jika sudah pernah mengumpulkan, nama file sebelumnya akan tampil
+              sebagai <strong>link biru</strong> yang bisa diklik untuk membuka
+              file. Kamu bisa memperbarui pengumpulan selama deadline belum
+              lewat.
+            </p>
           </>
         ),
       },
@@ -80,15 +106,22 @@ const FAQ_DATA = {
         answer: (
           <>
             <ol>
-              <li>Masuk ke menu <strong>Presensi</strong>.</li>
-              <li>Pilih mata kuliah yang sedang berlangsung.</li>
-              <li>Klik <strong>Pindai QR Code</strong> dan izinkan akses kamera.</li>
+              <li>
+                Masuk ke menu <strong>Presensi</strong>.
+              </li>
+              <li>Pilih mata pelajaran yang sedang berlangsung.</li>
+              <li>
+                Klik <strong>Pindai QR Code</strong> dan izinkan akses kamera.
+              </li>
               <li>Arahkan kamera ke QR Code yang ditampilkan guru.</li>
-              <li>Atau masukkan kode secara manual jika tidak bisa memindai.</li>
+              <li>
+                Atau masukkan kode secara manual jika tidak bisa memindai.
+              </li>
             </ol>
             <p>
-              <strong>Catatan:</strong> QR Code hanya valid selama sesi berlangsung (15 menit). Pastikan kamu
-              terdaftar di mata kuliah tersebut.
+              <strong>Catatan:</strong> QR Code hanya valid selama sesi
+              berlangsung (15 menit). Pastikan kamu terdaftar di mata pelajaran
+              tersebut.
             </p>
           </>
         ),
@@ -99,12 +132,14 @@ const FAQ_DATA = {
         answer: (
           <>
             <p>
-              Nilai dapat dilihat di menu <strong>Nilai</strong> pada sidebar. Di sana kamu bisa melihat
-              rincian nilai tugas, UTS, UAS, dan nilai akhir per mata kuliah yang sudah diinputkan guru.
+              Nilai dapat dilihat di menu <strong>Nilai</strong> pada sidebar.
+              Di sana kamu bisa melihat rincian nilai tugas, UTS, UAS, dan nilai
+              akhir per mata pelajaran yang sudah diinputkan guru.
             </p>
             <p>
-              Tersedia juga fitur <strong>Unduh Transkrip</strong> untuk mencetak atau menyimpan rekap nilai
-              seluruh mata kuliah dalam format PDF.
+              Tersedia juga fitur <strong>Unduh Transkrip</strong> untuk
+              mencetak atau menyimpan rekap nilai seluruh mata pelajaran dalam
+              format PDF.
             </p>
           </>
         ),
@@ -116,9 +151,14 @@ const FAQ_DATA = {
           <>
             <p>Untuk berpartisipasi di forum:</p>
             <ol>
-              <li>Masuk ke menu <strong>Forum Diskusi</strong>.</li>
-              <li>Pilih mata kuliah dan topik diskusi.</li>
-              <li>Klik <strong>Balas</strong> untuk merespons atau <strong>Buat Post</strong> untuk topik baru.</li>
+              <li>
+                Masuk ke menu <strong>Forum Diskusi</strong>.
+              </li>
+              <li>Pilih mata pelajaran dan topik diskusi.</li>
+              <li>
+                Klik <strong>Balas</strong> untuk merespons atau{" "}
+                <strong>Buat Post</strong> untuk topik baru.
+              </li>
             </ol>
           </>
         ),
@@ -130,13 +170,31 @@ const FAQ_DATA = {
           <>
             <p>Untuk mengerjakan kuis online yang ditugaskan guru:</p>
             <ol>
-              <li>Masuk ke menu <strong>Tugas</strong>.</li>
-              <li>Pilih kuis di tab <strong>Belum Dikerjakan</strong>.</li>
-              <li>Klik tombol <strong>Kerjakan Kuis</strong> (tombol ini hanya aktif jika deadline belum terlewati).</li>
-              <li>Jawab semua pertanyaan pilihan ganda yang tersedia dengan teliti.</li>
-              <li>Klik <strong>Kumpulkan</strong> setelah selesai sebelum waktu pengerjaan habis.</li>
+              <li>
+                Masuk ke menu <strong>Tugas</strong>.
+              </li>
+              <li>
+                Pilih kuis di tab <strong>Belum Dikerjakan</strong>.
+              </li>
+              <li>
+                Klik tombol <strong>Kerjakan Kuis</strong> (tombol ini hanya
+                aktif jika deadline belum terlewati).
+              </li>
+              <li>
+                Jawab semua pertanyaan pilihan ganda yang tersedia dengan
+                teliti.
+              </li>
+              <li>
+                Klik <strong>Kumpulkan</strong> setelah selesai sebelum waktu
+                pengerjaan habis.
+              </li>
             </ol>
-            <p>Setelah mengumpulkan, kuis akan berpindah ke tab <strong>Sudah Dikerjakan</strong>. Kamu dapat melihat rekap hasil kuis Anda secara langsung beserta skor Anda, dan nilainya bersifat permanen tidak dapat diubah.</p>
+            <p>
+              Setelah mengumpulkan, kuis akan berpindah ke tab{" "}
+              <strong>Sudah Dikerjakan</strong>. Kamu dapat melihat rekap hasil
+              kuis Anda secara langsung beserta skor Anda, dan nilainya bersifat
+              permanen tidak dapat diubah.
+            </p>
           </>
         ),
       },
@@ -152,11 +210,17 @@ const FAQ_DATA = {
         answer: (
           <>
             <ol>
-              <li>Masuk ke menu <strong>Materi</strong>.</li>
-              <li>Pilih mata kuliah yang ingin ditambahkan materi.</li>
-              <li>Klik tombol <strong>Tambah Materi</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Materi</strong>.
+              </li>
+              <li>Pilih mata pelajaran yang ingin ditambahkan materi.</li>
+              <li>
+                Klik tombol <strong>Tambah Materi</strong>.
+              </li>
               <li>Isi judul, deskripsi, dan unggah file (PDF, PPT, dll).</li>
-              <li>Klik <strong>Simpan</strong>.</li>
+              <li>
+                Klik <strong>Simpan</strong>.
+              </li>
             </ol>
           </>
         ),
@@ -167,25 +231,39 @@ const FAQ_DATA = {
         answer: (
           <>
             <ol>
-              <li>Masuk ke menu <strong>Presensi</strong>.</li>
-              <li>Pilih mata kuliah.</li>
-              <li>Klik <strong>Buka Sesi</strong> atau <strong>Pilih Tanggal</strong> untuk tanggal tertentu.</li>
-              <li>QR Code akan otomatis muncul dan berlaku selama <strong>15 menit</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Presensi</strong>.
+              </li>
+              <li>Pilih mata pelajaran.</li>
+              <li>
+                Klik <strong>Buka Sesi</strong> atau{" "}
+                <strong>Pilih Tanggal</strong> untuk tanggal tertentu.
+              </li>
+              <li>
+                QR Code akan otomatis muncul dan berlaku selama{" "}
+                <strong>15 menit</strong>.
+              </li>
               <li>Tampilkan QR Code kepada siswa untuk dipindai.</li>
             </ol>
-            <p>Status kehadiran siswa akan diperbarui secara real-time setelah mereka memindai.</p>
+            <p>
+              Status kehadiran siswa akan diperbarui secara real-time setelah
+              mereka memindai.
+            </p>
           </>
         ),
       },
       {
         icon: "fact_check",
-        question: "Bagaimana cara mengubah status kehadiran siswa secara manual?",
+        question:
+          "Bagaimana cara mengubah status kehadiran siswa secara manual?",
         answer: (
           <>
             <p>
-              Di halaman Presensi, pada tabel daftar hadir, setiap baris siswa memiliki
-              dropdown <strong>Status</strong>. Klik dropdown tersebut dan pilih status yang sesuai:
-              <strong> Hadir, Sakit, Izin, atau Alpa</strong>. Perubahan langsung tersimpan.
+              Di halaman Presensi, pada tabel daftar hadir, setiap baris siswa
+              memiliki dropdown <strong>Status</strong>. Klik dropdown tersebut
+              dan pilih status yang sesuai:
+              <strong> Hadir, Sakit, Izin, atau Alpa</strong>. Perubahan
+              langsung tersimpan.
             </p>
           </>
         ),
@@ -196,14 +274,32 @@ const FAQ_DATA = {
         answer: (
           <>
             <ol>
-              <li>Masuk ke menu <strong>Nilai Individu</strong> di sidebar.</li>
-              <li>Pilih <strong>Mata Kuliah</strong> dari dropdown.</li>
-              <li>Pilih <strong>Tugas</strong> spesifik yang ingin dinilai.</li>
-              <li>Daftar seluruh siswa akan tampil beserta status pengumpulan (Sudah Kumpul / Belum Kumpul).</li>
-              <li>Klik tombol <strong>Nilai</strong> di baris siswa yang sudah mengumpulkan.</li>
-              <li>Masukkan nilai (0–100) lalu klik <strong>Simpan</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Nilai Individu</strong> di sidebar.
+              </li>
+              <li>
+                Pilih <strong>Mata Pelajaran</strong> dari dropdown.
+              </li>
+              <li>
+                Pilih <strong>Tugas</strong> spesifik yang ingin dinilai.
+              </li>
+              <li>
+                Daftar seluruh siswa akan tampil beserta status pengumpulan
+                (Sudah Kumpul / Belum Kumpul).
+              </li>
+              <li>
+                Klik tombol <strong>Nilai</strong> di baris siswa yang sudah
+                mengumpulkan.
+              </li>
+              <li>
+                Masukkan nilai (0–100) lalu klik <strong>Simpan</strong>.
+              </li>
             </ol>
-            <p>Kamu bisa filter siswa berdasarkan status: <strong>Semua</strong>, <strong>Sudah Kumpul</strong>, atau <strong>Belum Kumpul</strong>. Tombol nilai hanya aktif untuk siswa yang sudah mengumpulkan.</p>
+            <p>
+              Kamu bisa filter siswa berdasarkan status: <strong>Semua</strong>,{" "}
+              <strong>Sudah Kumpul</strong>, atau <strong>Belum Kumpul</strong>.
+              Tombol nilai hanya aktif untuk siswa yang sudah mengumpulkan.
+            </p>
           </>
         ),
       },
@@ -214,13 +310,28 @@ const FAQ_DATA = {
           <>
             <p>Untuk menghapus kelompok yang sudah dibuat:</p>
             <ol>
-              <li>Masuk ke menu <strong>Kelompok</strong>.</li>
-              <li>Pilih mata kuliah yang sesuai.</li>
-              <li>Temukan kelompok yang ingin dihapus pada daftar kartu kelompok.</li>
-              <li>Klik ikon <strong>Tong Sampah Merah (Hapus Kelompok)</strong> di sebelah kanan status kelompok pada header kartu kelompok.</li>
-              <li>Akan muncul modal konfirmasi danger berwarna merah lembut. Konfirmasi tindakan dengan mengklik <strong>Hapus Kelompok</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Kelompok</strong>.
+              </li>
+              <li>Pilih mata pelajaran yang sesuai.</li>
+              <li>
+                Temukan kelompok yang ingin dihapus pada daftar kartu kelompok.
+              </li>
+              <li>
+                Klik ikon <strong>Tong Sampah Merah (Hapus Kelompok)</strong> di
+                sebelah kanan status kelompok pada header kartu kelompok.
+              </li>
+              <li>
+                Akan muncul modal konfirmasi danger berwarna merah lembut.
+                Konfirmasi tindakan dengan mengklik{" "}
+                <strong>Hapus Kelompok</strong>.
+              </li>
             </ol>
-            <p><strong>Peringatan:</strong> Menghapus kelompok bersifat permanen dan akan menghapus seluruh data keanggotaan siswa di dalam kelompok tersebut (Cascade Delete) secara bersih dari database.</p>
+            <p>
+              <strong>Peringatan:</strong> Menghapus kelompok bersifat permanen
+              dan akan menghapus seluruh data keanggotaan siswa di dalam
+              kelompok tersebut (Cascade Delete) secara bersih dari database.
+            </p>
           </>
         ),
       },
@@ -231,12 +342,26 @@ const FAQ_DATA = {
           <>
             <p>Untuk memantau skor kuis online siswa:</p>
             <ol>
-              <li>Masuk ke menu <strong>Tugas</strong>.</li>
+              <li>
+                Masuk ke menu <strong>Tugas</strong>.
+              </li>
               <li>Cari tugas kuis yang ingin dipantau.</li>
-              <li>Klik tombol <strong>Lihat Nilai</strong> (tombol ini khusus tampil untuk tipe tugas kuis setelah siswa mengerjakan).</li>
-              <li>Anda akan langsung diarahkan ke halaman <strong>Nilai Individu</strong> yang menyajikan rekap skor kuis siswa secara otomatis.</li>
+              <li>
+                Klik tombol <strong>Lihat Nilai</strong> (tombol ini khusus
+                tampil untuk tipe tugas kuis setelah siswa mengerjakan).
+              </li>
+              <li>
+                Anda akan langsung diarahkan ke halaman{" "}
+                <strong>Nilai Individu</strong> yang menyajikan rekap skor kuis
+                siswa secara otomatis.
+              </li>
             </ol>
-            <p><strong>Catatan:</strong> Nilai kuis ini dihitung otomatis oleh sistem berdasarkan jawaban pilihan ganda yang benar, dan bersifat 🔒 <strong>Permanen / Read-only</strong> (tidak dapat diedit secara manual oleh guru demi menjaga keaslian nilai kuis).</p>
+            <p>
+              <strong>Catatan:</strong> Nilai kuis ini dihitung otomatis oleh
+              sistem berdasarkan jawaban pilihan ganda yang benar, dan bersifat
+              🔒 <strong>Permanen / Read-only</strong> (tidak dapat diedit
+              secara manual oleh guru demi menjaga keaslian nilai kuis).
+            </p>
           </>
         ),
       },
@@ -251,8 +376,9 @@ const FAQ_DATA = {
         question: "Bagaimana jika saya lupa kata sandi?",
         answer: (
           <p>
-            Hubungi <strong>administrator akademik</strong> kampus untuk melakukan reset kata sandi. Administrator
-            akan memberikan kata sandi baru yang dapat kamu ganti setelah login.
+            Hubungi <strong>administrator akademik</strong> kampus untuk
+            melakukan reset kata sandi. Administrator akan memberikan kata sandi
+            baru yang dapat kamu ganti setelah login.
           </p>
         ),
       },
@@ -261,9 +387,10 @@ const FAQ_DATA = {
         question: "Browser apa yang direkomendasikan untuk Manis?",
         answer: (
           <p>
-            Manis direkomendasikan menggunakan browser versi terbaru dari <strong>Google Chrome</strong>,
-            <strong> Mozilla Firefox</strong>, atau <strong>Microsoft Edge</strong>. Izinkan akses kamera
-            di browser untuk menggunakan fitur presensi QR Code.
+            Manis direkomendasikan menggunakan browser versi terbaru dari{" "}
+            <strong>Google Chrome</strong>,<strong> Mozilla Firefox</strong>,
+            atau <strong>Microsoft Edge</strong>. Izinkan akses kamera di
+            browser untuk menggunakan fitur presensi QR Code.
           </p>
         ),
       },
@@ -272,8 +399,9 @@ const FAQ_DATA = {
         question: "Apakah Manis bisa diakses melalui ponsel?",
         answer: (
           <p>
-            Ya, Manis dapat diakses melalui browser di ponsel. Fitur pemindaian QR Code pada halaman presensi
-            siswa membutuhkan izin kamera di browser.
+            Ya, Manis dapat diakses melalui browser di ponsel. Fitur pemindaian
+            QR Code pada halaman presensi siswa membutuhkan izin kamera di
+            browser.
           </p>
         ),
       },
@@ -300,7 +428,12 @@ export default function FAQ() {
         {/* Header */}
         <div className="faq-header">
           <div className="faq-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>help</span>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "1rem" }}
+            >
+              help
+            </span>
             Pusat Bantuan
           </div>
           <h1 className="faq-title">Pertanyaan yang Sering Diajukan</h1>
@@ -312,14 +445,25 @@ export default function FAQ() {
         {/* Tabs */}
         <div className="faq-tabs">
           {ALL_CATEGORIES.map((cat) => {
-            const info = cat === "semua" ? { label: "Semua", icon: "apps" } : FAQ_DATA[cat];
+            const info =
+              cat === "semua"
+                ? { label: "Semua", icon: "apps" }
+                : FAQ_DATA[cat];
             return (
               <button
                 key={cat}
                 className={`faq-tab ${activeTab === cat ? "active" : ""}`}
-                onClick={() => { setActiveTab(cat); setOpenIndex(null); }}
+                onClick={() => {
+                  setActiveTab(cat);
+                  setOpenIndex(null);
+                }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>{info.icon}</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "1rem" }}
+                >
+                  {info.icon}
+                </span>
                 {info.label}
               </button>
             );
@@ -338,18 +482,26 @@ export default function FAQ() {
                 const isOpen = openIndex === key;
                 return (
                   <div key={key} className={`faq-item ${isOpen ? "open" : ""}`}>
-                    <button className="faq-question" onClick={() => toggle(key)}>
+                    <button
+                      className="faq-question"
+                      onClick={() => toggle(key)}
+                    >
                       <span className="faq-q-left">
                         <span className="faq-q-icon">
-                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>{item.icon}</span>
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "1rem" }}
+                          >
+                            {item.icon}
+                          </span>
                         </span>
                         {item.question}
                       </span>
-                      <span className="material-symbols-outlined faq-chevron">expand_more</span>
+                      <span className="material-symbols-outlined faq-chevron">
+                        expand_more
+                      </span>
                     </button>
-                    <div className="faq-answer">
-                      {item.answer}
-                    </div>
+                    <div className="faq-answer">{item.answer}</div>
                   </div>
                 );
               })}
@@ -360,9 +512,22 @@ export default function FAQ() {
         {/* Contact */}
         <div className="faq-contact">
           <h3>Masih butuh bantuan?</h3>
-          <p>Jika pertanyaanmu belum terjawab, hubungi administrator akademik kampus.</p>
-          <a className="faq-contact-btn" href="https://wa.me/628112222136" target="_blank" rel="noopener noreferrer">
-            <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>chat</span>
+          <p>
+            Jika pertanyaanmu belum terjawab, hubungi administrator akademik
+            kampus.
+          </p>
+          <a
+            className="faq-contact-btn"
+            href="https://wa.me/628112222136"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "1rem" }}
+            >
+              chat
+            </span>
             Hubungi Admin via WhatsApp
           </a>
         </div>

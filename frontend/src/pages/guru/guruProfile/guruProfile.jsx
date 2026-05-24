@@ -591,7 +591,7 @@ export default function GuruProfile({ onNavigate, onLogout }) {
                   <p
                     style={{ color: "var(--slate-500)", fontSize: "0.875rem" }}
                   >
-                    Belum ada mata kuliah yang diampu.
+                    Belum ada mata pelajaran yang diampu.
                   </p>
                 )}
               </div>

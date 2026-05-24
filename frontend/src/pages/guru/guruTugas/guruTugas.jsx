@@ -409,7 +409,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
               />
             </div>
             <div className="dt-field">
-              <label className="dt-label">Mata Kuliah</label>
+              <label className="dt-label">Mata Pelajaran</label>
               <select
                 className="dt-select"
                 value={form.matkulId}

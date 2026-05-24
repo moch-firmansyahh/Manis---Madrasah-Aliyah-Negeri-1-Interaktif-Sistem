@@ -53,7 +53,7 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
 
         setCourses(coursesWithProgress);
       } catch (error) {
-        console.error("Gagal memuat mata kuliah", error);
+        console.error("Gagal memuat mata pelajaran", error);
       } finally {
         setLoading(false);
       }

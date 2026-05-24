@@ -346,7 +346,7 @@ export default function GuruNilaiIndividu({
                   <p
                     style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}
                   >
-                    Belum ada tugas untuk mata kuliah ini
+                    Belum ada tugas untuk mata pelajaran ini
                   </p>
                 ) : (
                   <select
@@ -450,7 +450,7 @@ export default function GuruNilaiIndividu({
           {!selectedMk ? (
             <div className="dni-empty">
               <span className="material-symbols-outlined">school</span>
-              <p>Pilih mata kuliah pelajaran dahulu</p>
+              <p>Pilih mata pelajaran dahulu</p>
             </div>
           ) : !selectedTugas ? (
             <div className="dni-empty">

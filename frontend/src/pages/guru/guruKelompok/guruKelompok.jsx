@@ -106,7 +106,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
       const data = Array.isArray(res) ? res : (res.data || []);
       setMataKuliahList(data);
     } catch (error) {
-      console.error("Gagal memuat mata kuliah:", error);
+      console.error("Gagal memuat mata pelajaran:", error);
     }
   };
 
@@ -156,7 +156,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
       return;
     }
     if (!selectedMkId) {
-      showToast("Pilih mata kuliah terlebih dahulu.", "error");
+      showToast("Pilih mata pelajaran terlebih dahulu.", "error");
       return;
     }
     try {
@@ -475,13 +475,13 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
             </div>
             <div className="dk-modal-body">
               <div className="dk-field">
-                <label className="dk-label">Mata Kuliah</label>
+                <label className="dk-label">Mata Pelajaran</label>
                 <select
                   className="dk-input"
                   value={selectedMkId}
                   onChange={(e) => setSelectedMkId(e.target.value)}
                 >
-                  <option value="">— Pilih Mata Kuliah —</option>
+                  <option value="">— Pilih Mata Pelajaran —</option>
                   {mataKuliahList.map((mk) => (
                     <option key={mk.idMataKuliah} value={mk.idMataKuliah}>
                       {mk.namaMataKuliah}
