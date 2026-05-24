@@ -6,6 +6,7 @@ import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient, API_URL as API_BASE } from "../../../utils/apiClient";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
 
 export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
@@ -144,7 +145,7 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
   if (loading) {
-    return <div className="page-shell"><main className="page-main"><div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>Memuat materi...</div></main></div>;
+    return <LoadingScreen />;
   }
 
 

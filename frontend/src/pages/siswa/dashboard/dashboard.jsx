@@ -5,6 +5,7 @@ import "./notifikasi.css";
 import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient, API_URL } from "../../../utils/apiClient";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
 const AVATAR_HERO =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBLlRblArhYvkrSWfEx3UWaIaP5bdg8OpReWzF-sc4sB_2K3sC4IYv7Q4-lWy6VUtGhc5esYpVi12_HYjLZdjx6ILoT60xad1GfsEtHStVQIigk44gnAXnpEAjWrPWVYNa_AKdaDPqXQwdlJDbcccdQ96CZrZ6btx50rBBy3LvfY-eINJ1MtiJWLJpWBAo2nnbaNr3i-_Yn3B_BsVkOxpG3hVSKt38J2-NxnAah9LFYcNLvZARv4lzr86P24cdV4haCMW80Nudw5Lku";
@@ -63,23 +64,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
   }, []);
 
   if (loading) {
-    return (
-      <div className="page-shell">
-        <main className="page-main">
-          <div
-            className="page-content"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100vh",
-            }}
-          >
-            Memuat dashboard...
-          </div>
-        </main>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   console.log(
     "=== STATE dashboardData ===",

@@ -5,6 +5,7 @@ import "./presensiSiswa.css";
 import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 import { apiClient } from "../../../utils/apiClient";
 
 const HISTORY = [];
@@ -34,6 +35,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
   const [upcoming, setUpcoming]     = useState([]);
   const [history, setHistory]       = useState([]);
   const [dateFilter, setDateFilter] = useState("semua"); // semua | minggu | bulan
+  const [loading, setLoading]       = useState(true);
   const scanTimeoutRef              = useRef(null);
   const html5QrCodeRef              = useRef(null);
   const scannerContainerId          = "pmh-qr-reader";
@@ -53,6 +55,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
       } catch (error) {
         console.error("Failed to load courses", error);
         setUpcoming([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCourses();
@@ -221,6 +225,10 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
       stopCamera();
     };
   }, [stopCamera]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>

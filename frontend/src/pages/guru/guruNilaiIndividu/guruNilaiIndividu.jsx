@@ -5,6 +5,7 @@ import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient, API_URL } from "../../../utils/apiClient";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
 const API_BASE = API_URL;
 const MEMBER_COLORS = [
@@ -337,11 +338,7 @@ export default function GuruNilaiIndividu({
               <div className="dni-select-wrap">
                 <label>Tugas</label>
                 {loading ? (
-                  <p
-                    style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}
-                  >
-                    Memuat tugas...
-                  </p>
+                  <LoadingScreen />
                 ) : tugasList.length === 0 ? (
                   <p
                     style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}
@@ -458,10 +455,7 @@ export default function GuruNilaiIndividu({
               <p>Pilih tugas untuk melihat daftar siswa</p>
             </div>
           ) : loadingMhs ? (
-            <div className="dni-loading">
-              <span className="material-symbols-outlined">hourglass_empty</span>
-              <p>Memuat data siswa...</p>
-            </div>
+            <LoadingScreen />
           ) : filteredList.length === 0 ? (
             <div className="dni-empty">
               <span className="material-symbols-outlined">inbox</span>

@@ -5,6 +5,7 @@ import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient, API_URL } from "../../../utils/apiClient";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
 const API_BASE = API_URL;
 
@@ -207,6 +208,10 @@ const allKuis = [];
 
   const filtered = sortedTasks;
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
       {/* Toast */}
@@ -294,12 +299,7 @@ const allKuis = [];
 
           {/* Task List */}
           <div className="dt-task-list">
-            {loading ? (
-              <div className="dt-empty">
-                <span className="material-symbols-outlined">hourglass_empty</span>
-                <p>Memuat tugas...</p>
-              </div>
-            ) : filtered.length === 0 ? (
+            {filtered.length === 0 ? (
               <div className="dt-empty">
                 <span className="material-symbols-outlined">task_alt</span>
                 <p>Tidak ada tugas dalam kategori ini.</p>

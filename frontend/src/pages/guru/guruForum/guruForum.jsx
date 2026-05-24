@@ -5,6 +5,7 @@ import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
+import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
@@ -323,9 +324,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loadingCourses ? (
-                <div style={{ textAlign: "center", padding: "3rem" }}>
-                  Memuat daftar mata pelajaran...
-                </div>
+                <LoadingScreen />
               ) : mataKuliahList.length === 0 ? (
                 <div
                   className="fd-empty-state"
@@ -453,9 +452,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loading ? (
-                <div style={{ textAlign: "center", padding: "3rem" }}>
-                  Memuat diskusi...
-                </div>
+                <LoadingScreen />
               ) : threads.length === 0 ? (
                 <div
                   className="fd-empty-state"

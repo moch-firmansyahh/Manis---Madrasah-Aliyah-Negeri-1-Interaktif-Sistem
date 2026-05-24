@@ -17,7 +17,7 @@ const FAQ_DATA = {
               meliputi:
             </p>
             <ul>
-              <li>Pengelolaan materi perkuliahan</li>
+              <li>Pengelolaan materi pembelajaran</li>
               <li>Pemberian dan pengumpulan tugas</li>
               <li>Presensi digital berbasis QR Code</li>
               <li>Forum diskusi kelas</li>
@@ -32,7 +32,7 @@ const FAQ_DATA = {
         answer: (
           <p>
             Manis dapat digunakan oleh <strong>Guru</strong> dan{" "}
-            <strong>Siswa</strong> yang terdaftar di sistem akademik kampus.
+            <strong>Siswa</strong> yang terdaftar di sistem akademik sekolah.
             Akun dibuat oleh administrator dan tidak dapat didaftarkan sendiri.
           </p>
         ),
@@ -206,7 +206,7 @@ const FAQ_DATA = {
     items: [
       {
         icon: "upload_file",
-        question: "Bagaimana cara mengunggah materi perkuliahan?",
+        question: "Bagaimana cara mengunggah materi pembelajaran?",
         answer: (
           <>
             <ol>
@@ -376,7 +376,7 @@ const FAQ_DATA = {
         question: "Bagaimana jika saya lupa kata sandi?",
         answer: (
           <p>
-            Hubungi <strong>administrator akademik</strong> kampus untuk
+            Hubungi <strong>administrator akademik</strong> sekolah untuk
             melakukan reset kata sandi. Administrator akan memberikan kata sandi
             baru yang dapat kamu ganti setelah login.
           </p>
@@ -514,7 +514,7 @@ export default function FAQ() {
           <h3>Masih butuh bantuan?</h3>
           <p>
             Jika pertanyaanmu belum terjawab, hubungi administrator akademik
-            kampus.
+            sekolah.
           </p>
           <a
             className="faq-contact-btn"
