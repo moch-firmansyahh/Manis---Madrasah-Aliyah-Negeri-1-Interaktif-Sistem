@@ -324,7 +324,11 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loadingCourses ? (
-                <LoadingScreen fullScreen={false} />
+                <div className="fd-course-grid">
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                </div>
               ) : mataKuliahList.length === 0 ? (
                 <div
                   className="fd-empty-state"
@@ -452,7 +456,10 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loading ? (
-                <LoadingScreen fullScreen={false} />
+                <div className="fd-thread-list">
+                  <div className="fd-thread-card skeleton-shimmer" style={{ height: "180px", border: "none", marginBottom: "1rem" }}></div>
+                  <div className="fd-thread-card skeleton-shimmer" style={{ height: "180px", border: "none", marginBottom: "1rem" }}></div>
+                </div>
               ) : threads.length === 0 ? (
                 <div
                   className="fd-empty-state"

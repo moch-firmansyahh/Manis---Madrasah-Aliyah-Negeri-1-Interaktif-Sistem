@@ -317,10 +317,6 @@ export default function Nilai({ onNavigate, onLogout }) {
         />
 
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : (
-            <>
           {/* Page Header */}
           <div className="nlai-page-header">
             <div>
@@ -346,7 +342,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 grade
               </span>
               <div>
-                <p className="nlai-sum-val">{ipkKumulatif}</p>
+                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "50px", minHeight: "24px" } : {}}>{ipkKumulatif}</p>
                 <p className="nlai-sum-lbl">IPK Kumulatif</p>
               </div>
             </div>
@@ -355,7 +351,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 school
               </span>
               <div>
-                <p className="nlai-sum-val">{totalSksSelesai}</p>
+                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "50px", minHeight: "24px" } : {}}>{totalSksSelesai}</p>
                 <p className="nlai-sum-lbl">SKS Lulus</p>
               </div>
             </div>
@@ -364,7 +360,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 calendar_today
               </span>
               <div>
-                <p className="nlai-sum-val">{semesters.length}</p>
+                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "50px", minHeight: "24px" } : {}}>{semesters.length}</p>
                 <p className="nlai-sum-lbl">Semester Ditempuh</p>
               </div>
             </div>
@@ -373,13 +369,15 @@ export default function Nilai({ onNavigate, onLogout }) {
                 workspace_premium
               </span>
               <div>
-                <p className="nlai-sum-val">Cum Laude</p>
+                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "80px", minHeight: "24px" } : {}}>Cum Laude</p>
                 <p className="nlai-sum-lbl">Predikat Target</p>
               </div>
             </div>
           </div>
 
-          {semesters.length === 0 ? (
+          {loading ? (
+            <div className="nlai-semester-card skeleton-shimmer" style={{ height: "300px", marginTop: "2rem" }}></div>
+          ) : semesters.length === 0 ? (
             <div style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "1rem", marginTop: "2rem" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "4rem", color: "var(--slate-300)" }}>article</span>
               <h3 style={{ marginTop: "1rem", color: "var(--slate-700)" }}>Belum Ada Transkrip Nilai</h3>
@@ -546,8 +544,6 @@ export default function Nilai({ onNavigate, onLogout }) {
               <span>Skala 4.0 — IP ≥ 3.51 = Cum Laude</span>
             </div>
           </div>
-          </>
-          )}
           </>
           )}
         </div>

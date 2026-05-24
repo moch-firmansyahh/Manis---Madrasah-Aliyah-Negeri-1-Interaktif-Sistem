@@ -246,10 +246,6 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         )}
 
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : (
-            <>
           {/* Page header */}
           <div className="pmh-page-header">
             <div>
@@ -265,7 +261,12 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
               <div className="pmh-class-selector">
                 <p className="pmh-class-selector-label">Pilih Kelas yang Sedang Berlangsung</p>
                 <div className="pmh-class-tabs">
-                  {upcoming.length > 0 ? upcoming.map((c, i) => (
+                  {loading ? (
+                    <>
+                      <div className="pmh-class-tab skeleton-shimmer" style={{ height: "55px", width: "100%", border: "none", marginBottom: "8px" }}></div>
+                      <div className="pmh-class-tab skeleton-shimmer" style={{ height: "55px", width: "100%", border: "none", marginBottom: "8px" }}></div>
+                    </>
+                  ) : upcoming.length > 0 ? upcoming.map((c, i) => (
                     <button
                       key={c.id}
                       className={`pmh-class-tab ${selectedClass === i ? "pmh-class-tab--active" : ""}`}
@@ -396,46 +397,50 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
 
               {/* Attendance summary */}
               <div className="pmh-summary-card">
-                <h4 className="pmh-summary-title">Rekap Kehadiran Semester</h4>
-                <div className="pmh-summary-ring-wrap">
-                  <div className="pmh-ring-chart">
-                    <svg viewBox="0 0 80 80" className="pmh-ring-svg">
-                      <circle cx="40" cy="40" r="30" fill="none" stroke="#e2e8f0" strokeWidth="10"/>
-                      <circle cx="40" cy="40" r="30" fill="none" stroke="#2f9696" strokeWidth="10"
-                        strokeDasharray={`${history.length > 0 ? ((history.filter(h => h.status === "Hadir").length / history.length) * 188) : 0} 188`}
-                        strokeDashoffset="47"
-                        strokeLinecap="round"
-                        transform="rotate(-90 40 40)"
-                      />
-                    </svg>
-                    <div className="pmh-ring-label">
-                      <span className="pmh-ring-pct">{history.length > 0 ? Math.round((history.filter(h => h.status === "Hadir").length / history.length) * 100) : 0}%</span>
-                      <span className="pmh-ring-sub">Kehadiran</span>
+                <h4 className="pmh-summary-title">Kehadiran Kelas</h4>
+                {loading ? (
+                  <div className="skeleton-shimmer" style={{ height: "120px", width: "100%", borderRadius: "var(--radius-md)" }}></div>
+                ) : (
+                  <div className="pmh-summary-ring-wrap">
+                    <div className="pmh-ring-chart">
+                      <svg viewBox="0 0 80 80" className="pmh-ring-svg">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="#e2e8f0" strokeWidth="10"/>
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="#2f9696" strokeWidth="10"
+                          strokeDasharray={`${history.length > 0 ? ((history.filter(h => h.status === "Hadir").length / history.length) * 188) : 0} 188`}
+                          strokeDashoffset="47"
+                          strokeLinecap="round"
+                          transform="rotate(-90 40 40)"
+                        />
+                      </svg>
+                      <div className="pmh-ring-label">
+                        <span className="pmh-ring-pct">{history.length > 0 ? Math.round((history.filter(h => h.status === "Hadir").length / history.length) * 100) : 0}%</span>
+                        <span className="pmh-ring-sub">Kehadiran</span>
+                      </div>
+                    </div>
+                    <div className="pmh-summary-stats">
+                      <div className="pmh-sum-item">
+                        <span className="pmh-sum-dot" style={{ backgroundColor: "#2f9696" }}></span>
+                        <span className="pmh-sum-label">Hadir</span>
+                        <span className="pmh-sum-val">{history.filter(h => h.status === "Hadir").length}</span>
+                      </div>
+                      <div className="pmh-sum-item">
+                        <span className="pmh-sum-dot" style={{ backgroundColor: "#c47f17" }}></span>
+                        <span className="pmh-sum-label">Izin</span>
+                        <span className="pmh-sum-val">{history.filter(h => h.status === "Izin").length}</span>
+                      </div>
+                      <div className="pmh-sum-item">
+                        <span className="pmh-sum-dot" style={{ backgroundColor: "#4b53bc" }}></span>
+                        <span className="pmh-sum-label">Sakit</span>
+                        <span className="pmh-sum-val">{history.filter(h => h.status === "Sakit").length}</span>
+                      </div>
+                      <div className="pmh-sum-item">
+                        <span className="pmh-sum-dot" style={{ backgroundColor: "#dc2626" }}></span>
+                        <span className="pmh-sum-label">Alpa</span>
+                        <span className="pmh-sum-val">{history.filter(h => h.status === "Alpa").length}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="pmh-summary-stats">
-                    <div className="pmh-sum-item">
-                      <span className="pmh-sum-dot" style={{ backgroundColor: "#2f9696" }}></span>
-                      <span className="pmh-sum-label">Hadir</span>
-                      <span className="pmh-sum-val">{history.filter(h => h.status === "Hadir").length}</span>
-                    </div>
-                    <div className="pmh-sum-item">
-                      <span className="pmh-sum-dot" style={{ backgroundColor: "#c47f17" }}></span>
-                      <span className="pmh-sum-label">Izin</span>
-                      <span className="pmh-sum-val">{history.filter(h => h.status === "Izin").length}</span>
-                    </div>
-                    <div className="pmh-sum-item">
-                      <span className="pmh-sum-dot" style={{ backgroundColor: "#4b53bc" }}></span>
-                      <span className="pmh-sum-label">Sakit</span>
-                      <span className="pmh-sum-val">{history.filter(h => h.status === "Sakit").length}</span>
-                    </div>
-                    <div className="pmh-sum-item">
-                      <span className="pmh-sum-dot" style={{ backgroundColor: "#dc2626" }}></span>
-                      <span className="pmh-sum-label">Alpa</span>
-                      <span className="pmh-sum-val">{history.filter(h => h.status === "Alpa").length}</span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* History */}
@@ -458,41 +463,46 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
                   </div>
                 </div>
                 <div className="pmh-history-list">
-                  {(() => {
-                    const filtered = history.filter(h => {
-                      if (dateFilter === 'semua') return true;
-                      const hDate = new Date(h.rawDate || Date.now());
-                      const now = new Date();
-                      if (dateFilter === 'minggu') {
-                        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-                        return hDate >= weekAgo;
-                      }
-                      if (dateFilter === 'bulan') {
-                        return hDate.getMonth() === now.getMonth() && hDate.getFullYear() === now.getFullYear();
-                      }
-                      return true;
-                    });
-                    return filtered.length > 0 ? filtered.map((h, i) => (
-                    <div key={i} className="pmh-history-item">
-                      <div className="pmh-history-left">
-                        <p className="pmh-history-course">{h.code} — {h.name}</p>
-                        <p className="pmh-history-date">{h.date} · {h.time}</p>
+                  {loading ? (
+                    <>
+                      <div className="pmh-history-item skeleton-shimmer" style={{ height: "50px", border: "none", marginBottom: "8px" }}></div>
+                      <div className="pmh-history-item skeleton-shimmer" style={{ height: "50px", border: "none", marginBottom: "8px" }}></div>
+                    </>
+                  ) : (
+                    (() => {
+                      const filtered = history.filter(h => {
+                        if (dateFilter === 'semua') return true;
+                        const hDate = new Date(h.rawDate || Date.now());
+                        const now = new Date();
+                        if (dateFilter === 'minggu') {
+                          const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                          return hDate >= weekAgo;
+                        }
+                        if (dateFilter === 'bulan') {
+                          return hDate.getMonth() === now.getMonth() && hDate.getFullYear() === now.getFullYear();
+                        }
+                        return true;
+                      });
+                      return filtered.length > 0 ? filtered.map((h, i) => (
+                      <div key={i} className="pmh-history-item">
+                        <div className="pmh-history-left">
+                          <p className="pmh-history-course">{h.code} — {h.name}</p>
+                          <p className="pmh-history-date">{h.date} · {h.time}</p>
+                        </div>
+                        <StatusBadge status={h.status} />
                       </div>
-                      <StatusBadge status={h.status} />
-                    </div>
-                  )) : (
-                    <p style={{ color: "var(--slate-500)", textAlign: "center", padding: "1rem" }}>
-                      {dateFilter === 'semua' ? 'Belum ada riwayat kehadiran.' : 
-                       dateFilter === 'minggu' ? 'Tidak ada kehadiran minggu ini.' :
-                       'Tidak ada kehadiran bulan ini.'}
-                    </p>
-                  )})()}
+                    )) : (
+                      <p style={{ color: "var(--slate-500)", textAlign: "center", padding: "1rem" }}>
+                        {dateFilter === 'semua' ? 'Belum ada riwayat kehadiran.' : 
+                         dateFilter === 'minggu' ? 'Tidak ada kehadiran minggu ini.' :
+                         'Tidak ada kehadiran bulan ini.'}
+                      </p>
+                    )})()
+                  )}
                 </div>
               </div>
             </div>
           </div>
-          </>
-          )}
         </div>
       </main>
     </div>

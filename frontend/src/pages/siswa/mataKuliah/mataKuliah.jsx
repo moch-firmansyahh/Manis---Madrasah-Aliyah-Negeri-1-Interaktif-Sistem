@@ -215,10 +215,6 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
 
         {/* Content */}
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : (
-            <>
           {/* Course header */}
           <div className="mk-course-header">
             <span className="mk-faculty-badge">
@@ -232,7 +228,10 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
           </div>
 
           {/* Body grid */}
-          <div className="mk-body-grid">
+          {loading ? (
+            <div className="mk-body-grid skeleton-shimmer" style={{ height: "450px", width: "100%", border: "none", borderRadius: "12px" }}></div>
+          ) : (
+            <div className="mk-body-grid">
             {/* Left */}
             <div className="mk-left-col">
               {/* Video Player or Thumbnail */}
@@ -412,7 +411,6 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
               </div>
             </div>
           </div>
-          </>
           )}
         </div>
       </main>

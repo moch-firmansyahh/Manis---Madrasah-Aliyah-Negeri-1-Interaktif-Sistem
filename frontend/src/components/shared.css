@@ -624,3 +624,35 @@ img { display: block; }
     left: 0 !important;
   }
 }
+
+/* ══════════════════════════════════════════
+   SKELETON SHIMMER (Premium Loading state)
+   ══════════════════════════════════════════ */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.7) 25%,
+    rgba(241, 245, 249, 0.9) 50%,
+    rgba(226, 232, 240, 0.7) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-animation 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+  color: transparent !important;
+  user-select: none;
+  pointer-events: none;
+}
+
+.skeleton-shimmer * {
+  visibility: hidden !important;
+}
+
+@keyframes shimmer-animation {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+

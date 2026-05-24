@@ -240,10 +240,6 @@ const allKuis = [];
 
         {/* Page Content */}
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : (
-            <>
           {/* Page Header */}
           <div className="dt-page-header">
             <h2 className="dt-title">Daftar Tugas</h2>
@@ -299,7 +295,13 @@ const allKuis = [];
 
           {/* Task List */}
           <div className="dt-task-list">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <>
+                <div className="dt-task-card skeleton-shimmer" style={{ height: "140px", border: "none", marginBottom: "1rem" }}></div>
+                <div className="dt-task-card skeleton-shimmer" style={{ height: "140px", border: "none", marginBottom: "1rem" }}></div>
+                <div className="dt-task-card skeleton-shimmer" style={{ height: "140px", border: "none", marginBottom: "1rem" }}></div>
+              </>
+            ) : filtered.length === 0 ? (
               <div className="dt-empty">
                 <span className="material-symbols-outlined">task_alt</span>
                 <p>Tidak ada tugas dalam kategori ini.</p>
@@ -435,9 +437,6 @@ const allKuis = [];
               ))
             )}
           </div>
-
-          </>
-          )}
         </div>
       </main>
     </div>

@@ -280,7 +280,11 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
               </div>
 
               {loadingCourses ? (
-                <LoadingScreen fullScreen={false} />
+                <div className="fd-course-grid">
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                  <div className="fd-course-card skeleton-shimmer" style={{ height: "140px", border: "none" }}></div>
+                </div>
               ) : mataKuliahList.length === 0 ? (
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>school</span>
@@ -344,7 +348,10 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
               </div>
 
               {loading ? (
-                <LoadingScreen fullScreen={false} />
+                <div className="fd-thread-list">
+                  <div className="fd-thread-card skeleton-shimmer" style={{ height: "180px", border: "none", marginBottom: "1rem" }}></div>
+                  <div className="fd-thread-card skeleton-shimmer" style={{ height: "180px", border: "none", marginBottom: "1rem" }}></div>
+                </div>
               ) : threads.length === 0 ? (
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>forum</span>

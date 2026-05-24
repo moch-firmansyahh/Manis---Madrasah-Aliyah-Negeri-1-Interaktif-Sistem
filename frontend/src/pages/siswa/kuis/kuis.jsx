@@ -486,10 +486,11 @@ export default function QuizKuis({ onNavigate, onLogout, idKuis }) {
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="page-content">
           {loading ? (
-            <LoadingScreen fullScreen={false} />
+            <div className="quiz-result-container">
+              <div className="quiz-result-card skeleton-shimmer" style={{ height: "400px", width: "100%" }}></div>
+            </div>
           ) : (
             <>
           {/* Quiz Header */}

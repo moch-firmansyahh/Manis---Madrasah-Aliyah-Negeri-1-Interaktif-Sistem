@@ -97,10 +97,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
 
         {/* Content */}
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : (
-            <div className="db-grid">
+          <div className="db-grid">
             {/* ── Left Column ── */}
             <div className="db-left">
               <div className="db-page-header">
@@ -137,13 +134,13 @@ export default function Dashboard({ onNavigate, onLogout }) {
                     </p>
                   </div>
                   <div className="db-hero-stats">
-                    <div className="db-stat-box">
+                    <div className={`db-stat-box ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "60px", minHeight: "45px" } : {}}>
                       <p className="db-stat-val">
                         {dashboardData?.ipk?.toFixed(2) || "0.00"}
                       </p>
                       <p className="db-stat-lbl">IPK</p>
                     </div>
-                    <div className="db-stat-box">
+                    <div className={`db-stat-box ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "60px", minHeight: "45px" } : {}}>
                       <p className="db-stat-val">{dashboardData?.sks || "0"}</p>
                       <p className="db-stat-lbl">SKS</p>
                     </div>
@@ -171,7 +168,9 @@ export default function Dashboard({ onNavigate, onLogout }) {
                 </div>
 
                 <div className="db-progress-list">
-                  {dashboardData?.progress && (
+                  {loading ? (
+                    <div className="db-progress-item skeleton-shimmer" style={{ height: "60px", width: "100%" }}></div>
+                  ) : dashboardData?.progress ? (
                     <div
                       className="db-progress-item"
                       style={{ cursor: "pointer" }}
@@ -204,8 +203,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                         ></div>
                       </div>
                     </div>
-                  )}
-                  {!dashboardData?.progress && (
+                  ) : (
                     <p
                       style={{
                         padding: "1rem",
@@ -247,7 +245,9 @@ export default function Dashboard({ onNavigate, onLogout }) {
                 <div className="db-schedule-row">
                   <div>
                     <p className="db-sched-lbl">Jadwal Hari Ini</p>
-                    {dashboardData?.jadwal?.length > 0 ? (
+                    {loading ? (
+                      <div className="skeleton-shimmer" style={{ height: "18px", width: "150px", marginTop: "4px" }}></div>
+                    ) : dashboardData?.jadwal?.length > 0 ? (
                       dashboardData.jadwal.map((j, idx) => (
                         <p key={idx} className="db-sched-time">
                           {j.mataKuliah} ({j.hari}) - {j.waktu}
@@ -262,7 +262,9 @@ export default function Dashboard({ onNavigate, onLogout }) {
               </div>
 
               {/* Class Card — clickable to mata kuliah */}
-              {dashboardData?.mataKuliah?.length > 0 ? (
+              {loading ? (
+                <div className="db-class-card skeleton-shimmer" style={{ height: "135px" }}></div>
+              ) : dashboardData?.mataKuliah?.length > 0 ? (
                 <div
                   className="db-class-card"
                   style={{ cursor: "pointer" }}
@@ -333,7 +335,12 @@ export default function Dashboard({ onNavigate, onLogout }) {
                   <span className="material-symbols-outlined">forum</span>
                   <h3>Diskusi Terbaru</h3>
                 </div>
-                {dashboardData?.threads?.length > 0 ? (
+                {loading ? (
+                  <>
+                    <div className="db-disc-box skeleton-shimmer" style={{ height: "45px", marginBottom: "0.5rem" }}></div>
+                    <div className="db-disc-box skeleton-shimmer" style={{ height: "45px", marginBottom: "0.5rem" }}></div>
+                  </>
+                ) : dashboardData?.threads?.length > 0 ? (
                   dashboardData.threads.slice(0, 2).map((thread, idx) => (
                     <div
                       key={idx}
@@ -359,7 +366,6 @@ export default function Dashboard({ onNavigate, onLogout }) {
               </div>
             </div>
           </div>
-          )}
         </div>
       </main>
     </div>

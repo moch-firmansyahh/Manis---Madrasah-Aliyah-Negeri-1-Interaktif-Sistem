@@ -49,10 +49,10 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
       <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
         <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
         <div className="page-content">
-          {loading ? (
-            <LoadingScreen fullScreen={false} />
-          ) : error ? (
-            <div className="quiz-result-container">
+          <div className="quiz-result-container">
+            {loading ? (
+              <div className="quiz-result-card skeleton-shimmer" style={{ height: "300px", width: "100%" }}></div>
+            ) : error ? (
               <div className="quiz-result-card">
                 <div className="quiz-result-icon">
                   <span className="material-symbols-outlined">quiz</span>
@@ -64,11 +64,10 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
                   Kembali ke Daftar Tugas
                 </button>
               </div>
-            </div>
-          ) : (
-            <div className="quiz-result-container">
-            <div className="quiz-result-card">
-              <div className="quiz-result-icon">
+            ) : (
+              <>
+                <div className="quiz-result-card">
+                  <div className="quiz-result-icon">
                 <span className="material-symbols-outlined">{skor >= 70 ? "emoji_events" : "school"}</span>
               </div>
               <h2 className="quiz-result-title">Kuis Selesai!</h2>
@@ -225,8 +224,9 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
                 Kembali ke Daftar Tugas
               </button>
             </div>
+          </>
+        )}
           </div>
-          )}
         </div>
       </main>
     </div>

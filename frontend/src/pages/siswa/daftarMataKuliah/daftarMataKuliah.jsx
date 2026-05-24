@@ -94,12 +94,8 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
           }
         />
 
-        {loading ? (
-          <LoadingScreen fullScreen={false} />
-        ) : (
-          <>
-            {/* Hero Banner */}
-            <div className="dm-hero">
+        {/* Hero Banner */}
+        <div className="dm-hero">
           <img
             className="dm-hero-bg"
             src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop"
@@ -115,7 +111,13 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
         {/* Course Grid */}
         <div className="dm-grid-wrap">
           <div className="dm-course-grid">
-            {courses.length > 0 ? (
+            {loading ? (
+              <>
+                <div className="dm-course-card skeleton-shimmer" style={{ height: "260px" }}></div>
+                <div className="dm-course-card skeleton-shimmer" style={{ height: "260px" }}></div>
+                <div className="dm-course-card skeleton-shimmer" style={{ height: "260px" }}></div>
+              </>
+            ) : courses.length > 0 ? (
               courses.map((c) => (
                 <div key={c.id} className="dm-course-card">
                   <div className="dm-card-top">
@@ -206,8 +208,6 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
             )}
           </div>
         </div>
-      </>
-    )}
       </main>
     </div>
   );
