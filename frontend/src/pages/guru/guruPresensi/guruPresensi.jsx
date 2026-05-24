@@ -16,7 +16,11 @@ const INITIAL_STUDENTS = [];
 const STATUS_OPTS = ["Hadir", "Sakit", "Izin", "Alpa"];
 
 function statusColor(s) {
-  return ({ Hadir: "#2f9696", Sakit: "#4b53bc", Izin: "#c47f17", Alpa: "#dc2626" }[s] ?? "#64748b");
+  return (
+    { Hadir: "#2f9696", Sakit: "#4b53bc", Izin: "#c47f17", Alpa: "#dc2626" }[
+      s
+    ] ?? "#64748b"
+  );
 }
 function generateToken() {
   return `Manis-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -30,23 +34,29 @@ function fmtTime(sec) {
   return `${m}:${s}`;
 }
 
-const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export default function GuruPresensi({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const [toast, setToast]     = useState(null);
-  const [token, setToken]     = useState("");
+  const [toast, setToast] = useState(null);
+  const [token, setToken] = useState("");
   const [timeLeft, setTimeLeft] = useState(QR_TTL);
   const [qrLoaded, setQrLoaded] = useState(false);
   const [students, setStudents] = useState(INITIAL_STUDENTS);
   const [mataKuliahList, setMataKuliahList] = useState([]);
-  const [selectedMatkul, setSelectedMatkul] = useState({ id: null, name: "Memuat...", room: "-", time: "-", jadwal: "" });
-  const [sessionActive, setSessionActive]   = useState(true);
-  const [showMatkul, setShowMatkul]         = useState(false);
-  const [showJadwal, setShowJadwal]         = useState(false);
-  const [selectedDays, setSelectedDays]     = useState([]);
+  const [selectedMatkul, setSelectedMatkul] = useState({
+    id: null,
+    name: "Memuat...",
+    room: "-",
+    time: "-",
+    jadwal: "",
+  });
+  const [sessionActive, setSessionActive] = useState(true);
+  const [showMatkul, setShowMatkul] = useState(false);
+  const [showJadwal, setShowJadwal] = useState(false);
+  const [selectedDays, setSelectedDays] = useState([]);
   const [selectedDateFilter, setSelectedDateFilter] = useState("semua");
-  const [tempDate, setTempDate]             = useState("");
+  const [tempDate, setTempDate] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [page, setPage] = useState(1);
 
@@ -59,76 +69,91 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   const fetchDates = useCallback(async () => {
     if (!selectedMatkul?.id) return;
     try {
-      const res = await apiClient.get(`/api/guru/presensi/dates/${selectedMatkul.id}`);
+      const res = await apiClient.get(
+        `/api/guru/presensi/dates/${selectedMatkul.id}`,
+      );
       console.log("DEBUG - Available dates:", res);
       const dates = res.dates || [];
       // Format tanggal ke YYYY-MM-DD
-      const formattedDates = dates.map(d => {
-        if (typeof d === 'string' && d.includes('T')) {
-          return d.split('T')[0];
-        }
-        return new Date(d).toISOString().split('T')[0];
-      }).filter(Boolean).sort().reverse();
+      const formattedDates = dates
+        .map((d) => {
+          if (typeof d === "string" && d.includes("T")) {
+            return d.split("T")[0];
+          }
+          return new Date(d).toISOString().split("T")[0];
+        })
+        .filter(Boolean)
+        .sort()
+        .reverse();
       setAvailableDates(formattedDates);
     } catch (error) {
       console.error("Error fetching dates:", error);
     }
   }, [selectedMatkul?.id]);
 
-  const fetchStudents = useCallback(async (overrideDate = null) => {
-    if (!selectedMatkul?.id) return;
-    try {
-      let res;
-      
-      const cacheBuster = `_t=${Date.now()}`;
-      // Gunakan overrideDate kalau ada, kalau tidak pakai selectedDateFilter
-      const dateToUse = overrideDate || selectedDateFilter;
-      
-      // Jika ada tanggal yang dipilih (bukan "semua"), fetch by tanggal
-      if (dateToUse && dateToUse !== "semua") {
-        res = await apiClient.get(`/api/guru/presensi/daftar-hadir/${selectedMatkul.id}/${dateToUse}?${cacheBuster}`);
-        console.log("DEBUG - Daftar hadir by tanggal:", dateToUse, res);
-      } else {
-        // Fetch semua (default ke hari ini)
-        res = await apiClient.get(`/api/guru/presensi/matkul/${selectedMatkul.id}/daftar-hadir?${cacheBuster}`);
-        console.log("DEBUG - Daftar hadir default:", res);
+  const fetchStudents = useCallback(
+    async (overrideDate = null) => {
+      if (!selectedMatkul?.id) return;
+      try {
+        let res;
+
+        const cacheBuster = `_t=${Date.now()}`;
+        // Gunakan overrideDate kalau ada, kalau tidak pakai selectedDateFilter
+        const dateToUse = overrideDate || selectedDateFilter;
+
+        // Jika ada tanggal yang dipilih (bukan "semua"), fetch by tanggal
+        if (dateToUse && dateToUse !== "semua") {
+          res = await apiClient.get(
+            `/api/guru/presensi/daftar-hadir/${selectedMatkul.id}/${dateToUse}?${cacheBuster}`,
+          );
+          console.log("DEBUG - Daftar hadir by tanggal:", dateToUse, res);
+        } else {
+          // Fetch semua (default ke hari ini)
+          res = await apiClient.get(
+            `/api/guru/presensi/matkul/${selectedMatkul.id}/daftar-hadir?${cacheBuster}`,
+          );
+          console.log("DEBUG - Daftar hadir default:", res);
+        }
+
+        // Handle different response structures
+        let data = [];
+        if (res.data && Array.isArray(res.data)) {
+          data = res.data;
+        } else if (res.data?.data && Array.isArray(res.data.data)) {
+          data = res.data.data;
+        } else if (Array.isArray(res)) {
+          data = res;
+        }
+
+        console.log("DEBUG - Extracted students data:", data);
+        console.log("DEBUG - Number of students:", data.length);
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        setStudents([]);
       }
-      
-      // Handle different response structures
-      let data = [];
-      if (res.data && Array.isArray(res.data)) {
-        data = res.data;
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
-        data = res.data.data;
-      } else if (Array.isArray(res)) {
-        data = res;
-      }
-      
-      console.log("DEBUG - Extracted students data:", data);
-      console.log("DEBUG - Number of students:", data.length);
-      setStudents(data);
-    } catch (error) {
-      console.error("Error fetching students:", error);
-      setStudents([]);
-    }
-  }, [selectedMatkul?.id, selectedDateFilter]);
+    },
+    [selectedMatkul?.id, selectedDateFilter],
+  );
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await apiClient.get('/api/mata-kuliah');
-        const data = Array.isArray(res) ? res : (res.data || []);
-        const formatted = data.map(c => ({
+        const res = await apiClient.get("/api/mata-kuliah");
+        const data = Array.isArray(res) ? res : res.data || [];
+        const formatted = data.map((c) => ({
           id: c.idMataKuliah,
           name: c.namaMataKuliah,
           room: c.ruang || "Ruang Kelas",
           time: c.waktu || "08:00 - 10:30",
-          jadwal: c.jadwal || ""
+          jadwal: c.jadwal || "",
         }));
         setMataKuliahList(formatted);
         if (formatted.length > 0 && !selectedMatkul?.id) {
           setSelectedMatkul(formatted[0]);
-          setSelectedDays(formatted[0].jadwal ? formatted[0].jadwal.split(',') : []);
+          setSelectedDays(
+            formatted[0].jadwal ? formatted[0].jadwal.split(",") : [],
+          );
         }
       } catch (error) {
         console.error("Failed to load courses");
@@ -140,7 +165,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   // Update selectedDays when selectedMatkul changes
   useEffect(() => {
     if (selectedMatkul?.jadwal) {
-      setSelectedDays(selectedMatkul.jadwal.split(','));
+      setSelectedDays(selectedMatkul.jadwal.split(","));
     } else {
       setSelectedDays([]);
     }
@@ -149,25 +174,36 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (showJadwal && !e.target.closest('.dp-jadwal-popup') && !e.target.closest('.dp-btn-outline')) {
+      if (
+        showJadwal &&
+        !e.target.closest(".dp-jadwal-popup") &&
+        !e.target.closest(".dp-btn-outline")
+      ) {
         setShowJadwal(false);
       }
-      if (showMatkul && !e.target.closest('.dp-matkul-selector') && !e.target.closest('.dp-matkul-dropdown')) {
+      if (
+        showMatkul &&
+        !e.target.closest(".dp-matkul-selector") &&
+        !e.target.closest(".dp-matkul-dropdown")
+      ) {
         setShowMatkul(false);
       }
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [showJadwal, showMatkul]);
 
   useEffect(() => {
     if (selectedMatkul?.id) {
-      console.log("DEBUG - selectedMatkul changed, fetching dates and students for:", selectedMatkul.id);
+      console.log(
+        "DEBUG - selectedMatkul changed, fetching dates and students for:",
+        selectedMatkul.id,
+      );
       fetchDates();
       fetchStudents();
     }
   }, [selectedMatkul?.id, fetchDates, fetchStudents]);
-  
+
   // Fetch students saat tanggal berubah
   useEffect(() => {
     if (selectedMatkul?.id && selectedDateFilter) {
@@ -175,7 +211,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
       fetchStudents();
     }
   }, [selectedDateFilter, selectedMatkul?.id, fetchStudents]);
-  
+
   // Log students data for debugging
   useEffect(() => {
     console.log("DEBUG - students state changed:", students);
@@ -189,7 +225,10 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     // Refresh selalu jalan kalau ada matkul dipilih, tapi lebih cepat saat sessionActive
     const intervalTime = sessionActive ? 2000 : 5000;
     const interval = setInterval(() => {
-      console.log("DEBUG - Auto-refresh triggered, sessionActive:", sessionActive);
+      console.log(
+        "DEBUG - Auto-refresh triggered, sessionActive:",
+        sessionActive,
+      );
       fetchStudents();
     }, intervalTime);
     return () => clearInterval(interval);
@@ -217,10 +256,15 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
       showToast("Pilih mata kuliah terlebih dahulu", "error");
       return;
     }
-    setStudents((prev) => prev.map((s) => s.nis === nis ? { ...s, status: newStatus } : s));
+    setStudents((prev) =>
+      prev.map((s) => (s.nis === nis ? { ...s, status: newStatus } : s)),
+    );
     try {
       // Gunakan API baru berdasarkan NIS dan mata kuliah
-      await apiClient.put(`/api/guru/presensi/nis/${nis}/matkul/${selectedMatkul.id}/status`, { status: newStatus });
+      await apiClient.put(
+        `/api/guru/presensi/nis/${nis}/matkul/${selectedMatkul.id}/status`,
+        { status: newStatus },
+      );
       showToast("Status diperbarui");
     } catch (error) {
       console.error(error);
@@ -228,8 +272,10 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     }
   };
 
-  const statCount = (status) => students.filter((s) => s.status === status).length;
-  const urgency = timeLeft < 60 ? "urgent" : timeLeft < 5 * 60 ? "warning" : "normal";
+  const statCount = (status) =>
+    students.filter((s) => s.status === status).length;
+  const urgency =
+    timeLeft < 60 ? "urgent" : timeLeft < 5 * 60 ? "warning" : "normal";
 
   const endSession = () => {
     setSessionActive(false);
@@ -243,28 +289,44 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     }
 
     // Header CSV
-    const headers = ["No", "NIS", "Nama Siswa", "Status", "Tanggal Pertemuan", "Waktu Presensi"];
-    
+    const headers = [
+      "No",
+      "NIS",
+      "Nama Siswa",
+      "Status",
+      "Tanggal Pertemuan",
+      "Waktu Presensi",
+    ];
+
     // Data rows
     const rows = students.map((s, index) => [
       index + 1,
       s.nis || "-",
       s.nama || "-",
       s.status || "Alpa",
-      s.tanggalPertemuan ? new Date(s.tanggalPertemuan).toLocaleDateString('id-ID') : "-",
-      s.waktuPresensi ? new Date(s.waktuPresensi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-"
+      s.tanggalPertemuan
+        ? new Date(s.tanggalPertemuan).toLocaleDateString("id-ID")
+        : "-",
+      s.waktuPresensi
+        ? new Date(s.waktuPresensi).toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "-",
     ]);
 
     // Summary
-    const hadir = students.filter(s => s.status === "Hadir").length;
-    const sakit = students.filter(s => s.status === "Sakit").length;
-    const izin = students.filter(s => s.status === "Izin").length;
-    const alpa = students.filter(s => s.status === "Alpa" || !s.status).length;
+    const hadir = students.filter((s) => s.status === "Hadir").length;
+    const sakit = students.filter((s) => s.status === "Sakit").length;
+    const izin = students.filter((s) => s.status === "Izin").length;
+    const alpa = students.filter(
+      (s) => s.status === "Alpa" || !s.status,
+    ).length;
 
     const csvContent = [
       ["LAPORAN PRESENSI"],
       ["Mata Kuliah:", selectedMatkul.name],
-      ["Tanggal:", new Date().toLocaleDateString('id-ID')],
+      ["Tanggal:", new Date().toLocaleDateString("id-ID")],
       [],
       headers,
       ...rows,
@@ -274,54 +336,99 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
       ["Sakit:", sakit],
       ["Izin:", izin],
       ["Alpa:", alpa],
-      ["Total:", students.length]
-    ].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+      ["Total:", students.length],
+    ]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
 
     // Download
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `Laporan_Presensi_${selectedMatkul.name}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `Laporan_Presensi_${selectedMatkul.name}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     showToast("Laporan berhasil diunduh!");
   };
 
   return (
-    <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+    <div
+      className="page-shell"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       {/* Toast */}
       {toast && (
         <div className={`dp-toast dp-toast--${toast.type}`}>
-          <span className="material-symbols-outlined">{toast.type === "success" ? "check_circle" : "error"}</span>
+          <span className="material-symbols-outlined">
+            {toast.type === "success" ? "check_circle" : "error"}
+          </span>
           {toast.msg}
         </div>
       )}
 
-      <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruPresensi" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+      <SidebarGuru
+        onNavigate={onNavigate}
+        onLogout={onLogout}
+        activePage="guruPresensi"
+        mobileOpen={sidebarOpen}
+        onClose={closeSidebar}
+      />
 
-      <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
+      <main
+        className="page-main"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
+        <Navbar
+          role="Guru"
+          onOpenSidebar={openSidebar}
+          onNavigate={
+            typeof nav !== "undefined"
+              ? nav
+              : typeof onNavigate !== "undefined"
+                ? onNavigate
+                : undefined
+          }
+        />
 
         <div className="page-content">
           {/* Top bar */}
           <div className="dp-topbar">
             <div>
               <h2 className="dp-page-title">Manajemen Presensi</h2>
-              <p className="dp-page-sub">Hasilkan QR Code presensi dan pantau kehadiran siswa secara real-time.</p>
+              <p className="dp-page-sub">
+                Hasilkan QR Code presensi dan pantau kehadiran siswa secara
+                real-time.
+              </p>
             </div>
-            <div className="dp-top-actions" style={{ position: 'relative' }}>
-              <div className="dp-matkul-selector" onClick={() => setShowMatkul(!showMatkul)}>
+            <div className="dp-top-actions" style={{ position: "relative" }}>
+              <div
+                className="dp-matkul-selector"
+                onClick={() => setShowMatkul(!showMatkul)}
+              >
                 <span className="material-symbols-outlined">menu_book</span>
                 <span>{selectedMatkul.name}</span>
                 <span className="material-symbols-outlined">expand_more</span>
                 {showMatkul && (
                   <div className="dp-matkul-dropdown">
                     {mataKuliahList.map((mk) => (
-                      <button key={mk.id} className={`dp-matkul-opt ${selectedMatkul.id === mk.id ? "active" : ""}`}
-                        onClick={(e) => { e.stopPropagation(); setSelectedMatkul(mk); setShowMatkul(false); handleRefresh(); }}>
+                      <button
+                        key={mk.id}
+                        className={`dp-matkul-opt ${selectedMatkul.id === mk.id ? "active" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMatkul(mk);
+                          setShowMatkul(false);
+                          handleRefresh();
+                        }}
+                      >
                         <strong>{mk.name}</strong>
                         <span>{mk.time}</span>
                       </button>
@@ -329,18 +436,26 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   </div>
                 )}
               </div>
-              <button className="dp-btn-outline" onClick={() => setShowJadwal(!showJadwal)}>
-                <span className="material-symbols-outlined">calendar_month</span>
+              <button
+                className="dp-btn-outline"
+                onClick={() => setShowJadwal(!showJadwal)}
+              >
+                <span className="material-symbols-outlined">
+                  calendar_month
+                </span>
                 Pilih Tanggal
               </button>
               {showJadwal && (
-                <div className="dp-jadwal-popup" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="dp-jadwal-popup"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="dp-jadwal-header">
                     <span>Pilih Tanggal Presensi</span>
                     <button onClick={() => setShowJadwal(false)}>×</button>
                   </div>
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     className="dp-date-input"
                     value={tempDate}
                     onChange={(e) => setTempDate(e.target.value)}
@@ -350,33 +465,45 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                     onClick={async () => {
                       if (tempDate) {
                         // Tambahkan tanggal ke dropdown filter
-                        setAvailableDates(prev => [...new Set([...prev, tempDate])].sort().reverse());
+                        setAvailableDates((prev) =>
+                          [...new Set([...prev, tempDate])].sort().reverse(),
+                        );
                         setSelectedDateFilter(tempDate);
                         setShowJadwal(false);
                         setSessionActive(true);
                         try {
-                          const res = await apiClient.post(`/api/guru/presensi/matkul/${selectedMatkul.id}/generate`, { tanggal: tempDate });
+                          const res = await apiClient.post(
+                            `/api/guru/presensi/matkul/${selectedMatkul.id}/generate`,
+                            { tanggal: tempDate },
+                          );
                           console.log("DEBUG - Generate sesi response:", res);
                           if (res.token) {
                             setToken(res.token);
                             setTimeLeft(QR_TTL);
                             setQrLoaded(false);
                           }
-                          showToast(`Sesi dibuat untuk tanggal ${new Date(tempDate).toLocaleDateString('id-ID')}`);
+                          showToast(
+                            `Sesi dibuat untuk tanggal ${new Date(tempDate).toLocaleDateString("id-ID")}`,
+                          );
                           // Fetch dengan tanggal yang baru dipilih
                           setTimeout(() => fetchStudents(tempDate), 500);
                         } catch (err) {
-                          if (err.message.includes('sudah ada')) {
+                          if (err.message.includes("sudah ada")) {
                             // Generate new token for existing session
                             const newToken = `Manis-${Date.now()}-${Math.random().toString(36).substring(7)}`;
                             setToken(newToken);
                             setTimeLeft(QR_TTL);
                             setQrLoaded(false);
-                            showToast(`Sesi tanggal ${new Date(tempDate).toLocaleDateString('id-ID')} sudah ada - Token baru dibuat`);
+                            showToast(
+                              `Sesi tanggal ${new Date(tempDate).toLocaleDateString("id-ID")} sudah ada - Token baru dibuat`,
+                            );
                             // Fetch dengan tanggal yang dipilih
                             setTimeout(() => fetchStudents(tempDate), 500);
                           } else {
-                            showToast(err.message || "Gagal membuat sesi", "error");
+                            showToast(
+                              err.message || "Gagal membuat sesi",
+                              "error",
+                            );
                           }
                         }
                       } else {
@@ -400,52 +527,68 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   Tutup Sesi
                 </button>
               ) : (
-                <button className="dp-btn-primary" onClick={async () => {
-                  if (!selectedMatkul?.id) {
-                    showToast("Pilih mata kuliah terlebih dahulu", "error");
-                    return;
-                  }
-                  try {
-                    const res = await apiClient.post(`/api/guru/presensi/matkul/${selectedMatkul.id}/generate`);
-                    console.log("DEBUG - Generate sesi response:", res);
-                    console.log("DEBUG - res.token:", res.token);
-                    if (res.token) {
-                      console.log("DEBUG - Setting token:", res.token);
-                      setToken(res.token);
-                      setTimeLeft(QR_TTL);
-                      setQrLoaded(false);
-                      console.log("DEBUG - Token set, sessionActive set to true");
-                    } else {
-                      console.log("DEBUG - No token in response!");
+                <button
+                  className="dp-btn-primary"
+                  onClick={async () => {
+                    if (!selectedMatkul?.id) {
+                      showToast("Pilih mata kuliah terlebih dahulu", "error");
+                      return;
                     }
-                    setSessionActive(true);
-                    // Tambahkan tanggal hari ini ke filter
-                    const today = new Date().toISOString().split('T')[0];
-                    setAvailableDates(prev => [...new Set([...prev, today])].sort().reverse());
-                    setSelectedDateFilter(today);
-                    // Fetch dengan tanggal hari ini
-                    setTimeout(() => fetchStudents(today), 500);
-                    showToast("Sesi presensi berhasil dibuat!");
-                  } catch (error) {
-                    if (error.message.includes('sudah ada')) {
+                    try {
+                      const res = await apiClient.post(
+                        `/api/guru/presensi/matkul/${selectedMatkul.id}/generate`,
+                      );
+                      console.log("DEBUG - Generate sesi response:", res);
+                      console.log("DEBUG - res.token:", res.token);
+                      if (res.token) {
+                        console.log("DEBUG - Setting token:", res.token);
+                        setToken(res.token);
+                        setTimeLeft(QR_TTL);
+                        setQrLoaded(false);
+                        console.log(
+                          "DEBUG - Token set, sessionActive set to true",
+                        );
+                      } else {
+                        console.log("DEBUG - No token in response!");
+                      }
                       setSessionActive(true);
-                      // Generate new token for existing session
-                      const newToken = `Manis-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-                      setToken(newToken);
-                      setTimeLeft(QR_TTL);
-                      setQrLoaded(false);
                       // Tambahkan tanggal hari ini ke filter
-                      const today = new Date().toISOString().split('T')[0];
-                      setAvailableDates(prev => [...new Set([...prev, today])].sort().reverse());
+                      const today = new Date().toISOString().split("T")[0];
+                      setAvailableDates((prev) =>
+                        [...new Set([...prev, today])].sort().reverse(),
+                      );
                       setSelectedDateFilter(today);
-                      showToast("Sesi hari ini sudah ada - Token baru dibuat");
                       // Fetch dengan tanggal hari ini
                       setTimeout(() => fetchStudents(today), 500);
-                    } else {
-                      showToast(error.message || "Gagal membuat sesi", "error");
+                      showToast("Sesi presensi berhasil dibuat!");
+                    } catch (error) {
+                      if (error.message.includes("sudah ada")) {
+                        setSessionActive(true);
+                        // Generate new token for existing session
+                        const newToken = `Manis-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+                        setToken(newToken);
+                        setTimeLeft(QR_TTL);
+                        setQrLoaded(false);
+                        // Tambahkan tanggal hari ini ke filter
+                        const today = new Date().toISOString().split("T")[0];
+                        setAvailableDates((prev) =>
+                          [...new Set([...prev, today])].sort().reverse(),
+                        );
+                        setSelectedDateFilter(today);
+                        showToast(
+                          "Sesi hari ini sudah ada - Token baru dibuat",
+                        );
+                        // Fetch dengan tanggal hari ini
+                        setTimeout(() => fetchStudents(today), 500);
+                      } else {
+                        showToast(
+                          error.message || "Gagal membuat sesi",
+                          "error",
+                        );
+                      }
                     }
-                  }
-                }}>
+                  }}
+                >
                   <span className="material-symbols-outlined">play_circle</span>
                   Buka Sesi
                 </button>
@@ -471,7 +614,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   <>
                     {!qrLoaded && (
                       <div className="dp-qr-skeleton">
-                        <span className="material-symbols-outlined">qr_code_2</span>
+                        <span className="material-symbols-outlined">
+                          qr_code_2
+                        </span>
                         <span>Memuat QR...</span>
                       </div>
                     )}
@@ -493,24 +638,34 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
               </div>
               {token && (
                 <div className="dp-qr-token">
-                  <span className="dp-token-label">Token (untuk input manual)</span>
+                  <span className="dp-token-label">
+                    Token (untuk input manual)
+                  </span>
                   <code className="dp-token-value">{token}</code>
                 </div>
               )}
               <div className="dp-qr-footer">
                 <div className="dp-ttl-info">
                   <span className="dp-ttl-label">Masa Berlaku</span>
-                  <span className={`dp-ttl-value dp-ttl--${urgency}`}>{fmtTime(timeLeft)} Menit</span>
+                  <span className={`dp-ttl-value dp-ttl--${urgency}`}>
+                    {fmtTime(timeLeft)} Menit
+                  </span>
                 </div>
                 <div className="dp-ttl-bar-track">
-                  <div className={`dp-ttl-bar-fill dp-ttl--${urgency}`} style={{ width: `${(timeLeft / QR_TTL) * 100}%` }} />
+                  <div
+                    className={`dp-ttl-bar-fill dp-ttl--${urgency}`}
+                    style={{ width: `${(timeLeft / QR_TTL) * 100}%` }}
+                  />
                 </div>
                 <div className="dp-qr-actions">
                   <button className="dp-btn-refresh" onClick={handleRefresh}>
                     <span className="material-symbols-outlined">refresh</span>
                     Perbarui
                   </button>
-                  <button className="dp-btn-share" onClick={() => showToast("Link presensi disalin!")}>
+                  <button
+                    className="dp-btn-share"
+                    onClick={() => showToast("Link presensi disalin!")}
+                  >
                     <span className="material-symbols-outlined">share</span>
                     Bagikan
                   </button>
@@ -527,12 +682,16 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   <div className="dp-detail-item">
                     <span className="material-symbols-outlined">schedule</span>
                     <div>
-                      <p className="dp-detail-label">Waktu Perkuliahan</p>
-                      <p className="dp-detail-value">{selectedMatkul.time} WIB</p>
+                      <p className="dp-detail-label">Waktu Pelajaran</p>
+                      <p className="dp-detail-value">
+                        {selectedMatkul.time} WIB
+                      </p>
                     </div>
                   </div>
                   <div className="dp-detail-item">
-                    <span className="material-symbols-outlined">meeting_room</span>
+                    <span className="material-symbols-outlined">
+                      meeting_room
+                    </span>
                     <div>
                       <p className="dp-detail-label">Ruangan</p>
                       <p className="dp-detail-value">{selectedMatkul.room}</p>
@@ -541,7 +700,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                   <div className="dp-detail-item">
                     <span className="material-symbols-outlined">tag</span>
                     <div>
-                      <p className="dp-detail-label">Kode Mata Kuliah</p>
+                      <p className="dp-detail-label">Kode Mata Pelajaran</p>
                       <p className="dp-detail-value">{selectedMatkul.id}</p>
                     </div>
                   </div>
@@ -549,13 +708,17 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                     <span className="material-symbols-outlined">circle</span>
                     <div>
                       <p className="dp-detail-label">Status Sesi</p>
-                      <p className={`dp-detail-value ${sessionActive ? "dp-status--active" : "dp-status--closed"}`}>
+                      <p
+                        className={`dp-detail-value ${sessionActive ? "dp-status--active" : "dp-status--closed"}`}
+                      >
                         {sessionActive ? "● Berlangsung" : "● Ditutup"}
                       </p>
                     </div>
                   </div>
                   <div className="dp-detail-item">
-                    <span className="material-symbols-outlined">calendar_month</span>
+                    <span className="material-symbols-outlined">
+                      calendar_month
+                    </span>
                     <div>
                       <p className="dp-detail-label">Jadwal Mingguan</p>
                       <p className="dp-detail-value">
@@ -569,15 +732,42 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
               {/* Stats */}
               <div className="dp-stats-grid">
                 {[
-                  { label: "HADIR",  value: statCount("Hadir"), color: "#2f9696", icon: "check_circle" },
-                  { label: "SAKIT",  value: statCount("Sakit"), color: "#4b53bc", icon: "medication" },
-                  { label: "IZIN",   value: statCount("Izin"),  color: "#c47f17", icon: "event_busy" },
-                  { label: "ALPA",   value: statCount("Alpa"),  color: "#dc2626", icon: "cancel" },
+                  {
+                    label: "HADIR",
+                    value: statCount("Hadir"),
+                    color: "#2f9696",
+                    icon: "check_circle",
+                  },
+                  {
+                    label: "SAKIT",
+                    value: statCount("Sakit"),
+                    color: "#4b53bc",
+                    icon: "medication",
+                  },
+                  {
+                    label: "IZIN",
+                    value: statCount("Izin"),
+                    color: "#c47f17",
+                    icon: "event_busy",
+                  },
+                  {
+                    label: "ALPA",
+                    value: statCount("Alpa"),
+                    color: "#dc2626",
+                    icon: "cancel",
+                  },
                 ].map((s) => (
                   <div key={s.label} className="dp-stat-card">
-                    <span className="material-symbols-outlined dp-stat-icon" style={{ color: s.color }}>{s.icon}</span>
+                    <span
+                      className="material-symbols-outlined dp-stat-icon"
+                      style={{ color: s.color }}
+                    >
+                      {s.icon}
+                    </span>
                     <p className="dp-stat-label">{s.label}</p>
-                    <p className="dp-stat-value" style={{ color: s.color }}>{s.value}</p>
+                    <p className="dp-stat-value" style={{ color: s.color }}>
+                      {s.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -592,18 +782,28 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                 <p>{students.length} siswa terdaftar</p>
               </div>
               <div className="dp-table-actions">
-                <button className="dp-icon-btn" onClick={() => { fetchStudents(); showToast("Data diperbarui!"); }}>
+                <button
+                  className="dp-icon-btn"
+                  onClick={() => {
+                    fetchStudents();
+                    showToast("Data diperbarui!");
+                  }}
+                >
                   <span className="material-symbols-outlined">refresh</span>
                 </button>
-                <select 
+                <select
                   className="dp-date-filter"
                   value={selectedDateFilter}
                   onChange={(e) => setSelectedDateFilter(e.target.value)}
                 >
                   <option value="semua">Semua Tanggal</option>
-                  {availableDates.map(date => (
+                  {availableDates.map((date) => (
                     <option key={date} value={date}>
-                      {new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(date).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </option>
                   ))}
                 </select>
@@ -621,101 +821,178 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                 </thead>
                 <tbody>
                   {(() => {
-                    console.log("DEBUG RENDER - students.length:", students.length);
-                    console.log("DEBUG RENDER - selectedDateFilter:", selectedDateFilter);
-                    console.log("DEBUG RENDER - availableDates:", availableDates);
+                    console.log(
+                      "DEBUG RENDER - students.length:",
+                      students.length,
+                    );
+                    console.log(
+                      "DEBUG RENDER - selectedDateFilter:",
+                      selectedDateFilter,
+                    );
+                    console.log(
+                      "DEBUG RENDER - availableDates:",
+                      availableDates,
+                    );
                     if (students.length > 0) {
                       const firstStudent = students[0];
-                      console.log("DEBUG RENDER - First student:", firstStudent);
-                      console.log("DEBUG RENDER - First student tanggalPertemuan:", firstStudent?.tanggalPertemuan);
+                      console.log(
+                        "DEBUG RENDER - First student:",
+                        firstStudent,
+                      );
+                      console.log(
+                        "DEBUG RENDER - First student tanggalPertemuan:",
+                        firstStudent?.tanggalPertemuan,
+                      );
                     }
                     return null;
                   })()}
                   {students.length === 0 ? (
                     <tr>
-                      <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
-                        Tidak ada data siswa. Klik "Buka Sesi" untuk membuat sesi presensi.
+                      <td
+                        colSpan="4"
+                        style={{ textAlign: "center", padding: "20px" }}
+                      >
+                        Tidak ada data siswa. Klik "Buka Sesi" untuk membuat
+                        sesi presensi.
                       </td>
                     </tr>
-                  ) : (() => {
-                    // Jika semua student punya tanggalPertemuan null, tampilkan semua (sesi belum dibuat)
-                    const allNullTanggal = students.every(s => !s.tanggalPertemuan);
-                    console.log("DEBUG FILTER - allNullTanggal:", allNullTanggal);
-                    
-                    const filtered = selectedDateFilter === "semua" || allNullTanggal
-                      ? students 
-                      : students.filter(s => {
-                          if (!s.tanggalPertemuan) {
-                            console.log("DEBUG FILTER - Student without tanggalPertemuan:", s.nis);
-                            return false;
-                          }
-                          let sDate = null;
-                          if (typeof s.tanggalPertemuan === 'string' && s.tanggalPertemuan.includes('T')) {
-                            sDate = s.tanggalPertemuan.split('T')[0];
-                          } else {
-                            try {
-                              sDate = new Date(s.tanggalPertemuan).toISOString().split('T')[0];
-                            } catch (e) {
-                              return false;
-                            }
-                          }
-                          console.log("DEBUG FILTER - Comparing:", sDate, "vs", selectedDateFilter, "=", sDate === selectedDateFilter);
-                          return sDate === selectedDateFilter;
-                        });
-                    console.log("DEBUG RENDER - Filtered count:", filtered.length);
-                    return filtered.map((s) => (
-                    <tr key={s.id}>
-                      <td>
-                        <div className="dp-student-cell">
-                          {s.photo ? (
-                            <img src={s.photo} alt={s.name} className="dp-avatar-img" />
-                          ) : (
-                            <div className="dp-avatar-initials" style={{ backgroundColor: s.color }}>{s.initials}</div>
-                          )}
-                          <span className="dp-student-name">{s.name}</span>
-                        </div>
-                      </td>
-                      <td className="dp-nis">{s.nis}</td>
-                      <td className="dp-time">
-                        {s.waktuPresensi ? new Date(s.waktuPresensi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
-                      </td>
-                      <td>
-                        <div className="dp-status-wrap">
-                          <select
-                            className="dp-status-select"
-                            style={{ color: statusColor(s.status) }}
-                            value={s.status}
-                            onChange={(e) => handleStatusChange(s.nis, e.target.value)}
-                          >
-                            {STATUS_OPTS.map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </select>
-                          <span className="material-symbols-outlined dp-select-icon" style={{ color: statusColor(s.status) }}>expand_more</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ));})()}
+                  ) : (
+                    (() => {
+                      // Jika semua student punya tanggalPertemuan null, tampilkan semua (sesi belum dibuat)
+                      const allNullTanggal = students.every(
+                        (s) => !s.tanggalPertemuan,
+                      );
+                      console.log(
+                        "DEBUG FILTER - allNullTanggal:",
+                        allNullTanggal,
+                      );
+
+                      const filtered =
+                        selectedDateFilter === "semua" || allNullTanggal
+                          ? students
+                          : students.filter((s) => {
+                              if (!s.tanggalPertemuan) {
+                                console.log(
+                                  "DEBUG FILTER - Student without tanggalPertemuan:",
+                                  s.nis,
+                                );
+                                return false;
+                              }
+                              let sDate = null;
+                              if (
+                                typeof s.tanggalPertemuan === "string" &&
+                                s.tanggalPertemuan.includes("T")
+                              ) {
+                                sDate = s.tanggalPertemuan.split("T")[0];
+                              } else {
+                                try {
+                                  sDate = new Date(s.tanggalPertemuan)
+                                    .toISOString()
+                                    .split("T")[0];
+                                } catch (e) {
+                                  return false;
+                                }
+                              }
+                              console.log(
+                                "DEBUG FILTER - Comparing:",
+                                sDate,
+                                "vs",
+                                selectedDateFilter,
+                                "=",
+                                sDate === selectedDateFilter,
+                              );
+                              return sDate === selectedDateFilter;
+                            });
+                      console.log(
+                        "DEBUG RENDER - Filtered count:",
+                        filtered.length,
+                      );
+                      return filtered.map((s) => (
+                        <tr key={s.id}>
+                          <td>
+                            <div className="dp-student-cell">
+                              {s.photo ? (
+                                <img
+                                  src={s.photo}
+                                  alt={s.name}
+                                  className="dp-avatar-img"
+                                />
+                              ) : (
+                                <div
+                                  className="dp-avatar-initials"
+                                  style={{ backgroundColor: s.color }}
+                                >
+                                  {s.initials}
+                                </div>
+                              )}
+                              <span className="dp-student-name">{s.name}</span>
+                            </div>
+                          </td>
+                          <td className="dp-nis">{s.nis}</td>
+                          <td className="dp-time">
+                            {s.waktuPresensi
+                              ? new Date(s.waktuPresensi).toLocaleTimeString(
+                                  "id-ID",
+                                  { hour: "2-digit", minute: "2-digit" },
+                                )
+                              : "-"}
+                          </td>
+                          <td>
+                            <div className="dp-status-wrap">
+                              <select
+                                className="dp-status-select"
+                                style={{ color: statusColor(s.status) }}
+                                value={s.status}
+                                onChange={(e) =>
+                                  handleStatusChange(s.nis, e.target.value)
+                                }
+                              >
+                                {STATUS_OPTS.map((opt) => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                              <span
+                                className="material-symbols-outlined dp-select-icon"
+                                style={{ color: statusColor(s.status) }}
+                              >
+                                expand_more
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ));
+                    })()
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="dp-pagination-row">
               <p className="dp-pagination-info">
-                {selectedDateFilter === "semua" 
+                {selectedDateFilter === "semua"
                   ? `Menampilkan semua ${students.length} siswa`
-                  : `Menampilkan ${students.filter(s => {
-                      if (!s.tanggalPertemuan) return false;
-                      let sDate = null;
-                      if (typeof s.tanggalPertemuan === 'string' && s.tanggalPertemuan.includes('T')) {
-                        sDate = s.tanggalPertemuan.split('T')[0];
-                      } else {
-                        try {
-                          sDate = new Date(s.tanggalPertemuan).toISOString().split('T')[0];
-                        } catch (e) { return false; }
-                      }
-                      return sDate === selectedDateFilter;
-                    }).length} siswa untuk tanggal ${new Date(selectedDateFilter).toLocaleDateString('id-ID')}`
-                }
+                  : `Menampilkan ${
+                      students.filter((s) => {
+                        if (!s.tanggalPertemuan) return false;
+                        let sDate = null;
+                        if (
+                          typeof s.tanggalPertemuan === "string" &&
+                          s.tanggalPertemuan.includes("T")
+                        ) {
+                          sDate = s.tanggalPertemuan.split("T")[0];
+                        } else {
+                          try {
+                            sDate = new Date(s.tanggalPertemuan)
+                              .toISOString()
+                              .split("T")[0];
+                          } catch (e) {
+                            return false;
+                          }
+                        }
+                        return sDate === selectedDateFilter;
+                      }).length
+                    } siswa untuk tanggal ${new Date(selectedDateFilter).toLocaleDateString("id-ID")}`}
               </p>
             </div>
           </div>

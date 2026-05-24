@@ -45,7 +45,7 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
               guru: course.guru?.user?.nama || "Belum ditentukan",
               jadwal: course.jadwal || "-",
               desc:
-                "Materi dan tugas untuk mata kuliah " + course.namaMataKuliah,
+                "Materi dan tugas untuk mata pelajaran " + course.namaMataKuliah,
               progress: progress,
             };
           }),

@@ -273,18 +273,18 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
                   </nav>
                   <h2 className="fd-page-title">Forum Diskusi</h2>
                   <p className="fd-page-sub">
-                    Pilih mata kuliah untuk melihat forum diskusi kelas.
+                    Pilih mata pelajaran untuk melihat forum diskusi kelas.
                   </p>
                 </div>
               </div>
 
               {loadingCourses ? (
-                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat daftar mata kuliah...</div>
+                <div style={{ textAlign: "center", padding: "3rem" }}>Memuat daftar mata pelajaran...</div>
               ) : mataKuliahList.length === 0 ? (
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>school</span>
-                  <h3>Tidak Ada Mata Kuliah</h3>
-                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada mata kuliah yang tersedia.</p>
+                  <h3>Tidak Ada Mata Pelajaran</h3>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada mata pelajaran yang tersedia.</p>
                 </div>
               ) : (
                 <div className="fd-course-grid">
@@ -300,7 +300,7 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
                           <span className="material-symbols-outlined">forum</span>
                         </div>
                         <h3 className="fd-course-name">{mk.namaMataKuliah}</h3>
-                        <p className="fd-course-code">Kode: MK{String(mk.idMataKuliah).padStart(3, '0')}</p>
+                        <p className="fd-course-code">Kode: MP{String(mk.idMataKuliah).padStart(3, '0')}</p>
                         <div className="fd-course-footer">
                           <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>arrow_forward</span>
                           <span>Lihat Forum</span>
@@ -348,7 +348,7 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>forum</span>
                   <h3>Belum Ada Diskusi</h3>
-                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada yang memulai diskusi di mata kuliah ini.</p>
+                  <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Belum ada yang memulai diskusi di mata pelajaran ini.</p>
                 </div>
               ) : (
               <div className="fd-thread-list">

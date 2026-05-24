@@ -381,7 +381,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
                         </div>
                         <h3 className="fd-course-name">{mk.namaMataKuliah}</h3>
                         <p className="fd-course-code">
-                          Kode: MK{String(mk.idMataKuliah).padStart(3, "0")}
+                          Kode: MP{String(mk.idMataKuliah).padStart(3, "0")}
                         </p>
                         <div className="fd-course-footer">
                           <span

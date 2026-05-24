@@ -573,7 +573,7 @@ export default function GuruProfile({ onNavigate, onLogout }) {
               <div className="dprf-matkul-icon">
                 <span className="material-symbols-outlined">menu_book</span>
               </div>
-              <h3 className="dprf-matkul-title">Mata Kuliah Diampu</h3>
+              <h3 className="dprf-matkul-title">Mata Pelajaran yang Diampu</h3>
               <div className="dprf-matkul-list">
                 {mataKuliahList.length > 0 ? (
                   mataKuliahList.map((mk) => (

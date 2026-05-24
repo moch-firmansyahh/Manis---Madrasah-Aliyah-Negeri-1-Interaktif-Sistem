@@ -218,7 +218,7 @@ export default function Nilai({ onNavigate, onLogout }) {
       <p>Nama: <b>${nama}</b> &nbsp;|&nbsp; NIS: <b>${nis}</b></p>
       <table>
         <thead><tr>
-          <th>Kode MK</th><th>Mata Kuliah</th><th>SKS</th>
+          <th>Kode MK</th><th>Mata Pelajaran</th><th>SKS</th>
           <th>Tugas</th><th>UTS</th><th>UAS</th><th>Nilai</th>
         </tr></thead>
         <tbody>${rows}</tbody>

@@ -422,8 +422,8 @@ export default function Profile({ onNavigate, onLogout }) {
               </div>
 
               <div className="prf-data-field prf-fullwidth">
-                <p className="prf-field-label">PROGRAM STUDI</p>
-                <p className="prf-field-value prf-prodi">Teknik Informatika - Rekayasa Perangkat Lunak</p>
+                <p className="prf-field-label">KELAS</p>
+                <p className="prf-field-value prf-prodi">XII MIPA 1</p>
               </div>
 
               <div className="prf-data-grid prf-data-grid--3">
