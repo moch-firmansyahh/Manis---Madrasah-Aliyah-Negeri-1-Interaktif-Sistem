@@ -1,7 +1,14 @@
 import React from "react";
 import "./shared.css";
 
-export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogout, mobileOpen, onClose }) {
+export default function Sidebar({
+  onNavigate,
+  activePage,
+  presensiRoute,
+  onLogout,
+  mobileOpen,
+  onClose,
+}) {
   var presRoute = presensiRoute || "presensiSiswa";
 
   function nav(page) {
@@ -26,21 +33,27 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
   return (
     <>
       {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div className="sidebar-backdrop" onClick={onClose} />
-      )}
+      {mobileOpen && <div className="sidebar-backdrop" onClick={onClose} />}
 
       <aside className={`sidebar${mobileOpen ? " sidebar--mobile-open" : ""}`}>
         {/* Mobile close button */}
-        <button className="sidebar__mobile-close" onClick={onClose} aria-label="Tutup menu">
+        <button
+          className="sidebar__mobile-close"
+          onClick={onClose}
+          aria-label="Tutup menu"
+        >
           <span className="material-symbols-outlined">close</span>
         </button>
 
         <div className="sidebar__brand">
-          <div className="sidebar__logo" style={{ fontSize: '1.75rem' }}>📚</div>
+          <div className="sidebar__logo" style={{ fontSize: "1.75rem" }}>
+            📚
+          </div>
           <div>
             <p className="sidebar__app-name">Manis</p>
-            <p className="sidebar__app-sub">Madrasah Aliyah Negeri 1 Interaktif Sistem</p>
+            <p className="sidebar__app-sub">
+              Madrasah Aliyah Negeri 1 Interaktif Sistem
+            </p>
           </div>
         </div>
 
@@ -49,11 +62,17 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
             <span className="material-symbols-outlined">home</span>
             Beranda
           </button>
-          <button className={cls("daftarMataKuliah")} onClick={() => nav("daftarMataKuliah")}>
+          <button
+            className={cls("daftarMataKuliah")}
+            onClick={() => nav("daftarMataKuliah")}
+          >
             <span className="material-symbols-outlined">menu_book</span>
-            Mata Kuliah
+            Mata Pelajaran
           </button>
-          <button className={cls("daftarTugas")} onClick={() => nav("daftarTugas")}>
+          <button
+            className={cls("daftarTugas")}
+            onClick={() => nav("daftarTugas")}
+          >
             <span className="material-symbols-outlined">assignment</span>
             Tugas
           </button>
@@ -65,7 +84,10 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
             <span className="material-symbols-outlined">grade</span>
             Nilai
           </button>
-          <button className={cls("forumDiskusi")} onClick={() => nav("forumDiskusi")}>
+          <button
+            className={cls("forumDiskusi")}
+            onClick={() => nav("forumDiskusi")}
+          >
             <span className="material-symbols-outlined">forum</span>
             Diskusi
           </button>
@@ -78,7 +100,9 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
         <div className="sidebar__footer">
           <button
             className="sidebar__logout-btn"
-            onClick={() => { if (onLogout) onLogout(); }}
+            onClick={() => {
+              if (onLogout) onLogout();
+            }}
           >
             <span className="material-symbols-outlined">logout</span>
             Logout
