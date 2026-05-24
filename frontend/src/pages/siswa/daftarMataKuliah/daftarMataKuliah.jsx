@@ -62,10 +62,6 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
     fetchCourses();
   }, [nis]);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div
       className="page-shell"
@@ -98,8 +94,12 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
           }
         />
 
-        {/* Hero Banner */}
-        <div className="dm-hero">
+        {loading ? (
+          <LoadingScreen fullScreen={false} />
+        ) : (
+          <>
+            {/* Hero Banner */}
+            <div className="dm-hero">
           <img
             className="dm-hero-bg"
             src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop"
@@ -206,6 +206,8 @@ export default function DaftarMataKuliah({ onNavigate, onLogout }) {
             )}
           </div>
         </div>
+      </>
+    )}
       </main>
     </div>
   );

@@ -280,7 +280,7 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
               </div>
 
               {loadingCourses ? (
-                <LoadingScreen />
+                <LoadingScreen fullScreen={false} />
               ) : mataKuliahList.length === 0 ? (
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>school</span>
@@ -344,7 +344,7 @@ export default function ForumDiskusi({ onNavigate, onLogout }) {
               </div>
 
               {loading ? (
-                <LoadingScreen />
+                <LoadingScreen fullScreen={false} />
               ) : threads.length === 0 ? (
                 <div className="fd-empty-state" style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "#94a3b8", marginBottom: "1rem" }}>forum</span>

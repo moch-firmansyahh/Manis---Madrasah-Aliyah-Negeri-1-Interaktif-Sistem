@@ -41,17 +41,17 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
     fetchResult();
   }, [idKuis]);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  const { skor, soal } = result || {};
 
-  if (error) {
-    return (
-      <div className="page-shell">
-        <Sidebar onNavigate={onNavigate} onLogout={onLogout} activePage="daftarTugas" mobileOpen={sidebarOpen} onClose={closeSidebar} />
-        <main className="page-main">
-          <Navbar role="Siswa" onOpenSidebar={openSidebar} />
-          <div className="page-content">
+  return (
+    <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+      <Sidebar onNavigate={onNavigate} onLogout={onLogout} activePage="daftarTugas" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+      <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
+        <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+        <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : error ? (
             <div className="quiz-result-container">
               <div className="quiz-result-card">
                 <div className="quiz-result-icon">
@@ -65,21 +65,8 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
                 </button>
               </div>
             </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const { skor, soal } = result || {};
-
-  return (
-    <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
-      <Sidebar onNavigate={onNavigate} onLogout={onLogout} activePage="daftarTugas" mobileOpen={sidebarOpen} onClose={closeSidebar} />
-      <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
-        <div className="page-content">
-          <div className="quiz-result-container">
+          ) : (
+            <div className="quiz-result-container">
             <div className="quiz-result-card">
               <div className="quiz-result-icon">
                 <span className="material-symbols-outlined">{skor >= 70 ? "emoji_events" : "school"}</span>
@@ -239,6 +226,7 @@ export default function HasilKuis({ onNavigate, onLogout, idKuis }) {
               </button>
             </div>
           </div>
+          )}
         </div>
       </main>
     </div>

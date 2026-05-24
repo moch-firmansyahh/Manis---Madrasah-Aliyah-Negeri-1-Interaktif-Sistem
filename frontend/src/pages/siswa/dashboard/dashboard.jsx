@@ -63,9 +63,6 @@ export default function Dashboard({ onNavigate, onLogout }) {
     return () => clearInterval(interval); // Membersihkan interval saat komponen unmount
   }, []);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
   console.log(
     "=== STATE dashboardData ===",
     JSON.stringify(dashboardData, null, 2),
@@ -100,7 +97,10 @@ export default function Dashboard({ onNavigate, onLogout }) {
 
         {/* Content */}
         <div className="page-content">
-          <div className="db-grid">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <div className="db-grid">
             {/* ── Left Column ── */}
             <div className="db-left">
               <div className="db-page-header">
@@ -359,6 +359,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
               </div>
             </div>
           </div>
+          )}
         </div>
       </main>
     </div>

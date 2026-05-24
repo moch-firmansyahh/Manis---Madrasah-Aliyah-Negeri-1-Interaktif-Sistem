@@ -449,10 +449,6 @@ export default function QuizKuis({ onNavigate, onLogout, idKuis }) {
     );
   }
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
       <Sidebar
@@ -492,6 +488,10 @@ export default function QuizKuis({ onNavigate, onLogout, idKuis }) {
 
         {/* Page Content */}
         <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <>
           {/* Quiz Header */}
           <div className="quiz-header">
             <div className="quiz-header-left">
@@ -592,6 +592,8 @@ export default function QuizKuis({ onNavigate, onLogout, idKuis }) {
               ))}
             </div>
           </div>
+          </>
+          )}
         </div>
       </main>
     </div>

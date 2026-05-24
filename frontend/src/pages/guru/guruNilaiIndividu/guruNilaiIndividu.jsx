@@ -338,7 +338,7 @@ export default function GuruNilaiIndividu({
               <div className="dni-select-wrap">
                 <label>Tugas</label>
                 {loading ? (
-                  <LoadingScreen />
+                  <LoadingScreen fullScreen={false} />
                 ) : tugasList.length === 0 ? (
                   <p
                     style={{ fontSize: "0.875rem", color: "var(--slate-500)" }}
@@ -455,7 +455,7 @@ export default function GuruNilaiIndividu({
               <p>Pilih tugas untuk melihat daftar siswa</p>
             </div>
           ) : loadingMhs ? (
-            <LoadingScreen />
+            <LoadingScreen fullScreen={false} />
           ) : filteredList.length === 0 ? (
             <div className="dni-empty">
               <span className="material-symbols-outlined">inbox</span>

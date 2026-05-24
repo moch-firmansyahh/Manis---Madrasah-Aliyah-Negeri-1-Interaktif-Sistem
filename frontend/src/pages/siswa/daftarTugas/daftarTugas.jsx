@@ -208,10 +208,6 @@ const allKuis = [];
 
   const filtered = sortedTasks;
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
       {/* Toast */}
@@ -244,6 +240,10 @@ const allKuis = [];
 
         {/* Page Content */}
         <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <>
           {/* Page Header */}
           <div className="dt-page-header">
             <h2 className="dt-title">Daftar Tugas</h2>
@@ -436,6 +436,8 @@ const allKuis = [];
             )}
           </div>
 
+          </>
+          )}
         </div>
       </main>
     </div>

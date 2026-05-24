@@ -324,7 +324,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loadingCourses ? (
-                <LoadingScreen />
+                <LoadingScreen fullScreen={false} />
               ) : mataKuliahList.length === 0 ? (
                 <div
                   className="fd-empty-state"
@@ -452,7 +452,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
               </div>
 
               {loading ? (
-                <LoadingScreen />
+                <LoadingScreen fullScreen={false} />
               ) : threads.length === 0 ? (
                 <div
                   className="fd-empty-state"

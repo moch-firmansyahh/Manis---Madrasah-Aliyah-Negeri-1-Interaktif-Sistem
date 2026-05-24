@@ -144,12 +144,6 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-
-
   return (
     <div className="page-shell">
       {/* Toast */}
@@ -221,6 +215,10 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
 
         {/* Content */}
         <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <>
           {/* Course header */}
           <div className="mk-course-header">
             <span className="mk-faculty-badge">
@@ -414,6 +412,8 @@ export default function MataKuliah({ onNavigate, onLogout, idMataKuliah = 1 }) {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       </main>
     </div>

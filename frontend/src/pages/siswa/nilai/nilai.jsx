@@ -254,10 +254,6 @@ export default function Nilai({ onNavigate, onLogout }) {
           .reduce((acc, s) => acc + s.sks, 0)
       : 0;
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div
       className="page-shell"
@@ -321,6 +317,10 @@ export default function Nilai({ onNavigate, onLogout }) {
         />
 
         <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <>
           {/* Page Header */}
           <div className="nlai-page-header">
             <div>
@@ -546,6 +546,8 @@ export default function Nilai({ onNavigate, onLogout }) {
               <span>Skala 4.0 — IP ≥ 3.51 = Cum Laude</span>
             </div>
           </div>
+          </>
+          )}
           </>
           )}
         </div>

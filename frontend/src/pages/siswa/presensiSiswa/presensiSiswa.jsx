@@ -226,10 +226,6 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     };
   }, [stopCamera]);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
       {/* Sidebar */}
@@ -250,6 +246,10 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         )}
 
         <div className="page-content">
+          {loading ? (
+            <LoadingScreen fullScreen={false} />
+          ) : (
+            <>
           {/* Page header */}
           <div className="pmh-page-header">
             <div>
@@ -491,6 +491,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       </main>
     </div>
