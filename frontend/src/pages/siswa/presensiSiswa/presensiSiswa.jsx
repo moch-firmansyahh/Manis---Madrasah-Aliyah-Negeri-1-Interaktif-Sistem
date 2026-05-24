@@ -8,8 +8,6 @@ import Navbar from "../../../components/Navbar";
 import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 import { apiClient } from "../../../utils/apiClient";
 
-const HISTORY = [];
-
 function StatusBadge({ status }) {
   const map = {
     Hadir: { bg: "#ecfdf5", color: "#059669" },
@@ -68,9 +66,6 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
   const fetchHistory = useCallback(async () => {
     if (upcoming.length > 0 && upcoming[selectedClass]) {
       try {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const myNis = storedUser.nomorInduk || "";
-
         // Add cache-busting to get fresh data
         const res = await apiClient.get(`/api/presensi/siswa/${upcoming[selectedClass].id}?_t=${Date.now()}`);
         console.log("DEBUG - fetchHistory response:", res);
@@ -78,8 +73,26 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         const myRecords = Array.isArray(allData) ? allData : [];
         console.log("DEBUG - myRecords:", myRecords);
 
+        // Menghapus duplikasi per tanggal pertemuan (prioritaskan status selain Alpha)
+        const uniqueRecordsMap = new Map();
+        myRecords.forEach(h => {
+          const dateKey = h.tanggalPertemuan;
+          if (!dateKey) return;
+          
+          const existing = uniqueRecordsMap.get(dateKey);
+          if (existing) {
+            // Jika data sebelumnya Alpha, dan data sekarang bukan Alpha (contoh: Hadir), maka timpa
+            if (existing.statusKehadiran === "Alpha" && h.statusKehadiran !== "Alpha") {
+              uniqueRecordsMap.set(dateKey, h);
+            }
+          } else {
+            uniqueRecordsMap.set(dateKey, h);
+          }
+        });
+        const dedupedRecords = Array.from(uniqueRecordsMap.values());
+
         // Format respons untuk UI - handle timezone correctly
-        const formattedHist = myRecords
+        const formattedHist = dedupedRecords
           .sort((a, b) => {
             // Sort by tanggalPertemuan descending (paling baru di atas)
             const dateA = new Date(a.tanggalPertemuan || 0);
@@ -133,7 +146,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         if (state === 2) { // SCANNING
           await html5QrCodeRef.current.stop();
         }
-      } catch (e) {
+      } catch {
         // ignore stop errors
       }
       html5QrCodeRef.current = null;
@@ -233,7 +246,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
 
       {/* Main */}
       <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
-        <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={typeof nav !== "undefined" ? nav : (typeof onNavigate !== "undefined" ? onNavigate : undefined)} />
+        <Navbar role="Siswa" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
 
         {/* ── Toast Notification ── */}
         {toast && (
