@@ -62,7 +62,6 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   const [page, setPage] = useState(1);
   const [selectedClass, setSelectedClass] = useState(null);
 
-  const nav = (page) => { if (onNavigate) onNavigate(page); };
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -394,11 +393,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
           role="Guru"
           onOpenSidebar={openSidebar}
           onNavigate={
-            typeof nav !== "undefined"
-              ? nav
-              : typeof onNavigate !== "undefined"
-                ? onNavigate
-                : undefined
+            onNavigate
           }
         />
 

@@ -78,7 +78,6 @@ export default function GuruMateri({ onNavigate, onLogout }) {
     canDownload: true,
   });
 
-  const nav = (page) => { if (onNavigate) onNavigate(page); };
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
@@ -392,11 +391,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
           role="Guru"
           onOpenSidebar={openSidebar}
           onNavigate={
-            typeof nav !== "undefined"
-              ? nav
-              : typeof onNavigate !== "undefined"
-                ? onNavigate
-                : undefined
+            onNavigate
           }
         />
 
