@@ -1,15 +1,15 @@
 import { prisma } from "../../prismaClient.js";
 
-// Helper untuk mendapatkan start/end of day dalam UTC
+// Helper untuk mendapatkan start/end of day dalam UTC dengan offset WIB (+7 jam)
 function getStartOfDayUTC() {
-    const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0));
+    const localWIB = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const d = new Date(Date.UTC(localWIB.getUTCFullYear(), localWIB.getUTCMonth(), localWIB.getUTCDate(), 0, 0, 0, 0));
     return d;
 }
 
 function getEndOfDayUTC() {
-    const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999));
+    const localWIB = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const d = new Date(Date.UTC(localWIB.getUTCFullYear(), localWIB.getUTCMonth(), localWIB.getUTCDate(), 23, 59, 59, 999));
     return d;
 }
 
