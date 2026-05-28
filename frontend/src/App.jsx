@@ -159,6 +159,7 @@ function App() {
         else if (pageName === "guruForum") page = <GuruForum {...sharedProps} />;
         else if (pageName === "guruProfile") page = <GuruProfile {...sharedProps} />;
         else if (pageName === "guruMateri") page = <GuruMateri {...sharedProps} />;
+        else if (pageName === "guruDashboard") page = <DashboardGuru {...sharedProps} />;
         if (page) return <GuruClassProvider>{page}</GuruClassProvider>;
       }
       if (pageName === "faq") return (
