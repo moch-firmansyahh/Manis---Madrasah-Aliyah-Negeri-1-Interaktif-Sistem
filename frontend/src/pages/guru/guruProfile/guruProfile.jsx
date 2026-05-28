@@ -33,7 +33,6 @@ export default function GuruProfile({ onNavigate, onLogout }) {
   const [profileData, setProfileData] = useState({
     nama: storedUser.nama || "Guru",
   });
-  const [mataKuliahList, setMataKuliahList] = useState([]);
   const [stats, setStats] = useState({
     totalSiswa: 0,
     tugasDiberikan: 0,
@@ -79,10 +78,6 @@ export default function GuruProfile({ onNavigate, onLogout }) {
         if (meRes?.data?.fotoUrl) {
           setAvatarUrl(`${API_BASE}${meRes.data.fotoUrl}`);
         }
-
-        // Fetch courses taught by this guru
-        const mkRes = await apiClient.get("/api/mata-kuliah");
-        setMataKuliahList(Array.isArray(mkRes) ? mkRes : mkRes.data || []);
 
         // Fetch stats from dashboard
         const dashRes = await apiClient.get("/api/guru/dashboard");
@@ -567,36 +562,7 @@ export default function GuruProfile({ onNavigate, onLogout }) {
             </div>
           </div>
 
-          {/* Mata Kuliah Diampu + Statistik */}
-          <div className="prf-bottom-row">
-            <div className="dprf-matkul-card">
-              <div className="dprf-matkul-icon">
-                <span className="material-symbols-outlined">menu_book</span>
-              </div>
-              <h3 className="dprf-matkul-title">Mata Pelajaran yang Diampu</h3>
-              <div className="dprf-matkul-list">
-                {mataKuliahList.length > 0 ? (
-                  mataKuliahList.map((mk) => (
-                    <div key={mk.idMataKuliah} className="dprf-matkul-row">
-                      <div>
-                        <p className="dprf-mk-name">{mk.namaMataKuliah}</p>
-                        <p className="dprf-mk-code">
-                          MK-{mk.idMataKuliah} · 3 SKS
-                        </p>
-                      </div>
-                      <span className="dprf-mk-badge">Aktif</span>
-                    </div>
-                  ))
-                ) : (
-                  <p
-                    style={{ color: "var(--slate-500)", fontSize: "0.875rem" }}
-                  >
-                    Belum ada mata pelajaran yang diampu.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+
         </div>
       </main>
     </div>

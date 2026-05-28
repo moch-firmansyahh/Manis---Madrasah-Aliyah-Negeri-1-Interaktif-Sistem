@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../utils/apiClient";
 import "./ClassSelector.css"; // We'll create this or use inline/shared classes
 
 const ClassSelector = ({ onSelectClass, onCancel }) => {
@@ -13,7 +13,7 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
         setLoading(true);
         // We get the list of MataKuliah for this teacher, and extract unique classes
         const res = await apiClient.get("/api/mata-kuliah");
-        const matkulList = res.data.data || [];
+        const matkulList = Array.isArray(res) ? res : (res?.data?.data || res?.data || []);
         
         // Extract unique classes
         const uniqueClassesMap = new Map();
