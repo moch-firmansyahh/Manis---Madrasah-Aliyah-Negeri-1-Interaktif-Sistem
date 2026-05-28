@@ -127,7 +127,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
 
   useEffect(() => {
     fetchMateri(filterMatkul, filterTipe);
-  }, [filterMatkul, filterTipe]);
+  }, [filterMatkul, filterTipe, selectedClass]);
 
   const matakuliahName = (id) =>
     matkulList.find((m) => m.id === id)?.name || id;

@@ -133,12 +133,9 @@ export default function GuruTugas({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  useEffect(() => {
     if (selectedClass) {
       fetchMatkulList();
+      fetchTasks();
     }
   }, [selectedClass]);
 

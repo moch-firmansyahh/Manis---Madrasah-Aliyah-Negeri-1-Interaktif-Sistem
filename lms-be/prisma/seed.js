@@ -5,26 +5,16 @@ async function main() {
   console.log("Memulai proses seeding data...");
   console.log("Menghapus data lama...");
 
-  await prisma.likeForum.deleteMany();
-  await prisma.komentarForum.deleteMany();
-  await prisma.forumDiskusi.deleteMany();
-  await prisma.pilihanJawaban.deleteMany();
-  await prisma.soal.deleteMany();
-  await prisma.kuis.deleteMany();
-  await prisma.pengumpulanTugas.deleteMany();
-  await prisma.progressTugas.deleteMany();
-  await prisma.anggotaKelompok.deleteMany();
-  await prisma.kelompok.deleteMany();
-  await prisma.notifikasi.deleteMany();
-  await prisma.presensi.deleteMany();
-  await prisma.tugas.deleteMany();
-  await prisma.nilai.deleteMany();
-  await prisma.modulAjar.deleteMany();
-  await prisma.mataKuliah.deleteMany();
-  await prisma.siswa.deleteMany();
-  await prisma.guru.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.role.deleteMany();
+  const tables = [
+    'likeForum', 'komentarForum', 'forumDiskusi', 'pilihanJawaban', 'soal', 'kuis',
+    'pengumpulanTugas', 'progressTugas', 'anggotaKelompok', 'kelompok',
+    'notifikasi', 'presensi', 'tugas', 'nilai', 'modulAjar', 'mataKuliah',
+    'progressMateri', 'siswa', 'guru', 'user', 'role', 'kelas', 'jurusan',
+    'jawabanKuis',
+  ];
+  for (const t of tables) {
+    try { await prisma[t].deleteMany(); } catch (_) {}
+  }
 
   console.log("Data lama berhasil dihapus.");
 
@@ -44,7 +34,37 @@ async function main() {
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   // ══════════════════════════════════════════════
-  // 2. GURU (5 Guru)
+  // 2. JURUSAN & KELAS
+  // ══════════════════════════════════════════════
+  const jurusanList = [
+    { idJurusan: 1, namaJurusan: "MIPA" },
+    { idJurusan: 2, namaJurusan: "IPS" },
+  ];
+  for (const j of jurusanList) {
+    await prisma.jurusan.create({ data: j });
+  }
+  console.log("2 Jurusan berhasil dibuat.");
+
+  const kelasData = [
+    { namaKelas: "X MIPA 1", tingkat: 10, idJurusan: 1 },
+    { namaKelas: "X MIPA 2", tingkat: 10, idJurusan: 1 },
+    { namaKelas: "XI MIPA 1", tingkat: 11, idJurusan: 1 },
+    { namaKelas: "XI MIPA 2", tingkat: 11, idJurusan: 1 },
+    { namaKelas: "XII MIPA 1", tingkat: 12, idJurusan: 1 },
+    { namaKelas: "XII MIPA 2", tingkat: 12, idJurusan: 1 },
+    { namaKelas: "X IPS 1", tingkat: 10, idJurusan: 2 },
+    { namaKelas: "XI IPS 1", tingkat: 11, idJurusan: 2 },
+    { namaKelas: "XII IPS 1", tingkat: 12, idJurusan: 2 },
+  ];
+  const createdKelas = [];
+  for (const k of kelasData) {
+    const created = await prisma.kelas.create({ data: k });
+    createdKelas.push(created);
+  }
+  console.log(`${createdKelas.length} Kelas berhasil dibuat.`);
+
+  // ══════════════════════════════════════════════
+  // 3. GURU (5 Guru)
   // ══════════════════════════════════════════════
   const guruList = [
     {
@@ -117,70 +137,25 @@ async function main() {
   console.log("5 Guru berhasil dibuat.");
 
   // ══════════════════════════════════════════════
-  // 3. SISWA (10 Siswa)
+  // 3. SISWA (90 Siswa — 10 per kelas)
   // ══════════════════════════════════════════════
-  const siswaList = [
-    {
-      ni: "2026001",
-      nis: "2026001",
-      nama: "Andi Pratama",
-      email: "andi.pratama@sch.id",
-    },
-    {
-      ni: "2026002",
-      nis: "2026002",
-      nama: "Bella Safitri",
-      email: "bella.safitri@sch.id",
-    },
-    {
-      ni: "2026003",
-      nis: "2026003",
-      nama: "Cahya Nugraha",
-      email: "cahya.nugraha@sch.id",
-    },
-    {
-      ni: "2026004",
-      nis: "2026004",
-      nama: "Dina Maharani",
-      email: "dina.maharani@sch.id",
-    },
-    {
-      ni: "2026005",
-      nis: "2026005",
-      nama: "Eko Saputra",
-      email: "eko.saputra@sch.id",
-    },
-    {
-      ni: "2026006",
-      nis: "2026006",
-      nama: "Fitri Handayani",
-      email: "fitri.handayani@sch.id",
-    },
-    {
-      ni: "2026007",
-      nis: "2026007",
-      nama: "Galih Wicaksono",
-      email: "galih.wicaksono@sch.id",
-    },
-    {
-      ni: "2026008",
-      nis: "2026008",
-      nama: "Hana Permata",
-      email: "hana.permata@sch.id",
-    },
-    {
-      ni: "2026009",
-      nis: "2026009",
-      nama: "Irfan Maulana",
-      email: "irfan.maulana@sch.id",
-    },
-    {
-      ni: "2026010",
-      nis: "2026010",
-      nama: "Jasmine Putri",
-      email: "jasmine.putri@sch.id",
-    },
-  ];
+  const namaDepan = ["Andi", "Bella", "Cahya", "Dina", "Eko", "Fitri", "Galih", "Hana", "Irfan", "Jasmine"];
+  const namaBelakang = ["Pratama", "Safitri", "Nugraha", "Maharani", "Saputra", "Handayani", "Wicaksono", "Permata", "Maulana", "Putri"];
+
+  const siswaList = [];
+  for (let ki = 0; ki < createdKelas.length; ki++) {
+    const kelas = createdKelas[ki];
+    for (let si = 0; si < 10; si++) {
+      const nis = `2027${String(ki + 1).padStart(2, "0")}${String(si + 1).padStart(2, "0")}`;
+      siswaList.push({
+        ni: nis,
+        nis: nis,
+        nama: `${namaDepan[si]} ${namaBelakang[si]} (${kelas.namaKelas})`,
+        email: `siswa.${kelas.namaKelas.toLowerCase().replace(/\s+/g, "")}.${si + 1}@sch.id`,
+        idKelas: kelas.idKelas,
+      });
+    }
+  }
 
   for (const s of siswaList) {
     await prisma.user.create({
@@ -191,165 +166,66 @@ async function main() {
         password: hashedPassword,
         telepon: `08123${s.ni}`,
         roleId: 2,
-        siswa: { create: { nis: s.ni } },
+        siswa: { create: { nis: s.nis, idKelas: s.idKelas } },
       },
     });
   }
-  console.log("10 Siswa berhasil dibuat.");
+  console.log(`${siswaList.length} Siswa berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 4. MATA PELAJARAN (4 per semester, total 16)
+  // 4. MATA PELAJARAN (51 — per kelas: 6 MIPA / 5 IPS)
   // ══════════════════════════════════════════════
-  const matkulList = [
-    // Semester 1 (Completed)
-    {
-      nama: "Matematika Dasar I",
-      nipGuru: guruList[0].nip,
-      jadwal: "Senin,Rabu",
-      waktu: "08:00 - 10:00",
-      semester: 1,
-      sks: 3,
-    },
-    {
-      nama: "Fisika Dasar I",
-      nipGuru: guruList[1].nip,
-      jadwal: "Selasa,Kamis",
-      waktu: "10:30 - 12:00",
-      semester: 1,
-      sks: 3,
-    },
-    {
-      nama: "Kimia Dasar I",
-      nipGuru: guruList[2].nip,
-      jadwal: "Rabu,Jumat",
-      waktu: "13:00 - 15:00",
-      semester: 1,
-      sks: 3,
-    },
-    {
-      nama: "Biologi Umum",
-      nipGuru: guruList[3].nip,
-      jadwal: "Senin,Kamis",
-      waktu: "15:30 - 17:00",
-      semester: 1,
-      sks: 3,
-    },
-    // Semester 2 (Completed)
-    {
-      nama: "Matematika Wajib X",
-      nipGuru: guruList[4].nip,
-      jadwal: "Senin,Rabu",
-      waktu: "10:30 - 12:30",
-      semester: 2,
-      sks: 3,
-    },
-    {
-      nama: "Mekanika dan Termodinamika",
-      nipGuru: guruList[1].nip,
-      jadwal: "Selasa,Kamis",
-      waktu: "08:00 - 10:00",
-      semester: 2,
-      sks: 3,
-    },
-    {
-      nama: "Struktur Atom dan Ikatan Kimia",
-      nipGuru: guruList[2].nip,
-      jadwal: "Rabu,Jumat",
-      waktu: "10:30 - 12:30",
-      semester: 2,
-      sks: 3,
-    },
-    {
-      nama: "Sistem Organ Organisme",
-      nipGuru: guruList[3].nip,
-      jadwal: "Senin,Kamis",
-      waktu: "13:00 - 15:00",
-      semester: 2,
-      sks: 3,
-    },
-    // Semester 3 (Completed)
-    {
-      nama: "Matematika Dasar II",
-      nipGuru: guruList[0].nip,
-      jadwal: "Senin,Rabu",
-      waktu: "15:30 - 17:30",
-      semester: 3,
-      sks: 3,
-    },
-    {
-      nama: "Gelombang, Optik, dan Listrik Magnet",
-      nipGuru: guruList[1].nip,
-      jadwal: "Selasa,Kamis",
-      waktu: "13:00 - 15:00",
-      semester: 3,
-      sks: 3,
-    },
-    {
-      nama: "Termokimia dan Laju Reaksi",
-      nipGuru: guruList[2].nip,
-      jadwal: "Rabu,Jumat",
-      waktu: "08:00 - 10:00",
-      semester: 3,
-      sks: 3,
-    },
-    {
-      nama: "Genetika dan Evolusi",
-      nipGuru: guruList[3].nip,
-      jadwal: "Senin,Kamis",
-      waktu: "10:30 - 12:00",
-      semester: 3,
-      sks: 3,
-    },
-    // Semester 4 (Active)
-    {
-      nama: "Matematika Wajib XI",
-      nipGuru: guruList[4].nip,
-      jadwal: "Senin,Rabu",
-      waktu: "13:00 - 15:00",
-      semester: 4,
-      sks: 3,
-    },
-    {
-      nama: "Fisika Modern dan Astronomi",
-      nipGuru: guruList[1].nip,
-      jadwal: "Selasa,Kamis",
-      waktu: "15:30 - 17:30",
-      semester: 4,
-      sks: 3,
-    },
-    {
-      nama: "Kimia Organik dan Makromolekul",
-      nipGuru: guruList[2].nip,
-      jadwal: "Rabu,Jumat",
-      waktu: "08:00 - 10:00",
-      semester: 4,
-      sks: 3,
-    },
-    {
-      nama: "Ekologi dan Lingkungan",
-      nipGuru: guruList[3].nip,
-      jadwal: "Senin,Kamis",
-      waktu: "10:30 - 12:00",
-      semester: 4,
-      sks: 3,
-    },
+  const mipaMatkulTemplates = [
+    { nama: "Matematika Wajib", nipGuru: guruList[0].nip, semester: 1, sks: 3 },
+    { nama: "Bahasa Indonesia", nipGuru: guruList[1].nip, semester: 2, sks: 3 },
+    { nama: "Bahasa Inggris", nipGuru: guruList[2].nip, semester: 3, sks: 3 },
+    { nama: "Fisika", nipGuru: guruList[3].nip, semester: 4, sks: 3 },
+    { nama: "Kimia", nipGuru: guruList[4].nip, semester: 1, sks: 3 },
+    { nama: "Biologi", nipGuru: guruList[0].nip, semester: 2, sks: 3 },
   ];
+  const ipsMatkulTemplates = [
+    { nama: "Matematika Wajib", nipGuru: guruList[0].nip, semester: 1, sks: 3 },
+    { nama: "Bahasa Indonesia", nipGuru: guruList[1].nip, semester: 2, sks: 3 },
+    { nama: "Bahasa Inggris", nipGuru: guruList[2].nip, semester: 3, sks: 3 },
+    { nama: "Ekonomi", nipGuru: guruList[3].nip, semester: 4, sks: 3 },
+    { nama: "Sosiologi", nipGuru: guruList[4].nip, semester: 1, sks: 3 },
+  ];
+  const jadwalMipa = ["Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat", "Senin,Kamis", "Selasa,Jumat", "Rabu,Kamis"];
+  const jadwalIps = ["Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat", "Senin,Kamis", "Selasa,Jumat"];
 
+  const matkulList = [];
   const createdMatkul = [];
-  for (const mk of matkulList) {
-    const created = await prisma.mataKuliah.create({
-      data: {
-        namaMataKuliah: mk.nama,
-        nipGuru: mk.nipGuru,
-        jadwal: mk.jadwal,
-        waktu: mk.waktu,
-        semester: mk.semester,
-        sks: mk.sks,
-      },
-    });
-    createdMatkul.push(created);
+  for (let ki = 0; ki < createdKelas.length; ki++) {
+    const kelas = createdKelas[ki];
+    const templates = kelas.idJurusan === 1 ? mipaMatkulTemplates : ipsMatkulTemplates;
+    const jadwals = kelas.idJurusan === 1 ? jadwalMipa : jadwalIps;
+    for (let ti = 0; ti < templates.length; ti++) {
+      const tmpl = templates[ti];
+      const fullName = `${tmpl.nama} ${kelas.namaKelas}`;
+      matkulList.push({
+        nama: fullName,
+        nipGuru: tmpl.nipGuru,
+        idKelas: kelas.idKelas,
+        jadwal: jadwals[ti],
+        waktu: `${8 + ti * 2}:00 - ${10 + ti * 2}:00`,
+        semester: tmpl.semester,
+        sks: tmpl.sks,
+      });
+      const created = await prisma.mataKuliah.create({
+        data: {
+          namaMataKuliah: fullName,
+          nipGuru: tmpl.nipGuru,
+          idKelas: kelas.idKelas,
+          jadwal: jadwals[ti],
+          waktu: `${8 + ti * 2}:00 - ${10 + ti * 2}:00`,
+          semester: tmpl.semester,
+          sks: tmpl.sks,
+        },
+      });
+      createdMatkul.push(created);
+    }
   }
-  console.log("16 Mata Pelajaran berhasil dibuat (4 per semester).");
+  console.log(`${matkulList.length} Mata Pelajaran berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
   // 5. PRESENSI
@@ -399,50 +275,19 @@ async function main() {
   // ══════════════════════════════════════════════
   // 6. NILAI
   // ══════════════════════════════════════════════
-  const nilaiAndi = {
-    "Matematika Dasar I": 88,
-    "Fisika Dasar I": 82,
-    "Kimia Dasar I": 90,
-    "Biologi Umum": 85,
-    "Matematika Wajib X": 78,
-    "Mekanika dan Termodinamika": 85,
-    "Struktur Atom dan Ikatan Kimia": 80,
-    "Sistem Organ Organisme": 75,
-    "Matematika Dasar II": 86,
-    "Gelombang, Optik, dan Listrik Magnet": 79,
-    "Termokimia dan Laju Reaksi": 83,
-    "Genetika dan Evolusi": 88,
-  };
-
   const nilaiData = [];
   for (const mk of createdMatkul) {
     for (const s of siswaList) {
-      if (mk.semester <= 3) {
-        let nilaiAkhir;
-        if (s.ni === "2026001" && nilaiAndi[mk.namaMataKuliah]) {
-          nilaiAkhir = nilaiAndi[mk.namaMataKuliah];
-        } else {
-          nilaiAkhir = 65 + Math.floor(Math.random() * 30);
-        }
-        nilaiData.push({
-          nomorInduk: s.ni,
-          idMataKuliah: mk.idMataKuliah,
-          nilaiTugas: Math.min(100, nilaiAkhir + Math.floor(Math.random() * 8)),
-          nilaiKuis: Math.min(100, nilaiAkhir + Math.floor(Math.random() * 6)),
-          nilaiAkhir: nilaiAkhir,
-          semester: mk.semester,
-        });
-      } else {
-        const base = 65 + Math.floor(Math.random() * 30);
-        nilaiData.push({
-          nomorInduk: s.ni,
-          idMataKuliah: mk.idMataKuliah,
-          nilaiTugas: base + Math.floor(Math.random() * 10),
-          nilaiKuis: base + Math.floor(Math.random() * 8),
-          nilaiAkhir: null,
-          semester: mk.semester,
-        });
-      }
+      const base = 65 + Math.floor(Math.random() * 30);
+      const isComplete = mk.semester <= 3;
+      nilaiData.push({
+        nomorInduk: s.ni,
+        idMataKuliah: mk.idMataKuliah,
+        nilaiTugas: Math.min(100, base + Math.floor(Math.random() * 10)),
+        nilaiKuis: Math.min(100, base + Math.floor(Math.random() * 8)),
+        nilaiAkhir: isComplete ? base : null,
+        semester: mk.semester,
+      });
     }
   }
   await prisma.nilai.createMany({ data: nilaiData });
@@ -713,7 +558,7 @@ async function main() {
   const tugasData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
     const mk = createdMatkul[i];
-    const templates = tugasTemplates[i];
+    const templates = tugasTemplates[i % tugasTemplates.length];
     for (const tmpl of templates) {
       for (const s of siswaList) {
         const deadlineDate = new Date(
@@ -796,7 +641,7 @@ async function main() {
         idMataKuliah: mk.idMataKuliah,
         judul: `Diskusi: ${matkulSemester4[i].nama} - Pertemuan 1`,
         isiForum: `Selamat datang di forum diskusi ${matkulSemester4[i].nama}. Silakan bertanya atau berdiskusi mengenai materi pertemuan pertama.`,
-        nomorInduk: guruList[i].ni,
+        nomorInduk: guruList[i % guruList.length].ni,
       },
     });
     forumCreated.push(forum);
@@ -809,13 +654,13 @@ async function main() {
   const komentarData = [];
   for (let i = 0; i < forumCreated.length; i++) {
     komentarData.push({
-      nomorInduk: siswaList[(i * 2) % 10].ni,
+      nomorInduk: siswaList[(i * 2) % siswaList.length].ni,
       idForum: forumCreated[i].idForumDiskusi,
       isiKomentar:
         "Terima kasih Pak/Bu, materinya sangat bermanfaat. Apakah ada referensi tambahan?",
     });
     komentarData.push({
-      nomorInduk: siswaList[(i * 2 + 1) % 10].ni,
+      nomorInduk: siswaList[(i * 2 + 1) % siswaList.length].ni,
       idForum: forumCreated[i].idForumDiskusi,
       isiKomentar:
         "Saya ingin bertanya mengenai topik yang dibahas di slide ke-3.",
@@ -831,7 +676,7 @@ async function main() {
   for (let i = 0; i < forumCreated.length; i++) {
     for (let j = 0; j < 3; j++) {
       likeData.push({
-        nomorInduk: siswaList[(i + j) % 10].ni,
+        nomorInduk: siswaList[(i + j) % siswaList.length].ni,
         idForum: forumCreated[i].idForumDiskusi,
       });
     }
@@ -878,11 +723,11 @@ async function main() {
   const anggotaData = [];
   for (let ki = 0; ki < kelompokCreated.length; ki++) {
     const k = kelompokCreated[ki];
-    const startIdx = ki % 2 === 0 ? 0 : 5;
+    const shuffled = [...siswaList].sort(() => Math.random() - 0.5);
     for (let j = 0; j < 5; j++) {
       anggotaData.push({
         idKelompok: k.idKelompok,
-        nis: siswaList[startIdx + j].ni,
+        nis: shuffled[j].ni,
         nilaiTugas: 75 + Math.floor(Math.random() * 20),
       });
     }
@@ -899,10 +744,10 @@ async function main() {
   const progressData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
     const mk = createdMatkul[i];
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < Math.min(10, siswaList.length); j++) {
       progressData.push({
         idMataKuliah: mk.idMataKuliah,
-        nis: siswaList[j].ni,
+        nis: siswaList[(i + j) % siswaList.length].ni,
         judul: `Progress Tugas 1 - ${matkulList[i].nama}`,
         detailTugas: "Sudah mengerjakan 50% bagian teori dan praktikum.",
         deadlineTugas: new Date(today.getTime() + 14 * 24 * 3600000),
@@ -942,7 +787,7 @@ async function main() {
   const notifData = [];
   for (const mk of sem4Matkul) {
     notifData.push({
-      nis: "2026001",
+      nis: siswaList[0].ni,
       judul: "Materi Baru",
       pesan: `Materi "Pengantar ${mk.namaMataKuliah}" untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
       tipe: "materi",
@@ -950,7 +795,7 @@ async function main() {
       tipeRef: "materi",
     });
     notifData.push({
-      nis: "2026001",
+      nis: siswaList[0].ni,
       judul: "Tugas Baru",
       pesan: `Tugas baru telah tersedia untuk mata pelajaran ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
       tipe: "tugas",
@@ -970,14 +815,16 @@ async function main() {
   console.log("═══════════════════════════════════════════");
   console.log("");
   console.log("Ringkasan Data:");
+  console.log("  - 2 Jurusan (MIPA, IPS)");
+  console.log(`  - ${createdKelas.length} Kelas`);
   console.log("  - 3 Role (Admin, Siswa, Guru)");
   console.log("  - 5 Guru");
-  console.log("  - 10 Siswa");
-  console.log("  - 16 Mata Pelajaran (4 per semester)");
+  console.log(`  - ${siswaList.length} Siswa (10 per kelas)`);
+  console.log(`  - ${matkulList.length} Mata Pelajaran`);
   console.log("");
   console.log("Akun Login:");
   console.log("  Guru  -> D001 / password123");
-  console.log("  Siswa -> 2026001 / password123");
+  console.log(`  Siswa -> ${siswaList[0].ni} / password123`);
   console.log("");
 }
 
