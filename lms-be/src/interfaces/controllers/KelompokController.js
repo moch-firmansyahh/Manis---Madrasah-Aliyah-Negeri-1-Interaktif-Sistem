@@ -70,7 +70,8 @@ async saveGrades(req, res) {
 
 async getSiswa(req, res) {
     try {
-        const data = await this.kelompokUseCase.getAllSiswa();
+        const idKelas = req.query.idKelas ? parseInt(req.query.idKelas) : null;
+        const data = await this.kelompokUseCase.getAllSiswa(idKelas);
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -339,12 +339,16 @@ export default function GuruForum({ onNavigate, onLogout }) {
                     <span className="fd-breadcrumb--active">Forum Diskusi</span>
                   </nav>
                   <h2 className="fd-page-title">Forum Diskusi</h2>
-                  <p className="fd-page-sub">
-                    Kelas: <strong>{selectedClass.namaKelas}</strong>
-                  </p>
-                  <button onClick={clearClass} className="fd-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
-                    Ganti Kelas
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.5rem" }}>
+                    <span className="class-badge" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", background: "rgba(19, 116, 184, 0.1)", color: "#1374B8", border: "1px solid rgba(19, 116, 184, 0.2)", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "700" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>school</span>
+                      Kelas: {selectedClass.namaKelas}
+                    </span>
+                    <button onClick={clearClass} className="fd-btn-cancel" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", border: "1px solid var(--color-border)", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>swap_horiz</span>
+                      Ganti Kelas
+                    </button>
+                  </div>
                 </div>
               </div>
 

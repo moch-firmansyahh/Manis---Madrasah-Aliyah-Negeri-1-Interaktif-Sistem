@@ -13,15 +13,10 @@ export class DashboardSiswaUseCase {
       });
       const actualNis = siswaData ? siswaData.nis : nomorInduk;
 
-      // Cari mata kuliah pakai nomorInduk (untuk Nilai) DAN actualNis (untuk Tugas/Presensi/Kelompok)
+      // Cari mata kuliah berdasarkan idKelas siswa secara langsung
       const mataKuliah = await this.prisma.mataKuliah.findMany({
         where: {
-          OR: [
-            { nilai: { some: { nomorInduk: nomorInduk } } },
-            { presensi: { some: { nis: actualNis } } },
-            { tugas: { some: { nis: actualNis } } },
-            { kelompok: { some: { anggota: { some: { nis: actualNis } } } } },
-          ],
+          idKelas: siswaData.idKelas
         },
         include: {
           guru: { include: { user: { select: { nama: true } } } },
@@ -52,8 +47,9 @@ export class DashboardSiswaUseCase {
         );
       }
 
+      const idMataKuliahList = mataKuliahList.map(mk => mk.idMataKuliah);
       const threads = (await this.forumRepository.getRecentThreads)
-        ? await this.forumRepository.getRecentThreads(3)
+        ? await this.forumRepository.getRecentThreads(3, idMataKuliahList)
         : [];
 
       const jadwalData = await this.getJadwalMataKuliah(
@@ -122,17 +118,16 @@ export class DashboardSiswaUseCase {
       };
 
       let totalBobot = 0;
-      let totalSKS = 0;
+      let count = 0;
       for (const n of nilaiRecords) {
-        const sks = n.mataKuliah?.sks || 3;
         const nilai = parseFloat(n.nilaiAkhir);
         if (!isNaN(nilai)) {
-          totalBobot += bobotNilai(nilai) * sks;
-          totalSKS += sks;
+          totalBobot += bobotNilai(nilai);
+          count++;
         }
       }
 
-      return totalSKS > 0 ? Math.round((totalBobot / totalSKS) * 100) / 100 : 0;
+      return count > 0 ? Math.round((totalBobot / count) * 100) / 100 : 0;
     } catch (error) {
       console.error("calculateIPK error:", error);
       return 0;

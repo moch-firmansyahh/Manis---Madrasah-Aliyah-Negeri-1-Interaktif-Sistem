@@ -102,8 +102,10 @@ export class PrismaKelompokRepository {
       });
   }
 
-  async findAllSiswa() {
+  async findAllSiswa(idKelas) {
+      const whereClause = idKelas ? { idKelas: parseInt(idKelas) } : {};
       return await prisma.siswa.findMany({
+          where: whereClause,
           include: { user: { select: { nama: true, nomorInduk: true } } }
       });
   }

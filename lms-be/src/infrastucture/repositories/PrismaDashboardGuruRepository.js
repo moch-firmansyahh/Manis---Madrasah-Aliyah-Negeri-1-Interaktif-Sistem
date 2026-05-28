@@ -47,13 +47,20 @@ export class PrismaDashboardGuruRepository {
 
   async getTotalSiswa(nipGuru, idKelas = null) {
     try {
-      const mkFilter = { nipGuru };
-      if (idKelas) mkFilter.idKelas = idKelas;
-      const result = await prisma.nilai.groupBy({
-        by: ['nomorInduk'],
-        where: { mataKuliah: mkFilter }
+      if (idKelas) {
+        return await prisma.siswa.count({
+          where: { idKelas: parseInt(idKelas) }
+        });
+      }
+      const classes = await prisma.mataKuliah.findMany({
+        where: { nipGuru },
+        select: { idKelas: true },
+        distinct: ['idKelas']
       });
-      return result.length;
+      const classIds = classes.map(c => c.idKelas).filter(Boolean);
+      return await prisma.siswa.count({
+        where: { idKelas: { in: classIds } }
+      });
     } catch (error) {
       console.error("getTotalSiswa error:", error.message);
       return 0;

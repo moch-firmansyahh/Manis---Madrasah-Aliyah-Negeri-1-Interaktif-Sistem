@@ -146,17 +146,13 @@ export class PrismaNilaiRepository {
 
   async getSiswaByMataKuliah(idMataKuliah) {
     const intIdMk = parseInt(idMataKuliah);
-    // Kumpulkan dari presensi, kelompok, dan nilai
-    const nisSet = new Set();
-    const presensi = await prisma.presensi.findMany({ where: { idMataKuliah: intIdMk }, select: { nis: true } });
-    presensi.forEach(p => nisSet.add(p.nis));
-    const kelompok = await prisma.kelompok.findMany({ where: { idMataKuliah: intIdMk }, include: { anggota: { select: { nis: true } } } });
-    kelompok.forEach(k => k.anggota.forEach(a => nisSet.add(a.nis)));
-    const tugas = await prisma.tugas.findMany({ where: { idMataKuliah: intIdMk }, select: { nis: true } });
-    tugas.forEach(t => nisSet.add(t.nis));
-    if (nisSet.size === 0) return [];
+    const mk = await prisma.mataKuliah.findUnique({
+      where: { idMataKuliah: intIdMk },
+      select: { idKelas: true }
+    });
+    if (!mk || !mk.idKelas) return [];
     return await prisma.siswa.findMany({
-      where: { nis: { in: Array.from(nisSet) } },
+      where: { idKelas: mk.idKelas },
       include: { user: { select: { nama: true, nomorInduk: true } } }
     });
   }

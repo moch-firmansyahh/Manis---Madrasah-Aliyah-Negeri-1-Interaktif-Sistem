@@ -42,96 +42,23 @@ async findAllByGuru(idMataKuliahList) {
     }
 
 async createTugas(data) {
-    // Dapatkan semua siswa yang terdaftar di mata kuliah ini dari BERBAGAI SUMBER
     const idMataKuliah = parseInt(data.idMataKuliah);
-    const nomorIndukSet = new Set();
-
-    // 1. Cari dari tabel Nilai (siswa yang sudah punya nilai)
-    try {
-        const nilaiData = await prisma.nilai.findMany({
-            where: { idMataKuliah },
-            select: { nomorInduk: true }
-        });
-        nilaiData.forEach(n => nomorIndukSet.add(n.nomorInduk));
-    } catch (e) {}
-
-    // 2. Cari dari tabel Presensi (siswa yang pernah presensi)
-    try {
-        const presensiData = await prisma.presensi.findMany({
-            where: { idMataKuliah },
-            select: { nis: true }
-        });
-        const niss = presensiData.map(p => p.nis);
-        if (niss.length > 0) {
-            const mhs = await prisma.siswa.findMany({
-                where: { nis: { in: niss } },
-                select: { nomorInduk: true }
-            });
-            mhs.forEach(m => nomorIndukSet.add(m.nomorInduk));
-        }
-    } catch (e) {}
-
-    // 3. Cari dari tabel AnggotaKelompok (siswa yang terdaftar di kelompok)
-    try {
-        const kelompokData = await prisma.kelompok.findMany({
-            where: { idMataKuliah },
-            include: { anggota: { select: { nis: true } } }
-        });
-        const niss = kelompokData.flatMap(k => k.anggota.map(a => a.nis));
-        if (niss.length > 0) {
-            const mhs = await prisma.siswa.findMany({
-                where: { nis: { in: niss } },
-                select: { nomorInduk: true }
-            });
-            mhs.forEach(m => nomorIndukSet.add(m.nomorInduk));
-        }
-    } catch (e) {}
-
-    // 4. Cari dari tabel ProgressMateri (siswa yang akses materi)
-    try {
-        const modulList = await prisma.modulAjar.findMany({
-            where: { idMataKuliah },
-            select: { idModulAjar: true }
-        });
-        const modulIds = modulList.map(m => m.idModulAjar);
-        if (modulIds.length > 0) {
-            const progressData = await prisma.progressMateri.findMany({
-                where: { idModulAjar: { in: modulIds } },
-                select: { nis: true }
-            });
-            const niss = progressData.map(p => p.nis);
-            if (niss.length > 0) {
-                const mhs = await prisma.siswa.findMany({
-                    where: { nis: { in: niss } },
-                    select: { nomorInduk: true }
-                });
-                mhs.forEach(m => nomorIndukSet.add(m.nomorInduk));
-            }
-        }
-    } catch (e) {}
-
-    // Convert nomorInduk ke NIS
-    let siswaNISs = [];
-    const relatedNomorInduk = Array.from(nomorIndukSet);
-    if (relatedNomorInduk.length > 0) {
-        const siswas = await prisma.siswa.findMany({
-            where: { nomorInduk: { in: relatedNomorInduk } },
-            select: { nis: true }
-        });
-        siswaNISs = siswas.map(m => m.nis);
+    const mk = await prisma.mataKuliah.findUnique({
+        where: { idMataKuliah },
+        select: { idKelas: true, namaMataKuliah: true }
+    });
+    if (!mk || !mk.idKelas) {
+        throw new Error('Mata kuliah atau kelas tidak ditemukan.');
     }
 
-    // Fallback: jika masih kosong, gunakan semua siswa sebagai default
-    if (siswaNISs.length === 0) {
-        try {
-            const allSiswa = await prisma.siswa.findMany({ select: { nis: true } });
-            siswaNISs = allSiswa.map(m => m.nis);
-            console.log(`[createTugas] Fallback: menggunakan ${siswaNISs.length} siswa dari database`);
-        } catch (e) {}
-    }
+    const siswas = await prisma.siswa.findMany({
+        where: { idKelas: mk.idKelas },
+        select: { nis: true }
+    });
 
+    const siswaNISs = siswas.map(s => s.nis);
     if (siswaNISs.length === 0) {
-        throw new Error('Tidak ada siswa yang terdaftar di sistem. Pastikan ada data siswa di database.');
+        throw new Error('Tidak ada siswa yang terdaftar di kelas untuk mata pelajaran ini.');
     }
 
     console.log(`[createTugas] Membuat tugas untuk ${siswaNISs.length} siswa di mata kuliah ${idMataKuliah}`);
@@ -144,7 +71,7 @@ async createTugas(data) {
         siswaNISs.map(nis =>
             prisma.tugas.create({
                 data: {
-                    idMataKuliah: parseInt(data.idMataKuliah),
+                    idMataKuliah,
                     nis,
                     judul: trimString(data.judul, 200),
                     tipeTugas: data.tipeTugas || data.tipe || 'Individu',
@@ -162,14 +89,11 @@ async createTugas(data) {
 
     // Kirim notifikasi ke semua siswa
     try {
-        const mataKuliah = await prisma.mataKuliah.findUnique({
-            where: { idMataKuliah: parseInt(data.idMataKuliah) }
-        });
         await prisma.notifikasi.createMany({
             data: siswaNISs.map(nis => ({
                 nis,
                 judul: 'Tugas Baru',
-                pesan: `Tugas "${data.judul}" untuk mata kuliah ${mataKuliah?.namaMataKuliah || 'ini'} telah tersedia. Jangan lupa dikerjakan!`,
+                pesan: `Tugas "${data.judul}" untuk mata kuliah ${mk.namaMataKuliah || 'ini'} telah tersedia. Jangan lupa dikerjakan!`,
                 tipe: 'tugas',
                 idRef: newTugasRecords[0]?.idTugas,
                 tipeRef: 'tugas'
@@ -184,15 +108,28 @@ async createTugas(data) {
 }
 
 async createKuis(data, quizData) {
-    // Menyimpan Kuis beserta Soal dan Pilihan Jawabannya
     const idMataKuliah = parseInt(data.idMataKuliah);
-    const mataKuliah = await prisma.mataKuliah.findUnique({
-        where: { idMataKuliah }
+    const mk = await prisma.mataKuliah.findUnique({
+        where: { idMataKuliah },
+        select: { idKelas: true, namaMataKuliah: true }
     });
+    if (!mk || !mk.idKelas) {
+        throw new Error('Mata kuliah atau kelas tidak ditemukan.');
+    }
+
+    const siswas = await prisma.siswa.findMany({
+        where: { idKelas: mk.idKelas },
+        select: { nis: true }
+    });
+
+    const relatedNISs = siswas.map(s => s.nis);
+    if (relatedNISs.length === 0) {
+        throw new Error('Tidak ada siswa yang terdaftar di kelas untuk kuis ini.');
+    }
 
     const newKuis = await prisma.kuis.create({
         data: {
-            idMataKuliah: data.idMataKuliah,
+            idMataKuliah,
             judul: data.judul,
             deadlineKuis: new Date(data.deadlineTugas),
             soal: {
@@ -209,89 +146,19 @@ async createKuis(data, quizData) {
         }
     });
 
-    // Kirim notifikasi ke semua siswa yang terkait (dari berbagai sumber)
+    // Kirim notifikasi ke semua siswa yang terkait
     try {
-        const nomorIndukSet = new Set();
-
-        // 1. Cari dari tabel Nilai
-        try {
-            const nilaiData = await prisma.nilai.findMany({
-                where: { idMataKuliah },
-                select: { nomorInduk: true }
-            });
-            nilaiData.forEach(n => nomorIndukSet.add(n.nomorInduk));
-        } catch (e) {}
-
-        // 2. Cari dari tabel Presensi
-        try {
-            const presensiData = await prisma.presensi.findMany({
-                where: { idMataKuliah },
-                select: { nis: true }
-            });
-            const niss = presensiData.map(p => p.nis);
-            if (niss.length > 0) {
-                const mhs = await prisma.siswa.findMany({
-                    where: { nis: { in: niss } },
-                    select: { nomorInduk: true }
-                });
-                mhs.forEach(m => nomorIndukSet.add(m.nomorInduk));
-            }
-        } catch (e) {}
-
-        // 3. Cari dari tabel AnggotaKelompok
-        try {
-            const kelompokData = await prisma.kelompok.findMany({
-                where: { idMataKuliah },
-                include: { anggota: { select: { nis: true } } }
-            });
-            const niss = kelompokData.flatMap(k => k.anggota.map(a => a.nis));
-            if (niss.length > 0) {
-                const mhs = await prisma.siswa.findMany({
-                    where: { nis: { in: niss } },
-                    select: { nomorInduk: true }
-                });
-                mhs.forEach(m => nomorIndukSet.add(m.nomorInduk));
-            }
-        } catch (e) {}
-
-        // Convert ke NIS dan kirim notifikasi
-        const relatedNomorInduk = Array.from(nomorIndukSet);
-        if (relatedNomorInduk.length > 0) {
-            const siswas = await prisma.siswa.findMany({
-                where: { nomorInduk: { in: relatedNomorInduk } },
-                select: { nis: true }
-            });
-            const relatedNISs = siswas.map(m => m.nis);
-            if (relatedNISs.length > 0) {
-                await prisma.notifikasi.createMany({
-                    data: relatedNISs.map(nis => ({
-                        nis,
-                        judul: 'Kuis Baru',
-                        pesan: `Kuis "${data.judul}" untuk mata kuliah ${mataKuliah?.namaMataKuliah || 'ini'} telah tersedia. Ayo kerjakan sekarang!`,
-                        tipe: 'kuis',
-                        idRef: newKuis.idKuis,
-                        tipeRef: 'kuis'
-                    }))
-                });
-                console.log(`Notifikasi Kuis dikirim ke ${relatedNISs.length} siswa`);
-            }
-        } else {
-            // Fallback: kirim ke semua siswa
-            const allSiswa = await prisma.siswa.findMany({ select: { nis: true } });
-            if (allSiswa.length > 0) {
-                await prisma.notifikasi.createMany({
-                    data: allSiswa.map(m => ({
-                        nis: m.nis,
-                        judul: 'Kuis Baru',
-                        pesan: `Kuis "${data.judul}" untuk mata kuliah ${mataKuliah?.namaMataKuliah || 'ini'} telah tersedia. Ayo kerjakan sekarang!`,
-                        tipe: 'kuis',
-                        idRef: newKuis.idKuis,
-                        tipeRef: 'kuis'
-                    }))
-                });
-                console.log(`Notifikasi Kuis dikirim ke ${allSiswa.length} siswa (fallback)`);
-            }
-        }
+        await prisma.notifikasi.createMany({
+            data: relatedNISs.map(nis => ({
+                nis,
+                judul: 'Kuis Baru',
+                pesan: `Kuis "${data.judul}" untuk mata kuliah ${mk.namaMataKuliah || 'ini'} telah tersedia. Ayo kerjakan sekarang!`,
+                tipe: 'kuis',
+                idRef: newKuis.idKuis,
+                tipeRef: 'kuis'
+            }))
+        });
+        console.log(`Notifikasi Kuis dikirim ke ${relatedNISs.length} siswa`);
     } catch (e) {
         console.error('Gagal mengirim notifikasi kuis:', e.message);
     }

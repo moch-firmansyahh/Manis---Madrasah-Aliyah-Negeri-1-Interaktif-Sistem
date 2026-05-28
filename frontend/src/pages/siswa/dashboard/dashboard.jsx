@@ -140,10 +140,7 @@ export default function Dashboard({ onNavigate, onLogout }) {
                       </p>
                       <p className="db-stat-lbl">IPK</p>
                     </div>
-                    <div className={`db-stat-box ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "60px", minHeight: "45px" } : {}}>
-                      <p className="db-stat-val">{dashboardData?.sks || "0"}</p>
-                      <p className="db-stat-lbl">SKS</p>
-                    </div>
+
                   </div>
                 </div>
               </div>

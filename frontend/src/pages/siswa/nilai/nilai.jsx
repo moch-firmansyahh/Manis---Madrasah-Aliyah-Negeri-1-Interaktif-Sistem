@@ -44,15 +44,15 @@ function scoreBar(score) {
 
 // Compute IPK kumulatif from finished semesters
 function getIPKKumulatif(semesters) {
-  let totalBobot = 0,
-    totalSks = 0;
+  let totalIpk = 0,
+    count = 0;
   semesters.forEach((sem) => {
     if (sem.ipk !== null) {
-      totalBobot += sem.ipk * sem.sks;
-      totalSks += sem.sks;
+      totalIpk += sem.ipk;
+      count++;
     }
   });
-  return totalSks > 0 ? (totalBobot / totalSks).toFixed(2) : "—";
+  return count > 0 ? (totalIpk / count).toFixed(2) : "—";
 }
 
 function calculateGrade(tugas, kuis) {
@@ -112,8 +112,8 @@ export default function Nilai({ onNavigate, onLogout }) {
               (a === "null" ? 99 : Number(a)) - (b === "null" ? 99 : Number(b)),
           );
           const formattedSems = keys.map((k) => {
-            let totalSks = 0;
             let totalPoint = 0;
+            let gradedCount = 0;
 
             const isAktif = Number(k) > 3;
 
@@ -124,16 +124,14 @@ export default function Nilai({ onNavigate, onLogout }) {
                 (!isAktif && tugas !== null && kuis !== null ? Math.round((tugas * 0.5 + kuis * 0.5)) : null);
               const grade = (!isAktif && finalScore) ? calculateGrade(tugas, kuis) : null;
 
-              const sks = m.mataKuliah?.sks || 3;
-              totalSks += sks;
               if (grade) {
-                totalPoint += convertGradeToPoint(grade) * sks;
+                totalPoint += convertGradeToPoint(grade);
+                gradedCount++;
               }
 
               return {
                 kode: `MK${m.idMataKuliah}`,
                 nama: m.mataKuliah?.namaMataKuliah || "Mata Kuliah",
-                sks: sks,
                 tugas: tugas,
                 uts: kuis,
                 uas: finalScore,
@@ -142,13 +140,12 @@ export default function Nilai({ onNavigate, onLogout }) {
             });
 
             const ipk =
-              totalSks > 0 && totalPoint > 0 ? totalPoint / totalSks : null;
+              gradedCount > 0 ? totalPoint / gradedCount : null;
 
             return {
               label: !isAktif ? `Semester ${k}` : `Semester ${k} (Aktif)`,
               year: !isAktif ? "Tahun Akademik 2023/2024" : "Sedang Berlangsung — Nilai belum final",
               ipk: ipk,
-              sks: totalSks,
               matkul: matkul,
             };
           });
@@ -185,14 +182,12 @@ export default function Nilai({ onNavigate, onLogout }) {
     const nis = storedUser?.nomorInduk || "-";
     const selesai = semesters.filter(s => s.ipk !== null);
     const ipkFinal = ipkKumulatif;
-    const sksTotal = totalSksSelesai;
 
     const rows = selesai.flatMap(sem =>
       sem.matkul.map(mk => `
         <tr>
           <td>${mk.kode}</td>
           <td>${mk.nama}</td>
-          <td style="text-align:center">${mk.sks}</td>
           <td style="text-align:center">${mk.tugas ?? '—'}</td>
           <td style="text-align:center">${mk.uts ?? '—'}</td>
           <td style="text-align:center">${mk.uas ?? '—'}</td>
@@ -219,7 +214,7 @@ export default function Nilai({ onNavigate, onLogout }) {
       <p>Nama: <b>${nama}</b> &nbsp;|&nbsp; NIS: <b>${nis}</b></p>
       <table>
         <thead><tr>
-          <th>Kode MK</th><th>Mata Pelajaran</th><th>SKS</th>
+          <th>Kode MK</th><th>Mata Pelajaran</th>
           <th>Tugas</th><th>UTS</th><th>UAS</th><th>Nilai</th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -246,12 +241,7 @@ export default function Nilai({ onNavigate, onLogout }) {
     ipk: null,
   };
   const ipkKumulatif = semesters.length > 0 ? getIPKKumulatif(semesters) : "—";
-  const totalSksSelesai =
-    semesters.length > 0
-      ? semesters
-          .filter((s) => s.ipk !== null)
-          .reduce((acc, s) => acc + s.sks, 0)
-      : 0;
+
 
   return (
     <div
@@ -389,12 +379,7 @@ export default function Nilai({ onNavigate, onLogout }) {
               </div>
               <div className="nlai-sem-meta">
                 <div className="nlai-sem-meta-item">
-                  <p className="nlai-sem-meta-lbl">Total SKS</p>
-                  <p className="nlai-sem-meta-val">{sem.sks} SKS</p>
-                </div>
-                <div className="nlai-sem-meta-divider"></div>
-                <div className="nlai-sem-meta-item">
-                  <p className="nlai-sem-meta-lbl">IP Semester</p>
+                  <p className="nlai-sem-meta-lbl">Rata-Rata Semester</p>
                   <p className="nlai-sem-meta-val nlai-sem-meta-val--blue">
                     {sem.ipk !== null ? sem.ipk.toFixed(2) : "Belum Final"}
                   </p>
@@ -409,7 +394,6 @@ export default function Nilai({ onNavigate, onLogout }) {
                   <tr>
                     <th>Kode MK</th>
                     <th>Mata Pelajaran</th>
-                    <th className="nlai-th-center">SKS</th>
                     <th className="nlai-th-center">Tugas</th>
                     <th className="nlai-th-center">UTS</th>
                     <th className="nlai-th-center">UAS</th>
@@ -430,7 +414,6 @@ export default function Nilai({ onNavigate, onLogout }) {
                       <tr key={i} className="nlai-row">
                         <td className="nlai-code">{mk.kode}</td>
                         <td className="nlai-name">{mk.nama}</td>
-                        <td className="nlai-center">{mk.sks}</td>
                         <td className="nlai-center">
                           <span
                             className={

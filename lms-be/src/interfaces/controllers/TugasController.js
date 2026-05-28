@@ -22,15 +22,15 @@ export class TugasController {
         return res.status(400).json({ error: "NIS tidak ditemukan" });
       }
       
-      // Get courses taken by siswa (same as dashboard)
+      // Get courses taken by siswa by idKelas
+      const student = await prisma.siswa.findUnique({ where: { nis } });
+      if (!student) {
+        return res.status(404).json({ error: "Siswa tidak ditemukan" });
+      }
+
       const mataKuliahList = await prisma.mataKuliah.findMany({
         where: {
-          OR: [
-            { nilai: { some: { nomorInduk: nomorInduk } } },
-            { presensi: { some: { nis: nis } } },
-            { tugas: { some: { nis: nis } } },
-            { kelompok: { some: { anggota: { some: { nis: nis } } } } },
-          ],
+          idKelas: student.idKelas
         },
         select: { idMataKuliah: true }
       });

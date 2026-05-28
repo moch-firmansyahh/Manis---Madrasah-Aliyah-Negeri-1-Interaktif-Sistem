@@ -251,7 +251,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
               {notifications.length > 0 ? notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`notif-item ${notif.read ? "notif-read" : "notif-unread"}`}
+                  className={`notif-item notif-item--${notif.type} ${notif.read ? "notif-read" : "notif-unread"}`}
                   onClick={async () => {
                     if (!notif.read && isSiswa) {
                       try {

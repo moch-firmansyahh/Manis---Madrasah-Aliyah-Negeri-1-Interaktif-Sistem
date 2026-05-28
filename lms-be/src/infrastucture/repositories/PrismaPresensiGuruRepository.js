@@ -15,45 +15,24 @@ function getEndOfDayUTC() {
 
 export class PrismaPresensiGuruRepository {
     async getSiswaByMatkul(idMataKuliah) {
-        
-        const mataKuliah = await prisma.mataKuliah.findUnique({
-            where: { idMataKuliah: parseInt(idMataKuliah) },
-            include: {
-                nilai: { include: { user: true } },
-                presensi: { include: { siswa: { include: { user: true } } } },
-                kelompok: { include: { anggota: { include: { siswa: { include: { user: true } } } } } },
-                tugas: { include: { siswa: { include: { user: true } } } }
-            }
+        const intIdMk = parseInt(idMataKuliah);
+        const mk = await prisma.mataKuliah.findUnique({
+            where: { idMataKuliah: intIdMk },
+            select: { idKelas: true }
+        });
+        if (!mk || !mk.idKelas) return [];
+
+        const siswaList = await prisma.siswa.findMany({
+            where: { idKelas: mk.idKelas },
+            include: { user: true }
         });
 
-        const siswaMap = new Map();
-        const nomorIndukSet = new Set();
-        
-        mataKuliah?.nilai?.forEach(n => { if (n.nomorInduk) nomorIndukSet.add(n.nomorInduk); });
-        mataKuliah?.presensi?.forEach(p => { if (p.siswa) siswaMap.set(p.siswa.nis, p.siswa); });
-        mataKuliah?.kelompok?.forEach(k => { k.anggota?.forEach(a => { if (a.siswa) siswaMap.set(a.siswa.nis, a.siswa); }); });
-        mataKuliah?.tugas?.forEach(t => { if (t.siswa) siswaMap.set(t.siswa.nis, t.siswa); });
-
-        if (nomorIndukSet.size > 0) {
-            const siswaFromNilai = await prisma.siswa.findMany({
-                where: { nomorInduk: { in: Array.from(nomorIndukSet) } },
-                include: { user: true }
-            });
-            siswaFromNilai.forEach(m => siswaMap.set(m.nis, m));
-        }
-
-        if (siswaMap.size === 0) {
-            const allSiswa = await prisma.siswa.findMany({ include: { user: true } });
-            allSiswa.forEach(m => siswaMap.set(m.nis, m));
-        }
-
-        const siswaList = Array.from(siswaMap.values());
         const today = getStartOfDayUTC();
         const tomorrow = getEndOfDayUTC();
         
         const result = await Promise.all(siswaList.map(async (mhs, index) => {
             const presensiTerbaru = await prisma.presensi.findFirst({
-                where: { nis: mhs.nis, idMataKuliah: parseInt(idMataKuliah), tanggalPertemuan: { gte: today, lt: tomorrow } },
+                where: { nis: mhs.nis, idMataKuliah: intIdMk, tanggalPertemuan: { gte: today, lt: tomorrow } },
                 orderBy: { tanggalPertemuan: 'desc' }
             });
 
@@ -113,13 +92,23 @@ export class PrismaPresensiGuruRepository {
     }
 
     async getDaftarHadirByTanggal(idMataKuliah, tanggal) {
+        const intIdMk = parseInt(idMataKuliah);
+        const mk = await prisma.mataKuliah.findUnique({
+            where: { idMataKuliah: intIdMk },
+            select: { idKelas: true }
+        });
+        if (!mk || !mk.idKelas) return [];
+
         const targetDate = new Date(tanggal);
         const startOfDay = new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate(), 0, 0, 0, 0));
         const endOfDay = new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate(), 23, 59, 59, 999));
         
-        const allSiswa = await prisma.siswa.findMany({ include: { user: true } });
+        const allSiswa = await prisma.siswa.findMany({
+            where: { idKelas: mk.idKelas },
+            include: { user: true }
+        });
         const presensiList = await prisma.presensi.findMany({
-            where: { idMataKuliah: parseInt(idMataKuliah), tanggalPertemuan: { gte: startOfDay, lte: endOfDay } }
+            where: { idMataKuliah: intIdMk, tanggalPertemuan: { gte: startOfDay, lte: endOfDay } }
         });
         // Untuk setiap NIS, ambil yang statusnya "Hadir" jika ada, kalau tidak ambil yang terbaru
         const presensiMap = new Map();

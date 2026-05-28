@@ -427,13 +427,17 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                 Hasilkan QR Code presensi dan pantau kehadiran siswa secara
                 real-time.
               </p>
-              <p className="dp-page-sub">
-                Kelas: <strong>{selectedClass?.namaKelas}</strong>
-              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.5rem" }}>
+                <span className="class-badge" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", background: "rgba(19, 116, 184, 0.1)", color: "#1374B8", border: "1px solid rgba(19, 116, 184, 0.2)", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "700" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>school</span>
+                  Kelas: {selectedClass?.namaKelas}
+                </span>
+                <button onClick={clearClass} className="dp-btn-cancel" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", border: "1px solid var(--color-border)", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>swap_horiz</span>
+                  Ganti Kelas
+                </button>
+              </div>
             </div>
-            <button onClick={clearClass} className="dp-btn-cancel" style={{ padding: '8px 12px', fontSize: '0.85rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', height: 'fit-content', marginTop: '16px' }}>
-              Ganti Kelas
-            </button>
             <div className="dp-top-actions" style={{ position: "relative" }}>
               <div
                 className="dp-matkul-selector"

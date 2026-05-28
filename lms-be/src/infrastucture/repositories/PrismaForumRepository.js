@@ -43,8 +43,10 @@ export class PrismaForumRepository {
    * Digunakan oleh halaman dashboard.jsx (Dashboard Siswa).
    * @param {number} limit Batas jumlah diskusi yang diambil (misal: 3)
    */
-  async getRecentThreads(limit = 3) {
+  async getRecentThreads(limit = 3, idMataKuliahList = null) {
+    const whereClause = idMataKuliahList ? { idMataKuliah: { in: idMataKuliahList } } : {};
     return await prisma.forumDiskusi.findMany({
+      where: whereClause,
       take: limit,
       include: {
         user: {

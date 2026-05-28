@@ -94,8 +94,8 @@ async getAllKelompok(nipGuru, idKelas) {
     });
 }
 
-async getAllSiswa() {
-    const data = await this.kelompokRepository.findAllSiswa();
+async getAllSiswa(idKelas) {
+    const data = await this.kelompokRepository.findAllSiswa(idKelas);
     return data.map(m => ({
         nis: m.nis,
         name: m.user?.nama || "Siswa",

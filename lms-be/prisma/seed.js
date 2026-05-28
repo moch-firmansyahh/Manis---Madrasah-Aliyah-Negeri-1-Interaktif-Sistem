@@ -344,6 +344,7 @@ async function main() {
   const presensiData = [];
   for (const mk of createdMatkul) {
     for (const s of siswaList) {
+      if (s.idKelas !== mk.idKelas) continue;
       presensiData.push({
         nis: s.ni,
         idMataKuliah: mk.idMataKuliah,
@@ -371,6 +372,7 @@ async function main() {
   const nilaiData = [];
   for (const mk of createdMatkul) {
     for (const s of siswaList) {
+      if (s.idKelas !== mk.idKelas) continue;
       const base = 65 + Math.floor(Math.random() * 30);
       const isComplete = mk.semester <= 3;
       nilaiData.push({
@@ -606,6 +608,7 @@ async function main() {
     const templates = tugasMap[baseName] || tugasMap["Bahasa Indonesia"];
     for (const tmpl of templates) {
       for (const s of siswaList) {
+        if (s.idKelas !== mk.idKelas) continue;
         const deadlineDate = new Date(
           today.getTime() + tmpl.deadlineDays * 24 * 3600000,
         );
@@ -762,8 +765,10 @@ async function main() {
   const anggotaData = [];
   for (let ki = 0; ki < kelompokCreated.length; ki++) {
     const k = kelompokCreated[ki];
-    const shuffled = [...siswaList].sort(() => Math.random() - 0.5);
-    for (let j = 0; j < 5; j++) {
+    const subject = createdMatkul.find(m => m.idMataKuliah === k.idMataKuliah);
+    const classSiswaList = siswaList.filter(s => s.idKelas === subject.idKelas);
+    const shuffled = [...classSiswaList].sort(() => Math.random() - 0.5);
+    for (let j = 0; j < Math.min(5, shuffled.length); j++) {
       anggotaData.push({
         idKelompok: k.idKelompok,
         nis: shuffled[j].ni,
@@ -783,10 +788,11 @@ async function main() {
   const progressData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
     const mk = createdMatkul[i];
-    for (let j = 0; j < Math.min(10, siswaList.length); j++) {
+    const classSiswaList = siswaList.filter(s => s.idKelas === mk.idKelas);
+    for (let j = 0; j < Math.min(10, classSiswaList.length); j++) {
       progressData.push({
         idMataKuliah: mk.idMataKuliah,
-        nis: siswaList[(i + j) % siswaList.length].ni,
+        nis: classSiswaList[j].ni,
         judul: `Progress Tugas 1 - ${matkulList[i].nama}`,
         detailTugas: "Sudah mengerjakan 50% bagian teori dan praktikum.",
         deadlineTugas: new Date(today.getTime() + 14 * 24 * 3600000),
@@ -825,22 +831,25 @@ async function main() {
   const sem4Matkul = createdMatkul.filter((m) => m.semester === 4);
   const notifData = [];
   for (const mk of sem4Matkul) {
-    notifData.push({
-      nis: siswaList[0].ni,
-      judul: "Materi Baru",
-      pesan: `Materi untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
-      tipe: "materi",
-      isRead: false,
-      tipeRef: "materi",
-    });
-    notifData.push({
-      nis: siswaList[0].ni,
-      judul: "Tugas Baru",
-      pesan: `Tugas baru telah tersedia untuk mata pelajaran ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
-      tipe: "tugas",
-      isRead: false,
-      tipeRef: "tugas",
-    });
+    const classSiswaList = siswaList.filter(s => s.idKelas === mk.idKelas);
+    if (classSiswaList.length > 0) {
+      notifData.push({
+        nis: classSiswaList[0].ni,
+        judul: "Materi Baru",
+        pesan: `Materi untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
+        tipe: "materi",
+        isRead: false,
+        tipeRef: "materi",
+      });
+      notifData.push({
+        nis: classSiswaList[0].ni,
+        judul: "Tugas Baru",
+        pesan: `Tugas baru telah tersedia untuk mata pelajaran ${mk.namaMataKuliah}. Jangan lupa dikerjakan!`,
+        tipe: "tugas",
+        isRead: false,
+        tipeRef: "tugas",
+      });
+    }
   }
   await prisma.notifikasi.createMany({ data: notifData });
   console.log(`${notifData.length} Notifikasi berhasil dibuat.`);
