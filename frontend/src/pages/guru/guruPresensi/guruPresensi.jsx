@@ -139,6 +139,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   );
 
   useEffect(() => {
+    if (!selectedClass) return;
     const fetchCourses = async () => {
       try {
         const res = await apiClient.get("/api/mata-kuliah");
@@ -152,7 +153,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
           jadwal: c.jadwal || "",
         }));
         setMataKuliahList(formatted);
-        if (formatted.length > 0 && !selectedMatkul?.id) {
+        setSelectedMatkul({ id: null, name: "Memuat...", room: "-", time: "-", jadwal: "" });
+        setSessionActive(false);
+        if (formatted.length > 0) {
           setSelectedMatkul(formatted[0]);
           setSelectedDays(
             formatted[0].jadwal ? formatted[0].jadwal.split(",") : [],
@@ -163,7 +166,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
       }
     };
     fetchCourses();
-  }, []);
+  }, [selectedClass]);
 
   // Update selectedDays when selectedMatkul changes
   useEffect(() => {
@@ -397,6 +400,14 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
           }
         />
 
+        {!selectedClass ? (
+          <ClassSelector
+            onSelectClass={(cls) => setSelectedClass(cls)}
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }}
+          />
+        ) : (
         <div className="page-content">
           {/* Top bar */}
           <div className="dp-topbar">
@@ -405,6 +416,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
               <p className="dp-page-sub">
                 Hasilkan QR Code presensi dan pantau kehadiran siswa secara
                 real-time.
+              </p>
+              <p className="dp-page-sub">
+                Kelas: <strong>{selectedClass?.namaKelas}</strong>
               </p>
             </div>
             <button onClick={() => setSelectedClass(null)} className="dp-btn-cancel" style={{ padding: '8px 12px', fontSize: '0.85rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', height: 'fit-content', marginTop: '16px' }}>
@@ -999,6 +1013,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   );

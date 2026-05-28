@@ -63,7 +63,8 @@ export default function GuruMateri({ onNavigate, onLogout }) {
     try {
       const res = await apiClient.get('/api/mata-kuliah');
       const data = Array.isArray(res) ? res : (res.data || []);
-      setMatkulList(data.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah })));
+      const filteredData = selectedClass ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas) : data;
+      setMatkulList(filteredData.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah })));
     } catch (error) {
       console.error(error);
     }
@@ -114,9 +115,14 @@ export default function GuruMateri({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
-    fetchMatkulList();
     fetchMateri("Semua", "Semua");
   }, []);
+
+  useEffect(() => {
+    if (selectedClass) {
+      fetchMatkulList();
+    }
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchMateri(filterMatkul, filterTipe);
@@ -396,6 +402,14 @@ export default function GuruMateri({ onNavigate, onLogout }) {
           }
         />
 
+        {!selectedClass ? (
+          <ClassSelector
+            onSelectClass={(cls) => setSelectedClass(cls)}
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }}
+          />
+        ) : (
         <div className="page-content">
           {/* ═══════════════ LIST VIEW ═══════════════ */}
           {view === "list" && (
@@ -407,6 +421,12 @@ export default function GuruMateri({ onNavigate, onLogout }) {
                     Kelola modul ajar, dokumen, video, dan tautan materi untuk
                     siswa Anda.
                   </p>
+                  <p className="dm-page-sub">
+                    Kelas: <strong>{selectedClass?.namaKelas}</strong>
+                  </p>
+                  <button onClick={() => setSelectedClass(null)} className="dm-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+                    Ganti Kelas
+                  </button>
                 </div>
                 <button className="dm-btn-primary" onClick={startCreate}>
                   <span className="material-symbols-outlined">add</span>
@@ -862,6 +882,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
             </>
           )}
         </div>
+        )}
       </main>
     </div>
   );

@@ -130,9 +130,14 @@ export default function GuruTugas({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
-    fetchMatkulList();
     fetchTasks();
   }, []);
+
+  useEffect(() => {
+    if (selectedClass) {
+      fetchMatkulList();
+    }
+  }, [selectedClass]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -912,6 +917,14 @@ export default function GuruTugas({ onNavigate, onLogout }) {
           }
         />
 
+        {!selectedClass ? (
+          <ClassSelector
+            onSelectClass={(cls) => setSelectedClass(cls)}
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }}
+          />
+        ) : (
         <div className="page-content">
           {/* Top bar */}
           <div className="dt-topbar">
@@ -930,6 +943,12 @@ export default function GuruTugas({ onNavigate, onLogout }) {
                     ? "Isi detail tugas yang akan diberikan kepada siswa."
                     : "Perbarui informasi tugas yang sudah ada."}
               </p>
+              <p className="dt-page-sub">
+                Kelas: <strong>{selectedClass?.namaKelas}</strong>
+              </p>
+              <button onClick={() => setSelectedClass(null)} className="dt-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+                Ganti Kelas
+              </button>
             </div>
             {view === "list" && (
               <button className="dt-btn-primary" onClick={startForm}>
@@ -1151,6 +1170,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
           {view === "create" && renderTaskForm(handleCreate, "Buat Tugas")}
           {view === "edit" && renderTaskForm(handleUpdate, "Simpan Perubahan")}
         </div>
+        )}
       </main>
     </div>
   );
