@@ -64,7 +64,7 @@ async function main() {
   console.log(`${createdKelas.length} Kelas berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 3. GURU (5 Guru)
+  // 3. GURU (13 Guru)
   // ══════════════════════════════════════════════
   const guruList = [
     {
@@ -79,7 +79,7 @@ async function main() {
     {
       ni: "D002",
       nama: "Siti Rahayu, M.Pd",
-      email: "siti.rayahu@sch.id",
+      email: "siti.rahayu@sch.id",
       nip: "197505152005012001",
       nidn: "0515057501",
       bidang: "Fisika",
@@ -109,8 +109,80 @@ async function main() {
       email: "rudi.hermawan@sch.id",
       nip: "197912252008011001",
       nidn: "2512127901",
-      bidang: "Sains",
+      bidang: "Geografi",
       ruangKantor: "Ruang Guru Lt.1 R.103",
+    },
+    {
+      ni: "D006",
+      nama: "Momoh Mulyati, S.Pd",
+      email: "momoh.mulyati@sch.id",
+      nip: "198702122010012002",
+      nidn: "0212871201",
+      bidang: "Bahasa Inggris",
+      ruangKantor: "Ruang Guru Lt.1 R.104",
+    },
+    {
+      ni: "D007",
+      nama: "Fitri Nur Cahyati, S.Pd",
+      email: "fitri.cahyati@sch.id",
+      nip: "199003052013012001",
+      nidn: "0503901001",
+      bidang: "Bahasa Inggris",
+      ruangKantor: "Ruang Guru Lt.1 R.105",
+    },
+    {
+      ni: "D008",
+      nama: "Euis Kusmawati, S.Pd",
+      email: "euis.kusmawati@sch.id",
+      nip: "198508152011012001",
+      nidn: "1508852001",
+      bidang: "Bahasa Indonesia",
+      ruangKantor: "Ruang Guru Lt.2 R.202",
+    },
+    {
+      ni: "D009",
+      nama: "Deden Saefuloh, S.Pd., M.Pd",
+      email: "deden.saefuloh@sch.id",
+      nip: "198107202009011002",
+      nidn: "2007811001",
+      bidang: "PPKn & Sejarah",
+      ruangKantor: "Ruang Guru Lt.2 R.203",
+    },
+    {
+      ni: "D010",
+      nama: "H. Usep Fathudin, S.Ag., M.Ag",
+      email: "usep.fathudin@sch.id",
+      nip: "197810102008011003",
+      nidn: "1010788001",
+      bidang: "PAI",
+      ruangKantor: "Ruang Guru Lt.1 R.106",
+    },
+    {
+      ni: "D011",
+      nama: "Maman Abdurrahman, S.Ag., M.Pd",
+      email: "maman.abdurrahman@sch.id",
+      nip: "198312112011011001",
+      nidn: "1112831101",
+      bidang: "Bahasa Arab",
+      ruangKantor: "Ruang Guru Lt.2 R.204",
+    },
+    {
+      ni: "D012",
+      nama: "Tati Sumiati, S.Pd., M.Hum",
+      email: "tati.sumiati@sch.id",
+      nip: "199105122014012001",
+      nidn: "1205911001",
+      bidang: "Bahasa Sunda",
+      ruangKantor: "Ruang Guru Lt.1 R.107",
+    },
+    {
+      ni: "D013",
+      nama: "Iwan Setiawan, S.E., M.Si",
+      email: "iwan.setiawan@sch.id",
+      nip: "198011052009011003",
+      nidn: "0511801001",
+      bidang: "Ekonomi & Akuntansi",
+      ruangKantor: "Ruang Guru Lt.2 R.206",
     },
   ];
 
@@ -134,23 +206,28 @@ async function main() {
       },
     });
   }
-  console.log("5 Guru berhasil dibuat.");
+  console.log(`${guruList.length} Guru berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
   // 3. SISWA (90 Siswa — 10 per kelas)
   // ══════════════════════════════════════════════
-  const namaDepan = ["Andi", "Bella", "Cahya", "Dina", "Eko", "Fitri", "Galih", "Hana", "Irfan", "Jasmine"];
-  const namaBelakang = ["Pratama", "Safitri", "Nugraha", "Maharani", "Saputra", "Handayani", "Wicaksono", "Permata", "Maulana", "Putri"];
+  const namaDepan = ["Andi", "Bella", "Cahya", "Dina", "Eko", "Fitri", "Galih", "Hana", "Irfan", "Jasmine", "Rizky", "Siti", "Taufik", "Nina", "Rudi"];
+  const namaBelakang = ["Pratama", "Safitri", "Nugraha", "Maharani", "Saputra", "Handayani", "Wicaksono", "Permata", "Maulana", "Putri", "Ramadhan", "Kusuma", "Hidayat", "Anggraini", "Purnama"];
+
+  // Generate unique name combos per class using different offsets
+  const prefixNis = [202701, 202702, 202703, 202704, 202705, 202706, 202707, 202708, 202709];
 
   const siswaList = [];
   for (let ki = 0; ki < createdKelas.length; ki++) {
     const kelas = createdKelas[ki];
     for (let si = 0; si < 10; si++) {
-      const nis = `2027${String(ki + 1).padStart(2, "0")}${String(si + 1).padStart(2, "0")}`;
+      const nis = `${prefixNis[ki]}${String(si + 1).padStart(2, "0")}`;
+      const fi = (si + ki * 2) % namaDepan.length;
+      const bi = (si + ki * 3 + 2) % namaBelakang.length;
       siswaList.push({
         ni: nis,
         nis: nis,
-        nama: `${namaDepan[si]} ${namaBelakang[si]} (${kelas.namaKelas})`,
+        nama: `${namaDepan[fi]} ${namaBelakang[bi]} (${kelas.namaKelas})`,
         email: `siswa.${kelas.namaKelas.toLowerCase().replace(/\s+/g, "")}.${si + 1}@sch.id`,
         idKelas: kelas.idKelas,
       });
@@ -173,41 +250,65 @@ async function main() {
   console.log(`${siswaList.length} Siswa berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 4. MATA PELAJARAN (51 — per kelas: 6 MIPA / 5 IPS)
+  // 4. MATA PELAJARAN (108 — per kelas: 12 MIPA / 12 IPS)
   // ══════════════════════════════════════════════
+  const smtCycle = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4];
+
   const mipaMatkulTemplates = [
-    { nama: "Matematika Wajib", nipGuru: guruList[0].nip, semester: 1, sks: 3 },
-    { nama: "Bahasa Indonesia", nipGuru: guruList[1].nip, semester: 2, sks: 3 },
-    { nama: "Bahasa Inggris", nipGuru: guruList[2].nip, semester: 3, sks: 3 },
-    { nama: "Fisika", nipGuru: guruList[3].nip, semester: 4, sks: 3 },
-    { nama: "Kimia", nipGuru: guruList[4].nip, semester: 1, sks: 3 },
-    { nama: "Biologi", nipGuru: guruList[0].nip, semester: 2, sks: 3 },
+    { nama: "Matematika",         nipGuru: guruList[0].nip, semester: smtCycle[0],  sks: 3 },
+    { nama: "Fisika",             nipGuru: guruList[1].nip, semester: smtCycle[1],  sks: 3 },
+    { nama: "Kimia",              nipGuru: guruList[2].nip, semester: smtCycle[2],  sks: 3 },
+    { nama: "Biologi",            nipGuru: guruList[3].nip, semester: smtCycle[3],  sks: 3 },
+    { nama: "Teknologi/Informatika", nipGuru: guruList[1].nip,  semester: smtCycle[4],  sks: 2 },
+    { nama: "Bahasa Indonesia",   nipGuru: guruList[7].nip, semester: smtCycle[5],  sks: 3 },
+    { nama: "Bahasa Inggris",     nipGuru: guruList[5].nip, semester: smtCycle[6],  sks: 3 },
+    { nama: "PPKn",               nipGuru: guruList[8].nip, semester: smtCycle[7],  sks: 2 },
+    { nama: "Sejarah Indonesia",  nipGuru: guruList[8].nip, semester: smtCycle[8],  sks: 2 },
+    { nama: "PAI",                nipGuru: guruList[9].nip, semester: smtCycle[9],  sks: 3 },
+    { nama: "Bahasa Arab",        nipGuru: guruList[10].nip, semester: smtCycle[10], sks: 2 },
+    { nama: "Bahasa Sunda",       nipGuru: guruList[11].nip, semester: smtCycle[11], sks: 2 },
   ];
   const ipsMatkulTemplates = [
-    { nama: "Matematika Wajib", nipGuru: guruList[0].nip, semester: 1, sks: 3 },
-    { nama: "Bahasa Indonesia", nipGuru: guruList[1].nip, semester: 2, sks: 3 },
-    { nama: "Bahasa Inggris", nipGuru: guruList[2].nip, semester: 3, sks: 3 },
-    { nama: "Ekonomi", nipGuru: guruList[3].nip, semester: 4, sks: 3 },
-    { nama: "Sosiologi", nipGuru: guruList[4].nip, semester: 1, sks: 3 },
+    { nama: "Geografi",           nipGuru: guruList[4].nip,  semester: smtCycle[0],  sks: 3 },
+    { nama: "Sosiologi",          nipGuru: guruList[4].nip,  semester: smtCycle[1],  sks: 3 },
+    { nama: "Ekonomi",            nipGuru: guruList[12].nip, semester: smtCycle[2],  sks: 3 },
+    { nama: "Akuntansi",          nipGuru: guruList[12].nip, semester: smtCycle[3],  sks: 3 },
+    { nama: "Sejarah Peminatan",  nipGuru: guruList[8].nip,  semester: smtCycle[4],  sks: 2 },
+    { nama: "Bahasa Indonesia",   nipGuru: guruList[7].nip,  semester: smtCycle[5],  sks: 3 },
+    { nama: "Bahasa Inggris",     nipGuru: guruList[6].nip,  semester: smtCycle[6],  sks: 3 },
+    { nama: "PPKn",               nipGuru: guruList[8].nip,  semester: smtCycle[7],  sks: 2 },
+    { nama: "Sejarah Indonesia",  nipGuru: guruList[8].nip,  semester: smtCycle[8],  sks: 2 },
+    { nama: "PAI",                nipGuru: guruList[9].nip,  semester: smtCycle[9],  sks: 3 },
+    { nama: "Bahasa Arab",        nipGuru: guruList[10].nip, semester: smtCycle[10], sks: 2 },
+    { nama: "Bahasa Sunda",       nipGuru: guruList[11].nip, semester: smtCycle[11], sks: 2 },
   ];
-  const jadwalMipa = ["Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat", "Senin,Kamis", "Selasa,Jumat", "Rabu,Kamis"];
-  const jadwalIps = ["Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat", "Senin,Kamis", "Selasa,Jumat"];
+
+  const jadwalArr = [
+    "Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat", "Senin,Kamis",
+    "Selasa,Jumat", "Senin,Rabu", "Selasa,Kamis", "Rabu,Jumat",
+    "Senin,Kamis", "Selasa,Jumat", "Rabu,Kamis", "Senin,Jumat",
+  ];
+  const waktuArr = [
+    "07:00 - 08:30", "07:00 - 08:30", "08:30 - 10:00", "08:30 - 10:00",
+    "10:00 - 11:30", "10:00 - 11:30", "11:30 - 13:00", "11:30 - 13:00",
+    "13:00 - 14:30", "13:00 - 14:30", "14:30 - 16:00", "14:30 - 16:00",
+  ];
 
   const matkulList = [];
   const createdMatkul = [];
   for (let ki = 0; ki < createdKelas.length; ki++) {
     const kelas = createdKelas[ki];
     const templates = kelas.idJurusan === 1 ? mipaMatkulTemplates : ipsMatkulTemplates;
-    const jadwals = kelas.idJurusan === 1 ? jadwalMipa : jadwalIps;
     for (let ti = 0; ti < templates.length; ti++) {
       const tmpl = templates[ti];
       const fullName = `${tmpl.nama} ${kelas.namaKelas}`;
       matkulList.push({
         nama: fullName,
+        namaBase: tmpl.nama,
         nipGuru: tmpl.nipGuru,
         idKelas: kelas.idKelas,
-        jadwal: jadwals[ti],
-        waktu: `${8 + ti * 2}:00 - ${10 + ti * 2}:00`,
+        jadwal: jadwalArr[ti],
+        waktu: waktuArr[ti],
         semester: tmpl.semester,
         sks: tmpl.sks,
       });
@@ -216,8 +317,8 @@ async function main() {
           namaMataKuliah: fullName,
           nipGuru: tmpl.nipGuru,
           idKelas: kelas.idKelas,
-          jadwal: jadwals[ti],
-          waktu: `${8 + ti * 2}:00 - ${10 + ti * 2}:00`,
+          jadwal: jadwalArr[ti],
+          waktu: waktuArr[ti],
           semester: tmpl.semester,
           sks: tmpl.sks,
         },
@@ -236,16 +337,8 @@ async function main() {
   lastWeek.setDate(lastWeek.getDate() - 7);
 
   const statusOptions = [
-    "Hadir",
-    "Hadir",
-    "Hadir",
-    "Hadir",
-    "Hadir",
-    "Hadir",
-    "Hadir",
-    "Sakit",
-    "Izin",
-    "Alpha",
+    "Hadir", "Hadir", "Hadir", "Hadir", "Hadir",
+    "Hadir", "Hadir", "Sakit", "Izin", "Alpha",
   ];
 
   const presensiData = [];
@@ -294,271 +387,223 @@ async function main() {
   console.log(`${nilaiData.length} data Nilai berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 7. MODUL AJAR
+  // 7. MODUL AJAR (berdasarkan kurikulum)
   // ══════════════════════════════════════════════
+  const modulTopics = {
+    "Matematika": [
+      { judul: "Limit Fungsi Aljabar", tipe_modul: "PDF", deskripsi: "Materi lengkap tentang limit fungsi aljabar, sifat-sifat limit, dan contoh soal terapan.", ukuran: "2.5 MB", canDownload: true },
+      { judul: "Turunan Fungsi", tipe_modul: "Video", deskripsi: "Video pembelajaran turunan fungsi aljabar menggunakan aturan rantai dan turunan dasar.", ukuran: "150 MB", canDownload: false },
+      { judul: "Integral Tak Tentu & Tentu", tipe_modul: "PDF", deskripsi: "Pembahasan integral tak tentu dan integral tentu serta teknik integrasi substitusi.", ukuran: "3.1 MB", canDownload: true },
+      { judul: "Trigonometri Lanjutan", tipe_modul: "Video", deskripsi: "Video rumus-rumus trigonometri lanjutan, identitas, dan persamaan trigonometri.", ukuran: "180 MB", canDownload: false },
+    ],
+    "Fisika": [
+      { judul: "Gerak Lurus & Melingkar", tipe_modul: "PDF", deskripsi: "Konsep gerak lurus beraturan, GLBB, dan gerak melingkar beraturan.", ukuran: "2.8 MB", canDownload: true },
+      { judul: "Dinamika Newton", tipe_modul: "Video", deskripsi: "Video penjelasan Hukum I, II, III Newton beserta contoh soal aplikasi.", ukuran: "160 MB", canDownload: false },
+      { judul: "Usaha & Energi", tipe_modul: "PDF", deskripsi: "Konsep usaha, energi kinetik, energi potensial, dan hukum kekekalan energi mekanik.", ukuran: "2.2 MB", canDownload: true },
+      { judul: "Gelombang Mekanik", tipe_modul: "Video", deskripsi: "Video sifat-sifat gelombang, gelombang berjalan, dan gelombang stasioner.", ukuran: "140 MB", canDownload: false },
+    ],
+    "Kimia": [
+      { judul: "Stoikiometri & Konsep Mol", tipe_modul: "PDF", deskripsi: "Perhitungan kimia: mol, massa molar, volume molar, dan kadar zat.", ukuran: "3.0 MB", canDownload: true },
+      { judul: "Ikatan Kimia", tipe_modul: "Video", deskripsi: "Video jenis-jenis ikatan kimia: ionik, kovalen, logam, dan gaya antar molekul.", ukuran: "170 MB", canDownload: false },
+      { judul: "Laju Reaksi", tipe_modul: "PDF", deskripsi: "Faktor-faktor yang mempengaruhi laju reaksi, orde reaksi, dan persamaan laju.", ukuran: "2.6 MB", canDownload: true },
+      { judul: "Kesetimbangan Kimia", tipe_modul: "Video", deskripsi: "Video kesetimbangan dinamis, tetapan kesetimbangan, dan azas Le Chatelier.", ukuran: "155 MB", canDownload: false },
+    ],
+    "Biologi": [
+      { judul: "Struktur Sel & Jaringan", tipe_modul: "PDF", deskripsi: "Struktur dan fungsi sel hewan, sel tumbuhan, serta jaringan penyusun organ.", ukuran: "3.5 MB", canDownload: true },
+      { judul: "Sistem Organ Manusia", tipe_modul: "Video", deskripsi: "Video sistem pencernaan, peredaran darah, pernapasan, dan ekskresi manusia.", ukuran: "190 MB", canDownload: false },
+      { judul: "Genetika & Hereditas", tipe_modul: "PDF", deskripsi: "Hukum Mendel, persilangan monohibrid dan dihibrid, serta penyimpangan semu.", ukuran: "2.9 MB", canDownload: true },
+      { judul: "Evolusi & Bioteknologi", tipe_modul: "Video", deskripsi: "Video teori evolusi, bukti-bukti evolusi, dan aplikasi bioteknologi modern.", ukuran: "165 MB", canDownload: false },
+    ],
+    "Teknologi/Informatika": [
+      { judul: "Algoritma & Logika Dasar", tipe_modul: "PDF", deskripsi: "Pengantar algoritma, flowchart, pseudocode, dan logika pemrograman dasar.", ukuran: "2.0 MB", canDownload: true },
+      { judul: "Dasar-Dasar Pemrograman", tipe_modul: "Video", deskripsi: "Video tutorial pemrograman dasar menggunakan bahasa Python atau Scratch.", ukuran: "200 MB", canDownload: false },
+      { judul: "Jaringan Komputer", tipe_modul: "PDF", deskripsi: "Konsep jaringan komputer, topologi, protokol TCP/IP, dan keamanan jaringan.", ukuran: "2.3 MB", canDownload: true },
+    ],
+    "Bahasa Indonesia": [
+      { judul: "Teks Eksposisi & Argumentasi", tipe_modul: "PDF", deskripsi: "Struktur, ciri kebahasaan, dan langkah menyusun teks eksposisi dan argumentasi.", ukuran: "1.8 MB", canDownload: true },
+      { judul: "Menulis Laporan Ilmiah", tipe_modul: "Video", deskripsi: "Video panduan menulis laporan ilmiah sederhana beserta contoh dan template.", ukuran: "120 MB", canDownload: false },
+      { judul: "Unsur Sastra Modern", tipe_modul: "PDF", deskripsi: "Analisis unsur intrinsik dan ekstrinsik karya sastra modern Indonesia.", ukuran: "2.1 MB", canDownload: true },
+      { judul: "Ejaan & Tata Bahasa Baku", tipe_modul: "Video", deskripsi: "Video pembelajaran EYD, tanda baca, dan penggunaan kata baku dalam tulisan.", ukuran: "110 MB", canDownload: false },
+    ],
+    "Bahasa Inggris": [
+      { judul: "Reading Comprehension", tipe_modul: "PDF", deskripsi: "Strategi membaca teks bahasa Inggris, menemukan ide pokok, dan inference.", ukuran: "2.2 MB", canDownload: true },
+      { judul: "Advanced Grammar", tipe_modul: "Video", deskripsi: "Video tenses, modals, passive voice, dan conditional sentences.", ukuran: "130 MB", canDownload: false },
+      { judul: "Writing Academic Reports", tipe_modul: "PDF", deskripsi: "Panduan menulis laporan akademik, essay, dan summary dalam bahasa Inggris.", ukuran: "1.9 MB", canDownload: true },
+      { judul: "Public Speaking", tipe_modul: "Video", deskripsi: "Video teknik presentasi dan public speaking dalam bahasa Inggris.", ukuran: "145 MB", canDownload: false },
+    ],
+    "PPKn": [
+      { judul: "Nilai-Nilai Pancasila", tipe_modul: "PDF", deskripsi: "Pembahasan nilai-nilai Pancasila sebagai ideologi dan dasar negara.", ukuran: "1.5 MB", canDownload: true },
+      { judul: "Sistem Pemerintahan Indonesia", tipe_modul: "Video", deskripsi: "Video struktur pemerintahan Indonesia, lembaga negara, dan pembagian kekuasaan.", ukuran: "100 MB", canDownload: false },
+      { judul: "Hak & Kewajiban Warga Negara", tipe_modul: "PDF", deskripsi: "Hak asasi manusia, kewajiban warga negara, dan peraturan perundang-undangan.", ukuran: "1.7 MB", canDownload: true },
+    ],
+    "Sejarah Indonesia": [
+      { judul: "Masa Kolonial & Pergerakan Nasional", tipe_modul: "PDF", deskripsi: "Sejarah kolonialisme Belanda, perlawanan daerah, dan lahirnya pergerakan nasional.", ukuran: "3.2 MB", canDownload: true },
+      { judul: "Proklamasi & Kemerdekaan", tipe_modul: "Video", deskripsi: "Video kronologi proklamasi 17 Agustus 1945 dan peristiwa sekitar kemerdekaan.", ukuran: "175 MB", canDownload: false },
+      { judul: "Orde Lama, Baru & Reformasi", tipe_modul: "PDF", deskripsi: "Sejarah Indonesia dari Orde Lama, Orde Baru, hingga era Reformasi.", ukuran: "2.8 MB", canDownload: true },
+    ],
+    "PAI": [
+      { judul: "Tafsir Ayat-Ayat Tematik", tipe_modul: "PDF", deskripsi: "Tafsir ayat-ayat Al-Qur'an tentang akhlak, ibadah, dan muamalah.", ukuran: "2.4 MB", canDownload: true },
+      { judul: "Fiqih Ibadah & Muamalah", tipe_modul: "Video", deskripsi: "Video tata cara ibadah shalat, zakat, puasa, dan hukum muamalah sehari-hari.", ukuran: "185 MB", canDownload: false },
+      { judul: "Peradaban Islam", tipe_modul: "PDF", deskripsi: "Sejarah peradaban Islam dari masa Khulafaur Rasyidin hingga kejayaan Islam.", ukuran: "3.0 MB", canDownload: true },
+      { judul: "Akhlak & Tasawuf", tipe_modul: "Video", deskripsi: "Video akhlak terpuji, tasawuf, dan pembersihan jiwa dalam ajaran Islam.", ukuran: "135 MB", canDownload: false },
+    ],
+    "Bahasa Arab": [
+      { judul: "Qawaid: Nahwu & Shorof", tipe_modul: "PDF", deskripsi: "Kaedah nahwu dan shorof dasar untuk memahami struktur kalimat bahasa Arab.", ukuran: "2.7 MB", canDownload: true },
+      { judul: "Muthala'ah: Membaca Teks Arab", tipe_modul: "Video", deskripsi: "Video latihan membaca teks bahasa Arab dengan pemahaman dan terjemahan.", ukuran: "125 MB", canDownload: false },
+      { judul: "Muhadatsah: Dialog Sehari-hari", tipe_modul: "PDF", deskripsi: "Percakapan bahasa Arab untuk situasi sehari-hari beserta kosakata.", ukuran: "1.6 MB", canDownload: true },
+    ],
+    "Bahasa Sunda": [
+      { judul: "Sastra Sunda & Pupuh", tipe_modul: "PDF", deskripsi: "Karya sastra Sunda, jenis-jenis pupuh, dan contohnya dalam kehidupan.", ukuran: "2.0 MB", canDownload: true },
+      { judul: "Aksara Sunda", tipe_modul: "Video", deskripsi: "Video belajar membaca dan menulis aksara Sunda beserta latihan.", ukuran: "115 MB", canDownload: false },
+      { judul: "Budaya Lokal Sumedang", tipe_modul: "PDF", deskripsi: "Kearifan lokal Sumedang, tradisi, dan kesenian khas daerah Sumedang.", ukuran: "2.3 MB", canDownload: true },
+    ],
+    "Geografi": [
+      { judul: "Peta & Penginderaan Jauh", tipe_modul: "PDF", deskripsi: "Konsep dasar peta, proyeksi peta, SIG, dan penginderaan jauh.", ukuran: "3.3 MB", canDownload: true },
+      { judul: "Litosfer & Atmosfer", tipe_modul: "Video", deskripsi: "Video lapisan bumi, litosfer, atmosfer, cuaca, dan iklim.", ukuran: "160 MB", canDownload: false },
+      { judul: "Hidrosfer & Geografi Manusia", tipe_modul: "PDF", deskripsi: "Siklus hidrologi, perairan darat & laut, dan geografi penduduk.", ukuran: "2.5 MB", canDownload: true },
+      { judul: "Pembangunan Wilayah", tipe_modul: "Video", deskripsi: "Video konsep pembangunan wilayah, pusat pertumbuhan, dan pemerataan.", ukuran: "140 MB", canDownload: false },
+    ],
+    "Sosiologi": [
+      { judul: "Struktur & Mobilitas Sosial", tipe_modul: "PDF", deskripsi: "Struktur sosial, diferensiasi, stratifikasi, dan mobilitas sosial.", ukuran: "2.1 MB", canDownload: true },
+      { judul: "Konflik & Integrasi Sosial", tipe_modul: "Video", deskripsi: "Video teori konflik, integrasi sosial, dan resolusi konflik di masyarakat.", ukuran: "130 MB", canDownload: false },
+      { judul: "Lembaga Sosial", tipe_modul: "PDF", deskripsi: "Jenis dan fungsi lembaga sosial: keluarga, pendidikan, ekonomi, agama, politik.", ukuran: "1.9 MB", canDownload: true },
+    ],
+    "Ekonomi": [
+      { judul: "Permintaan & Penawaran", tipe_modul: "PDF", deskripsi: "Hukum permintaan dan penawaran, kurva, dan keseimbangan pasar.", ukuran: "2.4 MB", canDownload: true },
+      { judul: "Mekanisme Pasar", tipe_modul: "Video", deskripsi: "Video mekanisme pasar, elastisitas, dan struktur pasar.", ukuran: "150 MB", canDownload: false },
+      { judul: "Pendapatan Nasional", tipe_modul: "PDF", deskripsi: "Konsep PDB, PNB, pendapatan per kapita, dan distribusi pendapatan.", ukuran: "2.0 MB", canDownload: true },
+    ],
+    "Akuntansi": [
+      { judul: "Persamaan Dasar Akuntansi", tipe_modul: "PDF", deskripsi: "Konsep persamaan dasar akuntansi, aset, liabilitas, dan ekuitas.", ukuran: "2.2 MB", canDownload: true },
+      { judul: "Jurnal Umum & Buku Besar", tipe_modul: "Video", deskripsi: "Video pencatatan transaksi ke jurnal umum dan pemindahbukuan ke buku besar.", ukuran: "145 MB", canDownload: false },
+      { judul: "Neraca Saldo & Laporan Keuangan", tipe_modul: "PDF", deskripsi: "Penyusunan neraca saldo, laporan laba rugi, dan laporan perubahan ekuitas.", ukuran: "2.6 MB", canDownload: true },
+    ],
+    "Sejarah Peminatan": [
+      { judul: "Imperialisme & Revolusi Dunia", tipe_modul: "PDF", deskripsi: "Sejarah imperialisme modern, Revolusi Perancis, Revolusi Industri.", ukuran: "3.4 MB", canDownload: true },
+      { judul: "Perang Dunia I & II", tipe_modul: "Video", deskripsi: "Video kronologi, penyebab, dan dampak Perang Dunia I dan II.", ukuran: "180 MB", canDownload: false },
+      { judul: "Hubungan Internasional", tipe_modul: "PDF", deskripsi: "Organisasi internasional, PBB, dan hubungan diplomatik antar negara.", ukuran: "2.7 MB", canDownload: true },
+    ],
+  };
+
   const modulData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
     const mk = createdMatkul[i];
-    modulData.push({
-      idMataKuliah: mk.idMataKuliah,
-      judul: `Pengantar ${matkulList[i].nama}`,
-      tipe_modul: "PDF",
-      deskripsi: `Materi pengantar dan silabus untuk ${matkulList[i].nama}.`,
-      fileUrl: `/uploads/modul_pengantar_${mk.idMataKuliah}.pdf`,
-      ukuran: "2.5 MB",
-      canDownload: true,
-    });
-    modulData.push({
-      idMataKuliah: mk.idMataKuliah,
-      judul: `Praktikum ${matkulList[i].nama}`,
-      tipe_modul: "Video",
-      deskripsi: `Video pembelajaran praktikum untuk ${matkulList[i].nama}.`,
-      url: "https://www.youtube.com/watch?v=example",
-      ukuran: "150 MB",
-      canDownload: false,
-    });
+    const baseName = matkulList[i].namaBase;
+    const topics = modulTopics[baseName] || modulTopics["Bahasa Indonesia"];
+    for (let ti = 0; ti < topics.length; ti++) {
+      const t = topics[ti];
+      const suffix = `${baseName.replace(/\s+/g, '_').toLowerCase()}_${ti}_${mk.idMataKuliah}`;
+      modulData.push({
+        idMataKuliah: mk.idMataKuliah,
+        judul: t.judul,
+        tipe_modul: t.tipe_modul,
+        deskripsi: t.deskripsi,
+        fileUrl: t.tipe_modul === "PDF" ? `/uploads/modul_${suffix}.pdf` : null,
+        url: t.tipe_modul === "Video" ? `https://youtube.com/watch?v=${suffix}` : null,
+        ukuran: t.ukuran,
+        canDownload: t.canDownload,
+      });
+    }
   }
   await prisma.modulAjar.createMany({ data: modulData });
   console.log(`${modulData.length} Modul Ajar berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
-  // 8. TUGAS
+  // 8. TUGAS (berdasarkan kurikulum)
   // ══════════════════════════════════════════════
-  const tugasTemplates = [
-    // Semester 1
-    [
-      {
-        judul: "Latihan Aljabar dan Persamaan Linier",
-        detail:
-          "Kerjakan latihan soal persamaan linier satu variabel dan dua variabel pada lembar kerja.",
-        deadlineDays: 7,
-      },
-      {
-        judul: "Penerapan Himpunan dalam Kehidupan Sehari-hari",
-        detail:
-          "Buat laporan analisis tentang penerapan teori himpunan dalam menyelesaikan masalah sehari-hari.",
-        deadlineDays: 21,
-      },
+  const tugasMap = {
+    "Matematika": [
+      { judul: "Problem Set Harian — Limit Fungsi", detail: "Kerjakan 10 soal limit fungsi aljabar menggunakan sifat-sifat limit dan teknik pemfaktoran.", deadlineDays: 7 },
+      { judul: "Proyek Statistika Berbasis Data Nyata", detail: "Kumpulkan data nyata di lingkungan sekitar, olah secara statistika, dan buat laporan lengkap.", deadlineDays: 21 },
+      { judul: "Ulangan Bab — Turunan & Integral", detail: "Selesaikan 15 soal turunan dan integral fungsi aljabar untuk persiapan ulangan bab.", deadlineDays: 14 },
     ],
-    [
-      {
-        judul: "Pengukuran Fisika dan Ketidakpastian",
-        detail:
-          "Lakukan percobaan pengukuran panjang menggunakan jangka sorong dan hitung ketidakpastiannya.",
-        deadlineDays: 7,
-      },
-      {
-        judul: "Analisis Gerak Lurus Berubah Beraturan (GLBB)",
-        detail:
-          "Kerjakan 10 soal mengenai analisis grafik dan rumus GLBB pada gerak benda.",
-        deadlineDays: 21,
-      },
+    "Fisika": [
+      { judul: "Laporan Praktikum Gerak", detail: "Lakukan percobaan gerak menggunakan ticker timer dan buat laporan praktikum lengkap.", deadlineDays: 10 },
+      { judul: "Soal Latihan Dinamika Newton", detail: "Kerjakan 10 soal aplikasi Hukum Newton pada bidang miring, katrol, dan gaya gesek.", deadlineDays: 7 },
+      { judul: "Proyek Rangkaian Listrik Sederhana", detail: "Buat rangkaian listrik seri-paralel sederhana dan laporkan hasil pengukuran tegangan & arus.", deadlineDays: 24 },
     ],
-    [
-      {
-        judul: "Pengenalan Alat Laboratorium Kimia",
-        detail:
-          "Buat rangkuman fungsi dan cara penggunaan alat-alat laboratorium kimia dasar beserta simbol bahaya bahan kimia.",
-        deadlineDays: 5,
-      },
-      {
-        judul: "Klasifikasi Materi dan Perubahannya",
-        detail:
-          "Tentukan tipe perubahan fisika dan kimia pada 10 fenomena alam di sekitar kita.",
-        deadlineDays: 18,
-      },
+    "Kimia": [
+      { judul: "Tugas Perhitungan Mol", detail: "Selesaikan 10 soal perhitungan mol, massa molar, dan volume gas pada STP.", deadlineDays: 7 },
+      { judul: "Laporan Praktikum Laju Reaksi", detail: "Buat laporan praktikum pengaruh suhu dan konsentrasi terhadap laju reaksi kimia.", deadlineDays: 14 },
+      { judul: "Makalah Kimia Terapan", detail: "Buat makalah tentang aplikasi elektrokimia dalam kehidupan sehari-hari.", deadlineDays: 28 },
     ],
-    [
-      {
-        judul: "Pengamatan Sel Hewan dan Tumbuhan",
-        detail:
-          "Gambarkan struktur sel tumbuhan dan hewan hasil pengamatan mikroskop dan jelaskan perbedaannya.",
-        deadlineDays: 10,
-      },
-      {
-        judul: "Klasifikasi Makhluk Hidup 5 Kingdom",
-        detail:
-          "Buat kunci determinasi sederhana untuk mengklasifikasikan 5 spesies tumbuhan di lingkungan sekitar.",
-        deadlineDays: 24,
-      },
+    "Biologi": [
+      { judul: "Laporan Pengamatan Mikroskop", detail: "Amati preparat sel hewan dan tumbuhan di mikroskop, gambar, dan jelaskan strukturnya.", deadlineDays: 10 },
+      { judul: "Makalah Genetika", detail: "Buat makalah tentang penerapan hukum Mendel dalam persilangan tanaman.", deadlineDays: 21 },
+      { judul: "Proyek Ekologi Lingkungan", detail: "Lakukan observasi ekosistem di sekitar sekolah dan buat laporan rantai makanan.", deadlineDays: 28 },
     ],
-    // Semester 2
-    [
-      {
-        judul: "Penyelesaian Sistem Persamaan Linier Tiga Variabel",
-        detail:
-          "Selesaikan 5 soal SPLTV menggunakan metode eliminasi dan substitusi.",
-        deadlineDays: 10,
-      },
-      {
-        judul: "Fungsi Kuadrat dan Grafiknya",
-        detail:
-          "Gambarkan grafik fungsi kuadrat dan tentukan titik puncak, sumbu simetri, serta pembuat nol fungsi.",
-        deadlineDays: 24,
-      },
+    "Teknologi/Informatika": [
+      { judul: "Membuat Program Sederhana", detail: "Buat program kalkulator sederhana menggunakan bahasa pemrograman Python.", deadlineDays: 14 },
+      { judul: "Praktik Jaringan Komputer", detail: "Lakukan konfigurasi IP address dan uji koneksi antar dua perangkat jaringan.", deadlineDays: 10 },
+      { judul: "Laporan Eksplorasi Teknologi", detail: "Buat laporan eksplorasi tentang perkembangan teknologi AI atau IoT terkini.", deadlineDays: 21 },
     ],
-    [
-      {
-        judul: "Hukum Newton tentang Gerak",
-        detail:
-          "Selesaikan soal analisis gaya pada bidang miring kasar menggunakan Hukum II Newton.",
-        deadlineDays: 7,
-      },
-      {
-        judul: "Hukum Termodinamika pada Mesin Carnot",
-        detail:
-          "Hitung efisiensi mesin Carnot berdasarkan suhu reservoir tinggi dan rendah pada 5 kasus berbeda.",
-        deadlineDays: 20,
-      },
+    "Bahasa Indonesia": [
+      { judul: "Menulis Laporan Ilmiah", detail: "Buat laporan ilmiah sederhana tentang fenomena alam atau sosial dengan struktur yang benar.", deadlineDays: 14 },
+      { judul: "Analisis Unsur Sastra", detail: "Analisis unsur intrinsik dan ekstrinsik dari novel atau cerpen yang telah ditentukan.", deadlineDays: 21 },
+      { judul: "Presentasi Teks Argumentatif", detail: "Buat teks argumentatif tentang isu terkini dan presentasikan di depan kelas.", deadlineDays: 10 },
     ],
-    [
-      {
-        judul: "Konfigurasi Elektron Bohr dan Kuantum",
-        detail:
-          "Tuliskan konfigurasi elektron dan tentukan keempat bilangan kuantum elektron terakhir untuk 10 unsur.",
-        deadlineDays: 8,
-      },
-      {
-        judul: "Perbandingan Ikatan Ionik dan Kovalen",
-        detail:
-          "Buat tabel perbandingan sifat fisik senyawa ionik dan senyawa kovalen disertai contoh.",
-        deadlineDays: 22,
-      },
+    "Bahasa Inggris": [
+      { judul: "Essay Writing", detail: "Write a 500-word essay on the importance of environmental conservation.", deadlineDays: 14 },
+      { judul: "Role-Play Conversation", detail: "Practice a role-play conversation about ordering food at a restaurant and record it.", deadlineDays: 10 },
+      { judul: "Ringkasan Teks Berbahasa Inggris", detail: "Read an English article and write a summary in your own words.", deadlineDays: 7 },
     ],
-    [
-      {
-        judul: "Analisis Sistem Pencernaan Manusia",
-        detail:
-          "Buat infografis alur pencernaan makanan dan organ pencernaan serta enzim yang berperan.",
-        deadlineDays: 6,
-      },
-      {
-        judul: "Mekanisme Sistem Peredaran Darah",
-        detail:
-          "Gambarkan bagan sistem peredaran darah besar dan kecil pada manusia beserta fungsinya.",
-        deadlineDays: 18,
-      },
+    "PPKn": [
+      { judul: "Analisis Kasus Kewarganegaraan", detail: "Analisis sebuah kasus pelanggaran hak warga negara dan solusinya.", deadlineDays: 14 },
+      { judul: "Makalah Demokrasi", detail: "Buat makalah tentang pelaksanaan demokrasi di Indonesia dari masa ke masa.", deadlineDays: 21 },
+      { judul: "Debat Terbimbing", detail: "Buat argumen pro dan kontra untuk topik yang ditentukan dan persiapkan debat.", deadlineDays: 10 },
     ],
-    // Semester 3
-    [
-      {
-        judul: "Matriks dan Operasi Dasar",
-        detail:
-          "Lakukan operasi penjumlahan, perkalian, dan transpose pada matriks berordo 3x3.",
-        deadlineDays: 10,
-      },
-      {
-        judul: "Determinan dan Invers Matriks",
-        detail:
-          "Tentukan determinan dan invers dari matriks yang diberikan menggunakan metode adjoin.",
-        deadlineDays: 24,
-      },
+    "Sejarah Indonesia": [
+      { judul: "Makalah Sejarah", detail: "Buat makalah tentang salah satu peristiwa penting dalam sejarah Indonesia.", deadlineDays: 21 },
+      { judul: "Timeline Peristiwa", detail: "Buat timeline peristiwa pergerakan nasional dari tahun 1908 hingga 1945.", deadlineDays: 10 },
+      { judul: "Analisis Dokumen Primer", detail: "Analisis isi naskah proklamasi dan kaitannya dengan situasi politik saat itu.", deadlineDays: 14 },
     ],
-    [
-      {
-        judul: "Sifat-Sifat Gelombang Cahaya",
-        detail:
-          "Jelaskan fenomena difraksi, interferensi, dan polarisasi cahaya dalam kehidupan sehari-hari.",
-        deadlineDays: 5,
-      },
-      {
-        judul: "Hukum Ohm dan Rangkaian Listrik",
-        detail:
-          "Hitung kuat arus dan tegangan pada rangkaian listrik campuran menggunakan Hukum Ohm dan Kirchhoff.",
-        deadlineDays: 16,
-      },
+    "PAI": [
+      { judul: "Hafalan Surah Pendek", detail: "Setorkan hafalan surah-surah pendek juz 30 beserta terjemahannya.", deadlineDays: 14 },
+      { judul: "Esai Reflektif", detail: "Tulis esai tentang hikmah ibadah shalat dalam kehidupan sehari-hari.", deadlineDays: 21 },
+      { judul: "Makalah Fiqih Muamalah", detail: "Buat makalah tentang jual-beli, riba, dan akad syariah dalam ekonomi Islam.", deadlineDays: 28 },
     ],
-    [
-      {
-        judul: "Penentuan Entalpi Reaksi",
-        detail:
-          "Hitung perubahan entalpi reaksi netralisasi menggunakan kalorimeter sederhana.",
-        deadlineDays: 7,
-      },
-      {
-        judul: "Faktor-Faktor yang Mempengaruhi Laju Reaksi",
-        detail:
-          "Buat laporan praktikum pengaruh suhu dan konsentrasi terhadap laju reaksi kimia.",
-        deadlineDays: 20,
-      },
+    "Bahasa Arab": [
+      { judul: "Terjemahan Teks Arab", detail: "Terjemahkan teks bahasa Arab tentang kehidupan sehari-hari ke dalam bahasa Indonesia.", deadlineDays: 10 },
+      { judul: "Percakapan Lisan", detail: "Buat percakapan lisan bahasa Arab tentang perkenalan dan praktikkan dengan teman.", deadlineDays: 14 },
+      { judul: "Menulis Insya'", detail: "Tulis karangan sederhana berbahasa Arab tentang hobi atau cita-cita.", deadlineDays: 21 },
     ],
-    [
-      {
-        judul: "Hukum Mendel tentang Persilangan",
-        detail:
-          "Selesaikan soal persilangan monohibrid dan dihibrid beserta rasio fenotip dan genotipnya.",
-        deadlineDays: 8,
-      },
-      {
-        judul: "Bukti-Bukti Teori Evolusi",
-        detail:
-          "Buat esai analisis komparatif bukti homologi organ tubuh hewan sebagai bukti evolusi.",
-        deadlineDays: 22,
-      },
+    "Bahasa Sunda": [
+      { judul: "Membuat Pupuh", detail: "Buat satu bait pupuh sesuai dengan aturan guru lagu dan guru wilangan.", deadlineDays: 14 },
+      { judul: "Menerjemahkan Teks Sunda", detail: "Terjemahkan teks dongeng atau cerita rakyat Sunda ke dalam bahasa Indonesia.", deadlineDays: 10 },
+      { judul: "Proyek Budaya Lokal Sumedang", detail: "Buat laporan proyek tentang salah satu kesenian atau tradisi khas Sumedang.", deadlineDays: 28 },
     ],
-    // Semester 4 (Active)
-    [
-      {
-        judul: "Konsep Turunan Fungsi Aljabar",
-        detail:
-          "Selesaikan 10 soal turunan fungsi aljabar menggunakan aturan rantai dan turunan dasar.",
-        deadlineDays: 7,
-      },
-      {
-        judul: "Aplikasi Turunan dalam Masalah Maksimum/Minimum",
-        detail:
-          "Selesaikan masalah optimasi luas bidang tanah menggunakan konsep turunan pertama.",
-        deadlineDays: 21,
-      },
+    "Geografi": [
+      { judul: "Analisis Peta Topografi", detail: "Analisis peta topografi wilayah Sumedang dan identifikasi fitur geografisnya.", deadlineDays: 10 },
+      { judul: "Laporan Observasi Lingkungan", detail: "Lakukan observasi lingkungan sekitar dan buat laporan tentang kondisi geografisnya.", deadlineDays: 21 },
+      { judul: "Makalah Bencana Alam", detail: "Buat makalah tentang bencana alam di Indonesia dan upaya mitigasinya.", deadlineDays: 28 },
     ],
-    [
-      {
-        judul: "Efek Fotolistrik dan Teori Kuantum Planck",
-        detail:
-          "Jelaskan konsep efek fotolistrik dan hitung energi kinetik elektron yang lepas dari permukaan logam.",
-        deadlineDays: 5,
-      },
-      {
-        judul: "Klasifikasi Bintang dan Hukum Kepler",
-        detail:
-          "Tentukan periode revolusi planet menggunakan Hukum III Kepler pada sistem tata surya.",
-        deadlineDays: 18,
-      },
+    "Sosiologi": [
+      { judul: "Mini Riset Sosial", detail: "Lakukan mini riset tentang struktur sosial di lingkungan tempat tinggal.", deadlineDays: 21 },
+      { judul: "Analisis Kasus Konflik", detail: "Analisis sebuah kasus konflik sosial dan tawarkan solusi integrasi.", deadlineDays: 14 },
+      { judul: "Esai Perubahan Sosial", detail: "Tulis esai tentang dampak globalisasi terhadap perubahan sosial di masyarakat.", deadlineDays: 10 },
     ],
-    [
-      {
-        judul: "Tata Nama Senyawa Hidrokarbon Alkana Alkena Alkuna",
-        detail:
-          "Tuliskan nama IUPAC dan struktur molekul untuk 10 senyawa hidrokarbon.",
-        deadlineDays: 12,
-      },
-      {
-        judul: "Identifikasi Gugus Fungsi Senyawa Karbon",
-        detail:
-          "Lakukan analisis cara membedakan senyawa alkohol dan eter melalui reaksi kimia.",
-        deadlineDays: 28,
-      },
+    "Ekonomi": [
+      { judul: "Analisis Grafik Ekonomi", detail: "Analisis grafik permintaan dan penawaran untuk menentukan titik keseimbangan pasar.", deadlineDays: 7 },
+      { judul: "Studi Kasus Kebijakan Pemerintah", detail: "Analisis dampak kebijakan fiskal dan moneter terhadap perekonomian Indonesia.", deadlineDays: 21 },
+      { judul: "Laporan Survei Pasar", detail: "Lakukan survei pasar tentang kebutuhan konsumen dan buat laporan hasilnya.", deadlineDays: 28 },
     ],
-    [
-      {
-        judul: "Analisis Jaring-Jaring Makanan dan Aliran Energi",
-        detail:
-          "Gambarkan diagram jaring-jaring makanan pada ekosistem hutan dan hitung transfer energinya.",
-        deadlineDays: 8,
-      },
-      {
-        judul: "Dampak Pencemaran Lingkungan dan Solusinya",
-        detail:
-          "Buat artikel ulasan ilmiah mengenai dampak mikroplastik di ekosistem perairan lokal.",
-        deadlineDays: 22,
-      },
+    "Akuntansi": [
+      { judul: "Latihan Jurnal Transaksi", detail: "Catat 20 transaksi perusahaan jasa ke dalam jurnal umum.", deadlineDays: 10 },
+      { judul: "Menyusun Laporan Laba-Rugi", detail: "Susun laporan laba rugi berdasarkan data neraca saldo yang diberikan.", deadlineDays: 14 },
+      { judul: "Studi Kasus Perusahaan Jasa", detail: "Selesaikan siklus akuntansi lengkap untuk perusahaan jasa fiktif.", deadlineDays: 28 },
     ],
-  ];
+    "Sejarah Peminatan": [
+      { judul: "Makalah Komparatif Sejarah", detail: "Buat makalah perbandingan antara Revolusi Perancis dan Revolusi Indonesia.", deadlineDays: 28 },
+      { judul: "Peta Konsep Perang Dunia", detail: "Buat peta konsep yang menghubungkan penyebab, jalannya, dan dampak Perang Dunia II.", deadlineDays: 14 },
+      { judul: "Presentasi Tokoh Sejarah Dunia", detail: "Buat presentasi tentang salah satu tokoh sejarah dunia dan perannya.", deadlineDays: 10 },
+    ],
+  };
 
   const tugasData = [];
   for (let i = 0; i < createdMatkul.length; i++) {
     const mk = createdMatkul[i];
-    const templates = tugasTemplates[i % tugasTemplates.length];
+    const baseName = matkulList[i].namaBase;
+    const templates = tugasMap[baseName] || tugasMap["Bahasa Indonesia"];
     for (const tmpl of templates) {
       for (const s of siswaList) {
         const deadlineDate = new Date(
@@ -575,9 +620,7 @@ async function main() {
     }
   }
   await prisma.tugas.createMany({ data: tugasData });
-  console.log(
-    `${tugasData.length} Tugas berhasil dibuat.`
-  );
+  console.log(`${tugasData.length} Tugas berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
   // 9. KUIS
@@ -595,9 +638,7 @@ async function main() {
     });
     createdKuis.push(kuis);
   }
-  console.log(
-    `${createdKuis.length} Kuis berhasil dibuat.`
-  );
+  console.log(`${createdKuis.length} Kuis berhasil dibuat.`);
 
   // ══════════════════════════════════════════════
   // 10. SOAL & PILIHAN JAWABAN
@@ -622,9 +663,7 @@ async function main() {
       });
     }
   }
-  console.log(
-    "Soal & Pilihan Jawaban berhasil dibuat."
-  );
+  console.log("Soal & Pilihan Jawaban berhasil dibuat.");
 
   // ══════════════════════════════════════════════
   // 11. FORUM DISKUSI
@@ -789,7 +828,7 @@ async function main() {
     notifData.push({
       nis: siswaList[0].ni,
       judul: "Materi Baru",
-      pesan: `Materi "Pengantar ${mk.namaMataKuliah}" untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
+      pesan: `Materi untuk mata pelajaran ${mk.namaMataKuliah} telah tersedia. Silakan dipelajari!`,
       tipe: "materi",
       isRead: false,
       tipeRef: "materi",
@@ -818,13 +857,20 @@ async function main() {
   console.log("  - 2 Jurusan (MIPA, IPS)");
   console.log(`  - ${createdKelas.length} Kelas`);
   console.log("  - 3 Role (Admin, Siswa, Guru)");
-  console.log("  - 5 Guru");
+  console.log(`  - ${guruList.length} Guru`);
   console.log(`  - ${siswaList.length} Siswa (10 per kelas)`);
   console.log(`  - ${matkulList.length} Mata Pelajaran`);
+  console.log(`    - MIPA: ${mipaMatkulTemplates.length} mapel/kelas x 6 kelas = ${mipaMatkulTemplates.length * 6}`);
+  console.log(`    - IPS: ${ipsMatkulTemplates.length} mapel/kelas x 3 kelas = ${ipsMatkulTemplates.length * 3}`);
   console.log("");
-  console.log("Akun Login:");
-  console.log("  Guru  -> D001 / password123");
-  console.log(`  Siswa -> ${siswaList[0].ni} / password123`);
+  console.log("Akun Login (password: password123):");
+  console.log("  Guru:");
+  for (const g of guruList) {
+    console.log(`    ${g.ni} | ${g.nama}`);
+  }
+  console.log("  Siswa (contoh):");
+  console.log(`    ${siswaList[0].ni} | ${siswaList[0].nama}`);
+  console.log(`    ${siswaList[10].ni} | ${siswaList[10].nama}`);
   console.log("");
 }
 
