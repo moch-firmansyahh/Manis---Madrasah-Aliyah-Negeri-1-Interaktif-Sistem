@@ -8,7 +8,7 @@
   margin-bottom: 2rem;
 }
 @media (min-width: 768px) {
-  .dd-page-header { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  .dd-page-header { flex-direction: row; align-items: center; justify-content: space-between; }
 }
 
 .dd-title {
@@ -21,7 +21,10 @@
 
 .dd-subtitle { color: var(--slate-600); font-weight: 500; }
 
-.dd-action-row { display: flex; flex-wrap: wrap; gap: 0.625rem; justify-content: flex-end; }
+.dd-action-row { display: flex; flex-wrap: wrap; gap: 0.625rem; justify-content: flex-start; }
+@media (min-width: 768px) {
+  .dd-action-row { justify-content: flex-end; }
+}
 
 .dd-btn {
   display: flex;
@@ -43,6 +46,10 @@
 .dd-btn--dark  { background-color: #000d0d; }
 .dd-btn--amber { background-color: var(--color-primary); }
 
+@media (max-width: 767px) {
+  .dd-btn { width: 100%; justify-content: center; }
+}
+
 /* ─── Stats Grid ─── */
 .dd-stats-grid {
   display: grid;
@@ -50,6 +57,7 @@
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
+@media (min-width: 768px) { .dd-stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .dd-stats-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .dd-stat-card {
@@ -112,7 +120,7 @@
 .dd-table-link  { font-size: 0.875rem; font-weight: 700; color: var(--color-secondary); background: none; border: none; }
 .dd-table-link:hover { text-decoration: underline; }
 
-.dd-table-wrapper { overflow-x: auto; }
+.dd-table-wrapper { overflow-x: auto; width: 100%; }
 
 .dd-table { width: 100%; border-collapse: collapse; text-align: left; }
 .dd-table th {

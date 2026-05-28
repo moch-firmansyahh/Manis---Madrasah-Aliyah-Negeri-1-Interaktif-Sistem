@@ -4,6 +4,7 @@ import "./guruNilaiIndividu.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
@@ -56,6 +57,7 @@ export default function GuruNilaiIndividu({
   const [toast, setToast] = useState(null);
   const [nilaiModal, setNilaiModal] = useState(null);
   const [nilaiInput, setNilaiInput] = useState("");
+  const [selectedClass, setSelectedClass] = useState(null);
 
   useEffect(() => {
     if (idMataKuliah) {
@@ -81,8 +83,10 @@ export default function GuruNilaiIndividu({
   };
 
   useEffect(() => {
-    fetchMataKuliah();
-  }, []);
+    if (selectedClass) {
+      fetchMataKuliah();
+    }
+  }, [selectedClass]);
 
   useEffect(() => {
     if (selectedMk) {
@@ -100,7 +104,11 @@ export default function GuruNilaiIndividu({
     try {
       const res = await apiClient.get("/api/mata-kuliah");
       const data = res?.data || res;
-      if (Array.isArray(data)) setMataKuliahList(data);
+      const list = Array.isArray(data) ? data : [];
+      const filteredData = selectedClass 
+        ? list.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas)
+        : list;
+      setMataKuliahList(filteredData);
     } catch (e) {}
   };
 
@@ -300,6 +308,15 @@ export default function GuruNilaiIndividu({
           }
         />
 
+
+        {!selectedClass ? (
+          <ClassSelector 
+            onSelectClass={(cls) => setSelectedClass(cls)} 
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }} 
+          />
+        ) : (
         <div className="page-content">
           <div className="dni-header">
             <div>
@@ -309,10 +326,11 @@ export default function GuruNilaiIndividu({
                   : "Nilai Tugas Individu"}
               </h2>
               <p className="dni-subtitle">
-                {selectedTugas?.tipe === "K.uis"
-                  ? "Hasil dan nilai kuis siswa yang bersifat permanen"
-                  : "Pilih mata pelajaran dan tugas untuk memberi penilaian"}
+                Kelas: <strong>{selectedClass.namaKelas}</strong>
               </p>
+              <button onClick={() => setSelectedClass(null)} className="dni-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+                Ganti Kelas
+              </button>
             </div>
           </div>
 
@@ -649,6 +667,7 @@ export default function GuruNilaiIndividu({
             </div>
           )}
         </div>
+        )}
       </main>
     </div>
   );

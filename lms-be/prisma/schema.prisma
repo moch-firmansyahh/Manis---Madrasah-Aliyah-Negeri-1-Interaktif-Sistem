@@ -36,11 +36,33 @@ model User {
   likesForum LikeForum[]
 }
 
+// 1.a TABEL JURUSAN
+model Jurusan {
+  idJurusan   Int      @id @default(autoincrement())
+  namaJurusan String   @db.VarChar(100) // 'MIPA', 'IPS', dll.
+  kelas       Kelas[]
+}
+
+// 1.b TABEL KELAS
+model Kelas {
+  idKelas   Int      @id @default(autoincrement())
+  namaKelas String   @db.VarChar(100) // 'XII MIPA 1'
+  tingkat   Int      // 10, 11, 12
+  idJurusan Int
+  
+  jurusan   Jurusan  @relation(fields: [idJurusan], references: [idJurusan], onDelete: Cascade)
+  siswa     Siswa[]
+  mataKuliah MataKuliah[]
+}
+
 // 2. TABEL SISWA
 model Siswa {
   nis        String @id @db.VarChar(20) 
   nomorInduk String @unique @db.VarChar(20) 
+  idKelas    Int?   // Tambahan relasi ke Kelas
+  
   user       User   @relation(fields: [nomorInduk], references: [nomorInduk], onDelete: Cascade) 
+  kelas      Kelas? @relation(fields: [idKelas], references: [idKelas], onDelete: SetNull)
   
   tugas            Tugas[] 
   presensi         Presensi[] 
@@ -68,12 +90,15 @@ model MataKuliah {
   idMataKuliah   Int    @id @default(autoincrement())
   namaMataKuliah String @db.VarChar(150)
   nipGuru        String?  @db.VarChar(20)
+  idKelas        Int?     // Tambahan relasi ke Kelas
   semester       Int     @default(1)
   jadwal         String?  @db.VarChar(100)
   waktu          String?  @db.VarChar(100)
   sks            Int     @default(3)
 
   guru           Guru?    @relation(fields: [nipGuru], references: [nip])
+  kelas          Kelas?   @relation(fields: [idKelas], references: [idKelas], onDelete: Cascade)
+  
   nilai         Nilai[]
   kuis          Kuis[]
   forumDiskusi  ForumDiskusi[]

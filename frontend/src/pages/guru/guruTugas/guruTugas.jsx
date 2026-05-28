@@ -4,6 +4,7 @@ import "./guruTugas.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 import {
   extractTextFromFile,
@@ -49,6 +50,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
   const [deleteId, setDeleteId] = useState(null);
   const [deleteTipe, setDeleteTipe] = useState(null);
   const [filter, setFilter] = useState("Semua");
+  const [selectedClass, setSelectedClass] = useState(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -65,7 +67,8 @@ export default function GuruTugas({ onNavigate, onLogout }) {
     try {
       const res = await apiClient.get('/api/mata-kuliah');
       const data = Array.isArray(res) ? res : (res.data || []);
-      const mapped = data.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah }));
+      const filteredData = selectedClass ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas) : data;
+      const mapped = filteredData.map(mk => ({ id: mk.idMataKuliah, name: mk.namaMataKuliah }));
       setMatkulList(mapped);
       if (mapped.length > 0 && !form.matkulId) {
         setForm(prev => ({ ...prev, matkulId: mapped[0].id, matkulName: mapped[0].name }));
@@ -88,6 +91,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
     setQuizData(quizData.filter(item => item.id === soalToDelete.id));
   };
 
+  const nav = (page) => { if (onNavigate) onNavigate(page); };
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);

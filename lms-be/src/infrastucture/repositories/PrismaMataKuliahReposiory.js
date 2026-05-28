@@ -12,7 +12,8 @@ export class PrismaMataKuliahRepository {
       include: {
         guru: {
           include: { user: { select: { nama: true } } }
-        }
+        },
+        kelas: true
       },
       orderBy: { idMataKuliah: 'asc' }
     });
@@ -24,36 +25,27 @@ export class PrismaMataKuliahRepository {
       include: {
         guru: {
           include: { user: { select: { nama: true } } }
-        }
+        },
+        kelas: true
       },
       orderBy: { idMataKuliah: 'asc' }
     });
   }
 
   async findByNis(nis) {
-    // Mata kuliah yang diikuti siswa, melalui relasi Nilai, Presensi, Tugas, atau Kelompok
-    const courses = await prisma.mataKuliah.findMany({
-      where: {
-        OR: [
-          { nilai: { some: { nomorInduk: nis } } },
-          { presensi: { some: { nis: nis } } },
-          { tugas: { some: { nis: nis } } },
-          { kelompok: { some: { anggota: { some: { nis: nis } } } } }
-        ],
-      },
+    const siswa = await prisma.siswa.findUnique({ where: { nis } });
+    if (!siswa || !siswa.idKelas) return [];
+    
+    return await prisma.mataKuliah.findMany({
+      where: { idKelas: siswa.idKelas },
       include: {
         guru: {
           include: { user: { select: { nama: true } } }
-        }
+        },
+        kelas: true
       },
       orderBy: { idMataKuliah: "asc" },
     });
-
-    if (courses.length === 0) return [];
-
-    // Filter hanya semester terakhir (semester aktif)
-    const maxSemester = Math.max(...courses.map(c => c.semester));
-    return courses.filter(c => c.semester === maxSemester);
   }
 
   async findById(id) {

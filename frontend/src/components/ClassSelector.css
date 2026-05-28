@@ -1,0 +1,126 @@
+.class-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.class-selector-modal {
+  background-color: var(--white);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.class-selector-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.class-selector-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.class-selector-header p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.class-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.class-card:hover {
+  background-color: #e0e7ff;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.class-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.class-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.25rem;
+}
+
+.class-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.class-card:hover .class-badge {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
+}
+
+.class-selector-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(79, 70, 229, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -4,6 +4,7 @@ import "./guruKelompok.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 
 const API_BASE = API_URL;
@@ -58,6 +59,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [selectedMkId, setSelectedMkId] = useState("");
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -95,20 +97,27 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
   };
 
   useEffect(() => {
-    fetchGroups();
-    fetchAllStudents();
-    fetchCourses();
-  }, []);
+    if (selectedClass) {
+      fetchGroups();
+      fetchAllStudents();
+      fetchCourses();
+    }
+  }, [selectedClass]);
 
   const fetchCourses = async () => {
     try {
       const res = await apiClient.get('/api/mata-kuliah');
       const data = Array.isArray(res) ? res : (res.data || []);
-      setMataKuliahList(data);
+      const filteredData = selectedClass
+        ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas)
+        : data;
+      setMataKuliahList(filteredData);
     } catch (error) {
       console.error("Gagal memuat mata pelajaran:", error);
     }
   };
+
+  const visibleGroups = groups.filter(g => mataKuliahList.some(mk => mk.idMataKuliah === g.idMataKuliah));
 
   const openNilai = (group) => {
     setGradeInputs({ ...group.nilai });
@@ -549,13 +558,24 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
           }
         />
 
+        {!selectedClass ? (
+          <ClassSelector 
+            onSelectClass={(cls) => setSelectedClass(cls)} 
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }} 
+          />
+        ) : (
         <div className="page-content">
           <div className="dk-topbar">
             <div>
               <h2 className="dk-page-title">Kelompok & Nilai</h2>
               <p className="dk-page-sub">
-                Kelola anggota kelompok, pantau progress, dan berikan penilaian.
+                Kelas: <strong>{selectedClass.namaKelas}</strong>
               </p>
+              <button onClick={() => setSelectedClass(null)} className="dk-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+                Ganti Kelas
+              </button>
             </div>
             <button
               className="dk-btn-primary"
@@ -571,25 +591,25 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
             {[
               {
                 label: "Total Kelompok",
-                value: groups.length,
+                value: visibleGroups.length,
                 icon: "groups",
                 color: "var(--color-secondary)",
               },
               {
                 label: "On-Track",
-                value: groups.filter((g) => g.status === "On-Track").length,
+                value: visibleGroups.filter((g) => g.status === "On-Track").length,
                 icon: "trending_up",
                 color: "#2f9696",
               },
               {
                 label: "Terlambat",
-                value: groups.filter((g) => g.status === "Behind").length,
+                value: visibleGroups.filter((g) => g.status === "Behind").length,
                 icon: "warning",
                 color: "#dc2626",
               },
               {
                 label: "Selesai",
-                value: groups.filter((g) => g.status === "Completed").length,
+                value: visibleGroups.filter((g) => g.status === "Completed").length,
                 icon: "task_alt",
                 color: "#059669",
               },
@@ -613,7 +633,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
 
           {/* Groups */}
           <div className="dk-groups-grid">
-            {groups.map((group) => {
+            {visibleGroups.map((group) => {
               const graded = Object.values(group.nilai).filter(
                 (v) => v !== "",
               ).length;
@@ -793,6 +813,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
             })}
           </div>
         </div>
+        )}
       </main>
     </div>
   );

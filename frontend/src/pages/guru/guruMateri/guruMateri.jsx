@@ -48,6 +48,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [materi, setMateri] = useState(INITIAL_MATERI);
   const [matkulList, setMatkulList] = useState([]);
+  const [selectedClass, setSelectedClass] = useState(null);
   const [toast, setToast] = useState(null);
   const [view, setView] = useState("list"); // "list" | "create" | "edit"
   const [editId, setEditId] = useState(null);
@@ -77,6 +78,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
     canDownload: true,
   });
 
+  const nav = (page) => { if (onNavigate) onNavigate(page); };
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);

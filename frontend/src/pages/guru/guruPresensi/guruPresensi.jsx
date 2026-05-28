@@ -4,6 +4,7 @@ import "./guruPresensi.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
 import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
@@ -59,7 +60,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   const [tempDate, setTempDate] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [page, setPage] = useState(1);
+  const [selectedClass, setSelectedClass] = useState(null);
 
+  const nav = (page) => { if (onNavigate) onNavigate(page); };
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -141,7 +144,8 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
       try {
         const res = await apiClient.get("/api/mata-kuliah");
         const data = Array.isArray(res) ? res : res.data || [];
-        const formatted = data.map((c) => ({
+        const filteredData = selectedClass ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas) : data;
+        const formatted = filteredData.map((c) => ({
           id: c.idMataKuliah,
           name: c.namaMataKuliah,
           room: c.ruang || "Ruang Kelas",

@@ -4,6 +4,7 @@ import "../../siswa/forumDiskusi/forumDiskusi.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
 import { apiClient } from "../../../utils/apiClient";
 import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
@@ -78,22 +79,28 @@ export default function GuruForum({ onNavigate, onLogout }) {
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [selectedMatkul, setSelectedMatkul] = useState(null);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [selectedClass, setSelectedClass] = useState(null);
 
   // Fetch mata kuliah list
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await apiClient.get("/api/mata-kuliah");
-        const data = Array.isArray(res) ? res : res.data || [];
-        setMataKuliahList(data);
-      } catch (error) {
-        console.error("Failed to load courses", error);
-      } finally {
-        setLoadingCourses(false);
-      }
-    };
-    fetchCourses();
-  }, []);
+    if (selectedClass) {
+      const fetchCourses = async () => {
+        try {
+          const res = await apiClient.get("/api/mata-kuliah");
+          const data = Array.isArray(res) ? res : res.data || [];
+          const filteredData = selectedClass 
+            ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas)
+            : data;
+          setMataKuliahList(filteredData);
+        } catch (error) {
+          console.error("Failed to load courses", error);
+        } finally {
+          setLoadingCourses(false);
+        }
+      };
+      fetchCourses();
+    }
+  }, [selectedClass]);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
@@ -306,6 +313,14 @@ export default function GuruForum({ onNavigate, onLogout }) {
           onNavigate={onNavigate}
         />
 
+        {!selectedClass ? (
+          <ClassSelector 
+            onSelectClass={(cls) => setSelectedClass(cls)} 
+            onCancel={() => {
+              if (onNavigate) onNavigate("guruDashboard");
+            }} 
+          />
+        ) : (
         <div className="page-content">
           {/* COURSE LIST VIEW */}
           {view === "courses" && (
@@ -317,9 +332,11 @@ export default function GuruForum({ onNavigate, onLogout }) {
                   </nav>
                   <h2 className="fd-page-title">Forum Diskusi</h2>
                   <p className="fd-page-sub">
-                    Pilih mata pelajaran untuk melihat dan mengelola forum
-                    diskusi kelas.
+                    Kelas: <strong>{selectedClass.namaKelas}</strong>
                   </p>
+                  <button onClick={() => setSelectedClass(null)} className="fd-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+                    Ganti Kelas
+                  </button>
                 </div>
               </div>
 
@@ -866,6 +883,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
             </>
           )}
         </div>
+        )}
       </main>
     </div>
   );
