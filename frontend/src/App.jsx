@@ -160,7 +160,7 @@ function App() {
         else if (pageName === "guruProfile") page = <GuruProfile {...sharedProps} />;
         else if (pageName === "guruMateri") page = <GuruMateri {...sharedProps} />;
         else if (pageName === "guruDashboard") page = <DashboardGuru {...sharedProps} />;
-        if (page) return <GuruClassProvider>{page}</GuruClassProvider>;
+        if (page) return page;
       }
       if (pageName === "faq") return (
         <div>
@@ -195,9 +195,11 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <div className="page-fade-in" key={pageKey}>
-        {renderPage()}
-      </div>
+      <GuruClassProvider>
+        <div className="page-fade-in" key={pageKey}>
+          {renderPage()}
+        </div>
+      </GuruClassProvider>
     </Suspense>
   );
 }

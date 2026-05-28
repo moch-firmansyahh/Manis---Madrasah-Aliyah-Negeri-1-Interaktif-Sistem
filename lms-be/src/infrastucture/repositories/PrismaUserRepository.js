@@ -92,7 +92,12 @@ export class PrismaUserRepository {
         }
       }
     });
-    return siswa ? siswa.user : null;
+    if (siswa && siswa.user) {
+      const { user, ...siswaData } = siswa;
+      siswa.user.siswa = siswaData;
+      return siswa.user;
+    }
+    return null;
   }
 
   async findByNip(nip) {
@@ -104,7 +109,12 @@ export class PrismaUserRepository {
         }
       }
     });
-    return guru ? guru.user : null;
+    if (guru && guru.user) {
+      const { user, ...guruData } = guru;
+      guru.user.guru = guruData;
+      return guru.user;
+    }
+    return null;
   }
 
   async update(nomorInduk, data) {

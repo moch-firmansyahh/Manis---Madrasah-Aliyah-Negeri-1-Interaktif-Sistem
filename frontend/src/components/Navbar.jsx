@@ -210,20 +210,15 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
         </div>}
       </div>
       <div className="navbar__right">
-        <button className="navbar__bell" onClick={() => setNotifOpen(!notifOpen)} style={{ position: "relative" }}>
+        <button className="navbar__bell" onClick={() => setNotifOpen(!notifOpen)}>
           <span className="material-symbols-outlined">notifications</span>
           {unreadCount > 0 && (
-            <span className="navbar__bell-dot" style={{
-              position: 'absolute', top: '0', right: '0',
-              minWidth: '16px', height: '16px', borderRadius: '8px',
-              background: '#ef4444', color: 'white', fontSize: '10px',
-              fontWeight: 700, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', padding: '0 4px',
-              transform: 'translate(25%, -25%)'
-            }}>{unreadCount > 99 ? '99+' : unreadCount}</span>
+            <span className="navbar__bell-badge">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
           )}
         </button>
-
+ 
         {notifOpen && (
           <div className="notif-dropdown">
             <div className="notif-header">
@@ -251,7 +246,7 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
               {notifications.length > 0 ? notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`notif-item notif-item--${notif.type} ${notif.read ? "notif-read" : "notif-unread"}`}
+                  className={`notif-item ${notif.read ? "notif-read" : "notif-unread"}`}
                   onClick={async () => {
                     if (!notif.read && isSiswa) {
                       try {
@@ -288,10 +283,38 @@ export default function Navbar({ role, onOpenSidebar, onNavigate }) {
                     </span>
                   </div>
                   <div className="notif-content">
-                    <p className="notif-title">{notif.title}</p>
+                    <div className="notif-title-row">
+                      <p className="notif-title">{notif.title}</p>
+                      {notif.type && (
+                        <span className={`notif-type-tag notif-type-tag--${notif.type}`}>
+                          {notif.type}
+                        </span>
+                      )}
+                    </div>
                     <p className="notif-desc">{notif.desc}</p>
                     <p className="notif-time">{notif.time}</p>
                   </div>
+                  {!notif.read && isSiswa && (
+                    <button
+                      className="notif-item-read-btn"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          await apiClient.put(`/api/notifikasi/${notif.id}/read`);
+                          setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+                          setUnreadCount(prev => Math.max(0, prev - 1));
+                        } catch (err) {
+                          console.error("Gagal membaca:", err);
+                        }
+                      }}
+                      title="Tandai telah dibaca"
+                    >
+                      <span className="material-symbols-outlined">check</span>
+                    </button>
+                  )}
+                  {!notif.read && (
+                    <span className="notif-unread-dot"></span>
+                  )}
                 </div>
               )) : (
                 <div style={{ padding: "1.5rem", textAlign: "center", color: "var(--slate-400)" }}>
