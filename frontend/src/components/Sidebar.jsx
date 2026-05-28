@@ -53,7 +53,7 @@ export default function Sidebar({ onNavigate, activePage, presensiRoute, onLogou
           </button>
           <button className={cls("daftarMataKuliah")} onClick={() => nav("daftarMataKuliah")}>
             <span className="material-symbols-outlined">menu_book</span>
-            Mata Kuliah
+            Mata Pelajaran
           </button>
           <button className={cls("daftarTugas")} onClick={() => nav("daftarTugas")}>
             <span className="material-symbols-outlined">assignment</span>

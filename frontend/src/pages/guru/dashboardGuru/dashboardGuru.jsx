@@ -156,7 +156,6 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
           {/* Stats Grid - 3 Card Utama */}
           <div
             className="dd-stats-grid"
-            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
           >
             <div className="dd-stat-card">
               <div className="dd-stat-top">
