@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../../components/shared.css";
 import "./mataKuliah.css";
-import "./videoMataKuliah.css";
+
 import Sidebar from "../../../components/Sidebar";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";

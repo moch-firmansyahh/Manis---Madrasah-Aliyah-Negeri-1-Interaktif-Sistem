@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./shared.css";
-import "../pages/siswa/dashboard/notifikasi.css";
 import { apiClient, API_URL } from "../utils/apiClient";
 
 const API_BASE = API_URL;

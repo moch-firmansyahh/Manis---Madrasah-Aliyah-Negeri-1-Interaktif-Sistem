@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../../components/shared.css";
 import "./dashboard.css";
-import "./notifikasi.css";
+
 import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient, API_URL } from "../../../utils/apiClient";
