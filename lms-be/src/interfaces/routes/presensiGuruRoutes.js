@@ -40,14 +40,27 @@ router.post('/matkul/:idMataKuliah/generate', async (req, res) => {
       // Create date and set to noon UTC to prevent timezone shifts when saving
       targetDate = new Date(`${tanggal}T12:00:00.000Z`);
     } else {
-      targetDate.setUTCHours(12, 0, 0, 0);
+      // Shift to WIB (+7 hours) to determine the correct calendar day local to MAN 1 Sumedang, then set UTC to 12:00
+      const localWIB = new Date(Date.now() + 7 * 60 * 60 * 1000);
+      targetDate = new Date(Date.UTC(localWIB.getUTCFullYear(), localWIB.getUTCMonth(), localWIB.getUTCDate(), 12, 0, 0, 0));
     }
     
-    // Ambil SEMUA siswa yang ada di sistem
-    const siswaList = await prisma.siswa.findMany();
+    // Ambil detail mata kuliah untuk mendapatkan idKelas
+    const course = await prisma.mataKuliah.findUnique({
+      where: { idMataKuliah: parseInt(idMataKuliah) }
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Mata kuliah tidak ditemukan' });
+    }
+
+    // Ambil hanya siswa yang terdaftar di kelas mata kuliah ini
+    const siswaList = await prisma.siswa.findMany({
+      where: { idKelas: course.idKelas }
+    });
 
     if (siswaList.length === 0) {
-      return res.status(400).json({ error: 'Tidak ada siswa terdaftar' });
+      return res.status(400).json({ error: 'Tidak ada siswa terdaftar di kelas mata pelajaran ini' });
     }
 
     // Generate token QR unik

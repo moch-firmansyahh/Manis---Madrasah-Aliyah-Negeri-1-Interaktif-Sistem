@@ -27,7 +27,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   // scan states: idle | scanning | success | error
   const [scanState, setScanState]   = useState("idle");
-  const [selectedClass, setSelectedClass] = useState(0); 
+  const [selectedClassId, setSelectedClassId] = useState(null); 
+  const [classFilter, setClassFilter] = useState("hariIni"); // "hariIni" | "semua"
   const [toast, setToast]           = useState(null);   
   const [scanCode, setScanCode]     = useState("");
   const [upcoming, setUpcoming]     = useState([]);
@@ -38,6 +39,13 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
   const html5QrCodeRef              = useRef(null);
   const scannerContainerId          = "pmh-qr-reader";
 
+  const selectedCourse = upcoming.find(c => c.id === selectedClassId) || null;
+
+  const getHariIniIndo = () => {
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    return days[new Date().getDay()];
+  };
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -47,9 +55,29 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         const formatted = list.map((c) => ({
           id: c.idMataKuliah,
           code: `MK${c.idMataKuliah.toString().padStart(3, '0')}`,
-          name: c.namaMataKuliah
+          name: c.namaMataKuliah,
+          jadwal: c.jadwal,
+          waktu: c.waktu
         }));
         setUpcoming(formatted);
+
+        // Filter for classes scheduled for today
+        const todayStr = getHariIniIndo();
+        const todayClasses = formatted.filter(c => {
+          if (!c.jadwal) return false;
+          const days = c.jadwal.split(',').map(d => d.trim());
+          return days.includes(todayStr);
+        });
+
+        if (todayClasses.length > 0) {
+          setClassFilter("hariIni");
+          setSelectedClassId(todayClasses[0].id);
+        } else {
+          setClassFilter("semua");
+          if (formatted.length > 0) {
+            setSelectedClassId(formatted[0].id);
+          }
+        }
       } catch (error) {
         console.error("Failed to load courses", error);
         setUpcoming([]);
@@ -64,10 +92,10 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
   useEffect(() => () => clearTimeout(scanTimeoutRef.current), []);
 
   const fetchHistory = useCallback(async () => {
-    if (upcoming.length > 0 && upcoming[selectedClass]) {
+    if (selectedCourse) {
       try {
         // Add cache-busting to get fresh data
-        const res = await apiClient.get(`/api/presensi/siswa/${upcoming[selectedClass].id}?_t=${Date.now()}`);
+        const res = await apiClient.get(`/api/presensi/siswa/${selectedCourse.id}?_t=${Date.now()}`);
         console.log("DEBUG - fetchHistory response:", res);
         const allData = res.data || res || [];
         const myRecords = Array.isArray(allData) ? allData : [];
@@ -113,8 +141,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
               date: localDate
                 ? localDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })
                 : "-",
-              code: upcoming[selectedClass].code,
-              name: upcoming[selectedClass].name,
+              code: selectedCourse.code,
+              name: selectedCourse.name,
               status: displayStatus,
               time: localWaktu ? localWaktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-",
               rawStatus: h.statusKehadiran,
@@ -127,8 +155,10 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         console.error("DEBUG - fetchHistory error:", error);
         setHistory([]);
       }
+    } else {
+      setHistory([]);
     }
-  }, [selectedClass, upcoming]);
+  }, [selectedCourse]);
 
   useEffect(() => {
     fetchHistory();
@@ -157,13 +187,13 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     await stopCamera();
     setScanState("scanning");
     try {
-      if (!upcoming[selectedClass]) throw new Error("Pilih kelas terlebih dahulu");
+      if (!selectedCourse) throw new Error("Pilih kelas terlebih dahulu");
       await apiClient.post("/api/presensi/scan", {
-        idMataKuliah: upcoming[selectedClass].id,
+        idMataKuliah: selectedCourse.id,
         token: decodedText
       });
       setScanState("success");
-      showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
+      showToast("success", `Absen berhasil! ${selectedCourse.name}`);
       // Refresh riwayat untuk update waktu presensi
       await fetchHistory();
     } catch (error) {
@@ -171,10 +201,10 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
       showToast("error", error.message || "Gagal melakukan presensi");
       setTimeout(() => setScanState("idle"), 2000);
     }
-  }, [upcoming, selectedClass, stopCamera, fetchHistory]);
+  }, [selectedCourse, stopCamera, fetchHistory]);
 
   const startScan = async () => {
-    if (!upcoming[selectedClass]) {
+    if (!selectedCourse) {
       showToast("error", "Pilih kelas terlebih dahulu");
       return;
     }
@@ -206,16 +236,16 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
 
   const handleManualSubmit = async (e) => {
     e.preventDefault();
-    if (!scanCode.trim() || !upcoming[selectedClass]) return;
+    if (!scanCode.trim() || !selectedCourse) return;
     
     setScanState("scanning");
     try {
       await apiClient.post("/api/presensi/scan", {
-        idMataKuliah: upcoming[selectedClass].id,
+        idMataKuliah: selectedCourse.id,
         token: scanCode.trim()
       });
       setScanState("success");
-      showToast("success", `Absen berhasil! ${upcoming[selectedClass].name}`);
+      showToast("success", `Absen berhasil! ${selectedCourse.name}`);
       // Refresh riwayat untuk update waktu presensi
       await fetchHistory();
     } catch (error) {
@@ -231,6 +261,36 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     await stopCamera();
     setScanState("idle");
   };
+
+  const handleFilterChange = (filter) => {
+    setClassFilter(filter);
+    const todayStr = getHariIniIndo();
+    const targetClasses = filter === "semua" 
+      ? upcoming 
+      : upcoming.filter(c => c.jadwal && c.jadwal.split(',').map(d => d.trim()).includes(todayStr));
+    
+    if (targetClasses.length > 0) {
+      const isStillAvailable = targetClasses.some(c => c.id === selectedClassId);
+      if (!isStillAvailable) {
+        setSelectedClassId(targetClasses[0].id);
+        resetScan();
+      }
+    }
+  };
+
+  const getFilteredClasses = () => {
+    if (classFilter === "semua") {
+      return upcoming;
+    }
+    const todayStr = getHariIniIndo();
+    return upcoming.filter(c => {
+      if (!c.jadwal) return false;
+      const days = c.jadwal.split(',').map(d => d.trim());
+      return days.includes(todayStr);
+    });
+  };
+
+  const filteredClasses = getFilteredClasses();
 
   // Cleanup camera on unmount
   useEffect(() => {
@@ -272,24 +332,54 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
             <div className="pmh-scanner-col">
               {/* Class selector */}
               <div className="pmh-class-selector">
-                <p className="pmh-class-selector-label">Pilih Kelas yang Sedang Berlangsung</p>
+                <p className="pmh-class-selector-label">Pilih Kelas</p>
+                
+                <div className="pmh-class-filter-container">
+                  <button
+                    type="button"
+                    className={`pmh-class-filter-btn ${classFilter === "hariIni" ? "pmh-class-filter-btn--active" : ""}`}
+                    onClick={() => handleFilterChange("hariIni")}
+                  >
+                    Jadwal Hari Ini
+                  </button>
+                  <button
+                    type="button"
+                    className={`pmh-class-filter-btn ${classFilter === "semua" ? "pmh-class-filter-btn--active" : ""}`}
+                    onClick={() => handleFilterChange("semua")}
+                  >
+                    Semua Jadwal
+                  </button>
+                </div>
+
                 <div className="pmh-class-tabs">
                   {loading ? (
                     <>
                       <div className="pmh-class-tab skeleton-shimmer" style={{ height: "55px", width: "100%", border: "none", marginBottom: "8px" }}></div>
                       <div className="pmh-class-tab skeleton-shimmer" style={{ height: "55px", width: "100%", border: "none", marginBottom: "8px" }}></div>
                     </>
-                  ) : upcoming.length > 0 ? upcoming.map((c, i) => (
+                  ) : filteredClasses.length > 0 ? filteredClasses.map((c) => (
                     <button
                       key={c.id}
-                      className={`pmh-class-tab ${selectedClass === i ? "pmh-class-tab--active" : ""}`}
-                      onClick={() => { setSelectedClass(i); resetScan(); }}
+                      className={`pmh-class-tab ${selectedClassId === c.id ? "pmh-class-tab--active" : ""}`}
+                      onClick={() => { setSelectedClassId(c.id); resetScan(); }}
                     >
-                      <span className="pmh-class-tab-code">{c.code}</span>
-                      <span className="pmh-class-tab-name">{c.name}</span>
+                      <div className="pmh-class-tab-main">
+                        <span className="pmh-class-tab-code">{c.code}</span>
+                        <span className="pmh-class-tab-name">{c.name}</span>
+                      </div>
+                      {(c.jadwal || c.waktu) && (
+                        <div className="pmh-class-tab-schedule">
+                          <span className="material-symbols-outlined pmh-schedule-icon">schedule</span>
+                          <span>{c.jadwal} · {c.waktu}</span>
+                        </div>
+                      )}
                     </button>
                   )) : (
-                    <p style={{ color: "var(--slate-500)" }}>Belum terdaftar di mata pelajaran manapun</p>
+                    <p style={{ color: "var(--slate-500)", fontSize: "0.875rem", padding: "0.5rem 0" }}>
+                      {classFilter === "hariIni" 
+                        ? "Tidak ada jadwal mata pelajaran hari ini." 
+                        : "Belum terdaftar di mata pelajaran manapun."}
+                    </p>
                   )}
                 </div>
               </div>
@@ -341,7 +431,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
                       </div>
                       <div className="pmh-success-info">
                         <p className="pmh-success-title">Absen Berhasil!</p>
-                        <p className="pmh-success-sub">{upcoming[selectedClass]?.name}</p>
+                        <p className="pmh-success-sub">{selectedCourse?.name}</p>
                         <p className="pmh-success-time">
                           {new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
                         </p>
@@ -395,11 +485,11 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
                     LIVE
                   </span>
                 </div>
-                <h3 className="pmh-session-name">{upcoming[selectedClass]?.name || "Memuat..."}</h3>
+                <h3 className="pmh-session-name">{selectedCourse?.name || "Memuat..."}</h3>
                 <div className="pmh-session-details">
                   <div className="pmh-detail-row">
                     <span className="material-symbols-outlined">tag</span>
-                    <span>Kode: {upcoming[selectedClass]?.code || "-"}</span>
+                    <span>Kode: {selectedCourse?.code || "-"}</span>
                   </div>
                   <div className="pmh-detail-row">
                     <span className="material-symbols-outlined">event_available</span>
