@@ -75,7 +75,10 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
 
   const fetchGroups = async () => {
     try {
-      const res = await apiClient.get('/api/kelompok');
+      const params = new URLSearchParams();
+      if (selectedClass) params.append('idKelas', selectedClass.idKelas);
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+      const res = await apiClient.get(`/api/kelompok${queryStr}`);
       const data = res?.data || res;
       if (Array.isArray(data)) {
         setGroups(data.map(normalizeGroup));
@@ -117,7 +120,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
     }
   };
 
-  const visibleGroups = groups.filter(g => mataKuliahList.some(mk => mk.idMataKuliah === g.idMataKuliah));
+  const visibleGroups = groups;
 
   const openNilai = (group) => {
     setGradeInputs({ ...group.nilai });

@@ -1,6 +1,6 @@
 import { prisma } from "../../prismaClient.js";
 export class PrismaModulAjarRepository {
-async findAllByGuru(filterMatkul, filterTipe, nipGuru) {
+async findAllByGuru(filterMatkul, filterTipe, nipGuru, idKelas) {
     const where = {};
     if (filterMatkul && filterMatkul !== "Semua") {
         where.idMataKuliah = parseInt(filterMatkul);
@@ -8,8 +8,11 @@ async findAllByGuru(filterMatkul, filterTipe, nipGuru) {
     if (filterTipe && filterTipe !== "Semua") {
         where.tipe_modul = filterTipe;
     }
-    if (nipGuru) {
-        where.mataKuliah = { nipGuru: nipGuru };
+    const mataKuliahWhere = {};
+    if (nipGuru) mataKuliahWhere.nipGuru = nipGuru;
+    if (idKelas) mataKuliahWhere.idKelas = parseInt(idKelas);
+    if (Object.keys(mataKuliahWhere).length > 0) {
+        where.mataKuliah = mataKuliahWhere;
     }
 
     return await prisma.modulAjar.findMany({

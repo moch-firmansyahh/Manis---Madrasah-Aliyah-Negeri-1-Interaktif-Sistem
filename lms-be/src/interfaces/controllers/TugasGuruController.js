@@ -8,6 +8,9 @@ async getAllTugas(req, res) {
         let matkulIds = [];
         if (req.query.idMataKuliah) {
             matkulIds = [parseInt(req.query.idMataKuliah)];
+        } else if (req.query.idKelas && req.user?.guru?.nip) {
+            const matkuls = await this.tugasGuruUseCase.mataKuliahRepository.findByGuru(req.user.guru.nip);
+            matkulIds = matkuls.filter(m => m.kelas?.idKelas === parseInt(req.query.idKelas)).map(m => m.idMataKuliah);
         } else if (req.user && req.user.role === 'GURU' && req.user.guru) {
              const matkuls = await this.tugasGuruUseCase.mataKuliahRepository.findByGuru(req.user.guru.nip);
              matkulIds = matkuls.map(m => m.idMataKuliah);

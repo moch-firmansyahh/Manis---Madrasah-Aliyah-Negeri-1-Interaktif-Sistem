@@ -98,7 +98,10 @@ export default function GuruTugas({ onNavigate, onLogout }) {
 
   const fetchTasks = async () => {
     try {
-      const res = await apiClient.get('/api/guru/tugas');
+      const params = new URLSearchParams();
+      if (selectedClass) params.append('idKelas', selectedClass.idKelas);
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+      const res = await apiClient.get(`/api/guru/tugas${queryStr}`);
       const raw = res.data || res;
       if (Array.isArray(raw)) {
         const formatted = raw.map(t => {

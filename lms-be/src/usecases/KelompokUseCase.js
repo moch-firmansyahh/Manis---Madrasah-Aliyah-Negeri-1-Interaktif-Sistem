@@ -56,8 +56,8 @@ async saveGrades(idKelompok, grades) {
     return await this.kelompokRepository.updateGrades(idKelompok, grades);
 }
 
-async getAllKelompok(nipGuru) {
-    const kelompokData = await this.kelompokRepository.findAll(nipGuru);
+async getAllKelompok(nipGuru, idKelas) {
+    const kelompokData = await this.kelompokRepository.findAll(nipGuru, idKelas);
     
     return kelompokData.map(k => {
         const membersArr = [];

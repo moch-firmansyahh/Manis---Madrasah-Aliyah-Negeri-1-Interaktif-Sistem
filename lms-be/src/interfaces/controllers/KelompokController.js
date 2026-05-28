@@ -16,7 +16,8 @@ async getKelompok(req, res) {
 async getAllKelompok(req, res) {
     try {
         const nipGuru = req.user?.guru?.nip;
-        const data = await this.kelompokUseCase.getAllKelompok(nipGuru);
+        const idKelas = req.query.idKelas ? parseInt(req.query.idKelas) : null;
+        const data = await this.kelompokUseCase.getAllKelompok(nipGuru, idKelas);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });

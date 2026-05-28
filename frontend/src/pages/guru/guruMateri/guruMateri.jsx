@@ -88,6 +88,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
   const fetchMateri = async (mkFilter = filterMatkul, tpFilter = filterTipe) => {
     try {
       const params = new URLSearchParams();
+      if (selectedClass) params.append('idKelas', selectedClass.idKelas);
       if (mkFilter && mkFilter !== "Semua") params.append('matkul', mkFilter);
       if (tpFilter && tpFilter !== "Semua") params.append('tipe', tpFilter);
       const query = params.toString() ? `?${params.toString()}` : '';

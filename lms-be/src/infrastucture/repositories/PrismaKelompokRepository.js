@@ -1,9 +1,12 @@
 import { prisma } from "../../prismaClient.js";
 
 export class PrismaKelompokRepository {
-  async findAll(nipGuru) {
-      const whereClause = nipGuru ? {
-          mataKuliah: { nipGuru: nipGuru }
+  async findAll(nipGuru, idKelas) {
+      const mataKuliahFilter = {};
+      if (nipGuru) mataKuliahFilter.nipGuru = nipGuru;
+      if (idKelas) mataKuliahFilter.idKelas = idKelas;
+      const whereClause = Object.keys(mataKuliahFilter).length > 0 ? {
+          mataKuliah: mataKuliahFilter
       } : {};
       return await prisma.kelompok.findMany({
           where: whereClause,
