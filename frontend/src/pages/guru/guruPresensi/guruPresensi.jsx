@@ -51,7 +51,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     time: "-",
     jadwal: "",
   });
-  const [sessionActive, setSessionActive] = useState(true);
+  const [sessionActive, setSessionActive] = useState(false);
   const [showMatkul, setShowMatkul] = useState(false);
   const [showJadwal, setShowJadwal] = useState(false);
   const [selectedDays, setSelectedDays] = useState([]);
