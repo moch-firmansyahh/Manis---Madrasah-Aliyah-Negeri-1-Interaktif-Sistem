@@ -3,17 +3,16 @@ export class DashboardGuruUseCase {
     this.guruRepository = guruRepository;
   }
 
-  async getDashboardData(nomorInduk) {
+  async getDashboardData(nomorInduk, idKelas = null) {
     const guru = await this.guruRepository.getGuruInfo(nomorInduk);
     if (!guru) throw new Error("Data guru tidak ditemukan");
 
     const nip = guru.nip;
 
-    // Ambil semua data secara paralel agar respons API lebih cepat
     const [materiList, totalSiswa, submissionStats] = await Promise.all([
-      this.guruRepository.getMateriList(nip),
-      this.guruRepository.getTotalSiswa(nip),
-      this.guruRepository.getSubmissionStats(nip)
+      this.guruRepository.getMateriList(nip, idKelas),
+      this.guruRepository.getTotalSiswa(nip, idKelas),
+      this.guruRepository.getSubmissionStats(nip, idKelas)
     ]);
 
     // Format daftar materi

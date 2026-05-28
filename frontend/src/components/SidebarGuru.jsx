@@ -1,5 +1,6 @@
 import logoImg from "../assets/logo.png";
 import "./shared.css";
+import { useGuruClass } from "../contexts/GuruClassContext";
 
 export default function SidebarGuru({
   onNavigate,
@@ -8,9 +9,16 @@ export default function SidebarGuru({
   mobileOpen,
   onClose,
 }) {
+  const { clearClass } = useGuruClass();
+
   function nav(page) {
     if (onNavigate) onNavigate(page);
     if (onClose) onClose();
+  }
+
+  function gantiKelas() {
+    clearClass();
+    nav("guruDashboard");
   }
 
   function isActive(key) {
@@ -104,6 +112,14 @@ export default function SidebarGuru({
         </nav>
 
         <div className="sidebar__footer">
+          <button
+            className="sidebar__logout-btn"
+            onClick={gantiKelas}
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <span className="material-symbols-outlined">swap_horiz</span>
+            Ganti Kelas
+          </button>
           <button
             className="sidebar__logout-btn"
             onClick={() => {

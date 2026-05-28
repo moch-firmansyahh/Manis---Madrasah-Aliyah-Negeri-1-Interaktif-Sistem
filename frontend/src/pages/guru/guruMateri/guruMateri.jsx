@@ -5,7 +5,7 @@ import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
 import { apiClient } from "../../../utils/apiClient";
-import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 
 const AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBjoXu55KCdSSPl-2t0t7d2EH6gux6Xz8nZaCdXHePrj-gGn1ZWZyBoOucWc2yVgrhmNFyy8cKbxWH8i9Wm5VKkpqX9jraXjkHTr8PVU1oN3V4nkzLWUUm6nyAIS3hGDic_uY0YoNLNNZluKTKqFwJb2gYlRl9eATGdlXClTx6IXpYvk-2u1qqvfUGTzs-QJPlXTouWTyNYzTe8j8mS09evVA_aHTYfHxneVwUsb2jUygYzuAIDU5KwqO2kISzLvnzaTentePscoGoo";
@@ -49,7 +49,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [materi, setMateri] = useState(INITIAL_MATERI);
   const [matkulList, setMatkulList] = useState([]);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const { selectedClass, clearClass } = useGuruClass();
   const [toast, setToast] = useState(null);
   const [view, setView] = useState("list"); // "list" | "create" | "edit"
   const [editId, setEditId] = useState(null);
@@ -234,6 +234,24 @@ export default function GuruMateri({ onNavigate, onLogout }) {
   const needsUrl = form.tipe === "Link" || form.tipe === "Video";
   const needsFile = !needsUrl;
 
+  if (!selectedClass) {
+    return (
+      <div className="page-shell" style={{ backgroundColor: "var(--color-background)" }}>
+        <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruMateri" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <main className="page-main" style={{ backgroundColor: "var(--color-background)" }}>
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            <h3>Belum memilih kelas</h3>
+            <p style={{ margin: "1rem 0" }}>Silakan pilih kelas terlebih dahulu melalui Dashboard.</p>
+            <button onClick={() => onNavigate && onNavigate("guruDashboard")} style={{ padding: "0.5rem 1.5rem", backgroundColor: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className="page-shell"
@@ -403,14 +421,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
           }
         />
 
-        {!selectedClass ? (
-          <ClassSelector
-            onSelectClass={(cls) => setSelectedClass(cls)}
-            onCancel={() => {
-              if (onNavigate) onNavigate("guruDashboard");
-            }}
-          />
-        ) : (
+        
         <div className="page-content">
           {/* ═══════════════ LIST VIEW ═══════════════ */}
           {view === "list" && (
@@ -425,7 +436,7 @@ export default function GuruMateri({ onNavigate, onLogout }) {
                   <p className="dm-page-sub">
                     Kelas: <strong>{selectedClass?.namaKelas}</strong>
                   </p>
-                  <button onClick={() => setSelectedClass(null)} className="dm-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+                  <button onClick={clearClass} className="dm-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
                     Ganti Kelas
                   </button>
                 </div>
@@ -883,7 +894,6 @@ export default function GuruMateri({ onNavigate, onLogout }) {
             </>
           )}
         </div>
-        )}
       </main>
     </div>
   );

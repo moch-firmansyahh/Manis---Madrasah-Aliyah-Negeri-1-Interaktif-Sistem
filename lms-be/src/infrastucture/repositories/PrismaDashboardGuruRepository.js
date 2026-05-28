@@ -45,15 +45,13 @@ export class PrismaDashboardGuruRepository {
     }
   }
 
-  async getTotalSiswa(nipGuru) {
+  async getTotalSiswa(nipGuru, idKelas = null) {
     try {
+      const mkFilter = { nipGuru };
+      if (idKelas) mkFilter.idKelas = idKelas;
       const result = await prisma.nilai.groupBy({
         by: ['nomorInduk'],
-        where: {
-          mataKuliah: {
-            nipGuru: nipGuru
-          }
-        }
+        where: { mataKuliah: mkFilter }
       });
       return result.length;
     } catch (error) {
@@ -62,17 +60,13 @@ export class PrismaDashboardGuruRepository {
     }
   }
 
-  async getMateriList(nipGuru) {
+  async getMateriList(nipGuru, idKelas = null) {
     try {
+      const mkFilter = { nipGuru };
+      if (idKelas) mkFilter.idKelas = idKelas;
       return await prisma.modulAjar.findMany({
-        where: {
-          mataKuliah: {
-            nipGuru: nipGuru
-          }
-        },
-        include: {
-          mataKuliah: true
-        },
+        where: { mataKuliah: mkFilter },
+        include: { mataKuliah: true },
         orderBy: { tanggal: 'desc' },
         take: 10
       });
@@ -82,14 +76,14 @@ export class PrismaDashboardGuruRepository {
     }
   }
 
-  async getSubmissionStats(nipGuru) {
+  async getSubmissionStats(nipGuru, idKelas = null) {
     try {
+      const mkFilter = { nipGuru };
+      if (idKelas) mkFilter.idKelas = idKelas;
       const allSubmissions = await prisma.pengumpulanTugas.findMany({
         where: {
           tugas: {
-            mataKuliah: {
-              nipGuru: nipGuru
-            }
+            mataKuliah: mkFilter
           }
         },
         include: {

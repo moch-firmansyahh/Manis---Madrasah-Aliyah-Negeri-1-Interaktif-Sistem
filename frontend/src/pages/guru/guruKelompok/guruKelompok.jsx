@@ -4,7 +4,7 @@ import "./guruKelompok.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 
 const API_BASE = API_URL;
@@ -59,7 +59,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [selectedMkId, setSelectedMkId] = useState("");
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(null);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const { selectedClass, clearClass } = useGuruClass();
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -220,6 +220,24 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
     );
     return allStudents.filter((s) => !alreadyInAnyGroup.has(s.nis));
   };
+
+  if (!selectedClass) {
+    return (
+      <div className="page-shell">
+        <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruKelompok" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <main className="page-main">
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            <h3>Belum memilih kelas</h3>
+            <p style={{ margin: "1rem 0" }}>Silakan pilih kelas terlebih dahulu melalui Dashboard.</p>
+            <button onClick={() => onNavigate && onNavigate("guruDashboard")} style={{ padding: "0.5rem 1.5rem", backgroundColor: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -561,14 +579,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
           }
         />
 
-        {!selectedClass ? (
-          <ClassSelector 
-            onSelectClass={(cls) => setSelectedClass(cls)} 
-            onCancel={() => {
-              if (onNavigate) onNavigate("guruDashboard");
-            }} 
-          />
-        ) : (
+
         <div className="page-content">
           <div className="dk-topbar">
             <div>
@@ -576,7 +587,7 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
               <p className="dk-page-sub">
                 Kelas: <strong>{selectedClass.namaKelas}</strong>
               </p>
-              <button onClick={() => setSelectedClass(null)} className="dk-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+              <button onClick={() => clearClass} className="dk-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
                 Ganti Kelas
               </button>
             </div>
@@ -816,7 +827,6 @@ export default function GuruKelompok({ onNavigate, onLogout }) {
             })}
           </div>
         </div>
-        )}
       </main>
     </div>
   );

@@ -18,7 +18,8 @@ export class MataKuliahController {
   async getAll(req, res) {
     try {
       if (req.user && req.user.role === 'GURU' && req.user.guru) {
-        const result = await this.mataKuliahUseCase.getByGuru(req.user.guru.nip);
+        const idKelas = req.query.idKelas ? parseInt(req.query.idKelas) : null;
+        const result = await this.mataKuliahUseCase.getByGuru(req.user.guru.nip, idKelas);
         return res.json(result);
       }
       

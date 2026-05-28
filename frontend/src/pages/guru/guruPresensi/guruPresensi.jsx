@@ -4,7 +4,7 @@ import "./guruPresensi.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 import { apiClient } from "../../../utils/apiClient";
 
 const AVATAR =
@@ -60,7 +60,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
   const [tempDate, setTempDate] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [page, setPage] = useState(1);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const { selectedClass, clearClass } = useGuruClass();
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -142,10 +142,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     if (!selectedClass) return;
     const fetchCourses = async () => {
       try {
-        const res = await apiClient.get("/api/mata-kuliah");
+        const res = await apiClient.get(`/api/mata-kuliah?idKelas=${selectedClass.idKelas}`);
         const data = Array.isArray(res) ? res : res.data || [];
-        const filteredData = selectedClass ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas) : data;
-        const formatted = filteredData.map((c) => ({
+        const formatted = data.map((c) => ({
           id: c.idMataKuliah,
           name: c.namaMataKuliah,
           room: c.ruang || "Ruang Kelas",
@@ -365,6 +364,24 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
     showToast("Laporan berhasil diunduh!");
   };
 
+  if (!selectedClass) {
+    return (
+      <div className="page-shell">
+        <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruPresensi" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <main className="page-main">
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            <h3>Belum memilih kelas</h3>
+            <p style={{ margin: "1rem 0" }}>Silakan pilih kelas terlebih dahulu melalui Dashboard.</p>
+            <button onClick={() => onNavigate && onNavigate("guruDashboard")} style={{ padding: "0.5rem 1.5rem", backgroundColor: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className="page-shell"
@@ -400,14 +417,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
           }
         />
 
-        {!selectedClass ? (
-          <ClassSelector
-            onSelectClass={(cls) => setSelectedClass(cls)}
-            onCancel={() => {
-              if (onNavigate) onNavigate("guruDashboard");
-            }}
-          />
-        ) : (
+
         <div className="page-content">
           {/* Top bar */}
           <div className="dp-topbar">
@@ -421,7 +431,7 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                 Kelas: <strong>{selectedClass?.namaKelas}</strong>
               </p>
             </div>
-            <button onClick={() => setSelectedClass(null)} className="dp-btn-cancel" style={{ padding: '8px 12px', fontSize: '0.85rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', height: 'fit-content', marginTop: '16px' }}>
+            <button onClick={clearClass} className="dp-btn-cancel" style={{ padding: '8px 12px', fontSize: '0.85rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', height: 'fit-content', marginTop: '16px' }}>
               Ganti Kelas
             </button>
             <div className="dp-top-actions" style={{ position: "relative" }}>
@@ -1013,7 +1023,6 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
             </div>
           </div>
         </div>
-        )}
       </main>
     </div>
   );

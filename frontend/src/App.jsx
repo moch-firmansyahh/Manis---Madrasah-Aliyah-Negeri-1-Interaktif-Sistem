@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import Login from "./pages/auth/login/login";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen";
+import { GuruClassProvider } from "./contexts/GuruClassContext";
 import "./App.css";
 
 // Lazy Loaded Pages
@@ -149,13 +150,17 @@ function App() {
       if (pageName === "nilai") return <Nilai {...sharedProps} />;
       if (pageName === "pengumpulanTugas") return <PengumpulanTugas {...sharedProps} taskId={currentPage.taskId} />;
 
-      if (pageName === "guruPresensi") return <GuruPresensi {...sharedProps} />;
-      if (pageName === "guruTugas") return <GuruTugas {...sharedProps} />;
-      if (pageName === "guruKelompok") return <GuruKelompok {...sharedProps} />;
-      if (pageName === "guruNilaiIndividu") return <GuruNilaiIndividu {...sharedProps} />;
-      if (pageName === "guruForum") return <GuruForum {...sharedProps} />;
-      if (pageName === "guruProfile") return <GuruProfile {...sharedProps} />;
-      if (pageName === "guruMateri") return <GuruMateri {...sharedProps} />;
+      if (pageName.startsWith("guru")) {
+        let page;
+        if (pageName === "guruPresensi") page = <GuruPresensi {...sharedProps} />;
+        else if (pageName === "guruTugas") page = <GuruTugas {...sharedProps} />;
+        else if (pageName === "guruKelompok") page = <GuruKelompok {...sharedProps} />;
+        else if (pageName === "guruNilaiIndividu") page = <GuruNilaiIndividu {...sharedProps} />;
+        else if (pageName === "guruForum") page = <GuruForum {...sharedProps} />;
+        else if (pageName === "guruProfile") page = <GuruProfile {...sharedProps} />;
+        else if (pageName === "guruMateri") page = <GuruMateri {...sharedProps} />;
+        if (page) return <GuruClassProvider>{page}</GuruClassProvider>;
+      }
       if (pageName === "faq") return (
         <div>
           <div style={{ padding: "1rem 2rem", background: "#fff", borderBottom: "1px solid #eee", display: "flex", alignItems: "center", gap: "0.75rem" }}>

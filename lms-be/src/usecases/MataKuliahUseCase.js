@@ -13,9 +13,9 @@ export class MataKuliahUseCase {
     return await this.mataKuliahRepository.findAll();
   }
 
-  async getByGuru(nipGuru) {
+  async getByGuru(nipGuru, idKelas = null) {
     if (!nipGuru) throw new Error("NIP Guru wajib diisi");
-    return await this.mataKuliahRepository.findByGuru(nipGuru);
+    return await this.mataKuliahRepository.findByGuru(nipGuru, idKelas);
   }
 
   async getByNis(nis) {

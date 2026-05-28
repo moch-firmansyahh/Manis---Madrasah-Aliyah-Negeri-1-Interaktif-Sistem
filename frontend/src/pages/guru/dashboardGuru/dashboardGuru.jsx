@@ -4,6 +4,8 @@ import "./dashboardGuru.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
+import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 
 const AVATAR_GURU =
@@ -13,6 +15,7 @@ const API_BASE = API_URL;
 
 export default function DashboardGuru({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
+  const { selectedClass, selectClass } = useGuruClass();
   const [toast, setToast] = useState(null);
   const [selectedMateri, setSelectedMateri] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(AVATAR_GURU);
@@ -29,13 +32,16 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!selectedClass) return;
     const fetchDashboard = async () => {
       try {
+        setLoading(true);
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         if (storedUser.fotoUrl) {
           setAvatarUrl(`${API_BASE}${storedUser.fotoUrl}`);
         }
-        const res = await apiClient.get("/api/guru/dashboard");
+        const url = `/api/guru/dashboard?idKelas=${selectedClass.idKelas}`;
+        const res = await apiClient.get(url);
         if (res && res.data) {
           setDashboardData(res.data);
         } else if (res) {
@@ -48,7 +54,7 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
       }
     };
     fetchDashboard();
-  }, []);
+  }, [selectedClass]);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -56,6 +62,24 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
   };
 
   const nav = (page) => onNavigate && onNavigate(page);
+
+  if (!selectedClass) {
+    return (
+      <div className="page-shell">
+        <SidebarGuru
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          activePage="guruDashboard"
+          mobileOpen={sidebarOpen}
+          onClose={closeSidebar}
+        />
+        <main className="page-main">
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={nav} />
+          <ClassSelector onSelectClass={selectClass} />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page-shell">
@@ -108,13 +132,7 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
         <Navbar
           role="Guru"
           onOpenSidebar={openSidebar}
-          onNavigate={
-            typeof nav !== "undefined"
-              ? nav
-              : typeof onNavigate !== "undefined"
-                ? onNavigate
-                : undefined
-          }
+          onNavigate={nav}
         />
 
         {/* Content */}
@@ -126,6 +144,9 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
               <p className="dd-subtitle">
                 Selamat pagi, Pak / Bu {dashboardData.lecturerName}. Berikut
                 ringkasan kurasi akademik Anda hari ini.
+              </p>
+              <p style={{ marginTop: "0.5rem", color: "var(--color-primary)", fontWeight: 600 }}>
+                Kelas: <strong>{selectedClass.namaKelas}</strong>
               </p>
             </div>
             <div className="dd-action-row">

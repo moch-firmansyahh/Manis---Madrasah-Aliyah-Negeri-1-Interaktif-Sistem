@@ -4,7 +4,7 @@ import "../../siswa/forumDiskusi/forumDiskusi.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 import { apiClient } from "../../../utils/apiClient";
 import LoadingScreen from "../../../components/LoadingScreen/LoadingScreen";
 
@@ -79,19 +79,16 @@ export default function GuruForum({ onNavigate, onLogout }) {
   const [mataKuliahList, setMataKuliahList] = useState([]);
   const [selectedMatkul, setSelectedMatkul] = useState(null);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const { selectedClass, clearClass } = useGuruClass();
 
   // Fetch mata kuliah list
   useEffect(() => {
     if (selectedClass) {
       const fetchCourses = async () => {
         try {
-          const res = await apiClient.get("/api/mata-kuliah");
+          const res = await apiClient.get("/api/mata-kuliah?idKelas=" + selectedClass.idKelas);
           const data = Array.isArray(res) ? res : res.data || [];
-          const filteredData = selectedClass 
-            ? data.filter(mk => mk.kelas && mk.kelas.idKelas === selectedClass.idKelas)
-            : data;
-          setMataKuliahList(filteredData);
+          setMataKuliahList(data);
         } catch (error) {
           console.error("Failed to load courses", error);
         } finally {
@@ -281,6 +278,24 @@ export default function GuruForum({ onNavigate, onLogout }) {
     if (file) setAttachedFile(file);
   };
 
+  if (!selectedClass) {
+    return (
+      <div className="page-shell">
+        <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruForum" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <main className="page-main">
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            <h3>Belum memilih kelas</h3>
+            <p style={{ margin: "1rem 0" }}>Silakan pilih kelas terlebih dahulu melalui Dashboard.</p>
+            <button onClick={() => onNavigate && onNavigate("guruDashboard")} style={{ padding: "0.5rem 1.5rem", backgroundColor: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className="page-shell"
@@ -313,14 +328,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
           onNavigate={onNavigate}
         />
 
-        {!selectedClass ? (
-          <ClassSelector 
-            onSelectClass={(cls) => setSelectedClass(cls)} 
-            onCancel={() => {
-              if (onNavigate) onNavigate("guruDashboard");
-            }} 
-          />
-        ) : (
+        {
         <div className="page-content">
           {/* COURSE LIST VIEW */}
           {view === "courses" && (
@@ -334,7 +342,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
                   <p className="fd-page-sub">
                     Kelas: <strong>{selectedClass.namaKelas}</strong>
                   </p>
-                  <button onClick={() => setSelectedClass(null)} className="fd-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+                  <button onClick={clearClass} className="fd-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
                     Ganti Kelas
                   </button>
                 </div>
@@ -883,7 +891,7 @@ export default function GuruForum({ onNavigate, onLogout }) {
             </>
           )}
         </div>
-        )}
+        }
       </main>
     </div>
   );

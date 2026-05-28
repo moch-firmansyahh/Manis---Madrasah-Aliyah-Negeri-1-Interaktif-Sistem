@@ -19,9 +19,11 @@ export class PrismaMataKuliahRepository {
     });
   }
 
-  async findByGuru(nipGuru) {
+  async findByGuru(nipGuru, idKelas = null) {
+    const where = { nipGuru };
+    if (idKelas) where.idKelas = idKelas;
     return await prisma.mataKuliah.findMany({
-      where: { nipGuru },
+      where,
       include: {
         guru: {
           include: { user: { select: { nama: true } } }

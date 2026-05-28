@@ -4,7 +4,7 @@ import "./guruTugas.css";
 import SidebarGuru from "../../../components/SidebarGuru";
 import { useSidebar } from "../../../components/useSidebar";
 import Navbar from "../../../components/Navbar";
-import ClassSelector from "../../../components/ClassSelector";
+import { useGuruClass } from "../../../contexts/GuruClassContext";
 import { apiClient, API_URL } from "../../../utils/apiClient";
 import {
   extractTextFromFile,
@@ -50,7 +50,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
   const [deleteId, setDeleteId] = useState(null);
   const [deleteTipe, setDeleteTipe] = useState(null);
   const [filter, setFilter] = useState("Semua");
-  const [selectedClass, setSelectedClass] = useState(null);
+  const { selectedClass, clearClass } = useGuruClass();
 
   const [form, setForm] = useState({
     title: "",
@@ -917,14 +917,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
           }
         />
 
-        {!selectedClass ? (
-          <ClassSelector
-            onSelectClass={(cls) => setSelectedClass(cls)}
-            onCancel={() => {
-              if (onNavigate) onNavigate("guruDashboard");
-            }}
-          />
-        ) : (
+
         <div className="page-content">
           {/* Top bar */}
           <div className="dt-topbar">
@@ -946,7 +939,7 @@ export default function GuruTugas({ onNavigate, onLogout }) {
               <p className="dt-page-sub">
                 Kelas: <strong>{selectedClass?.namaKelas}</strong>
               </p>
-              <button onClick={() => setSelectedClass(null)} className="dt-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
+              <button onClick={() => clearClass()} className="dt-btn-cancel" style={{ marginTop: '0.5rem', padding: '4px 8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>
                 Ganti Kelas
               </button>
             </div>
@@ -1024,7 +1017,25 @@ export default function GuruTugas({ onNavigate, onLogout }) {
                   const progress = task.tipe === 'Kuis' 
                     ? (task.totalSiswa > 0 ? Math.round((task.jumlahPengerjaan / task.totalSiswa) * 100) : 0)
                     : (task.total > 0 ? Math.round((task.submitted / task.total) * 100) : 0);
-                  return (
+  if (!selectedClass) {
+    return (
+      <div className="page-shell">
+        <SidebarGuru onNavigate={onNavigate} onLogout={onLogout} activePage="guruTugas" mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <main className="page-main">
+          <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={onNavigate} />
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            <h3>Belum memilih kelas</h3>
+            <p style={{ margin: "1rem 0" }}>Silakan pilih kelas terlebih dahulu melalui Dashboard.</p>
+            <button onClick={() => onNavigate && onNavigate("guruDashboard")} style={{ padding: "0.5rem 1.5rem", backgroundColor: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
                     <div key={task.id} className="dt-task-card">
                       <div className="dt-task-card-header">
                         <div className="dt-task-meta">
@@ -1170,7 +1181,6 @@ export default function GuruTugas({ onNavigate, onLogout }) {
           {view === "create" && renderTaskForm(handleCreate, "Buat Tugas")}
           {view === "edit" && renderTaskForm(handleUpdate, "Simpan Perubahan")}
         </div>
-        )}
       </main>
     </div>
   );
