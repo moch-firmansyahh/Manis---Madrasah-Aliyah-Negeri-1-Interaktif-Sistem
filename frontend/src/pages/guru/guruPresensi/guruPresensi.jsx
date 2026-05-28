@@ -407,6 +407,9 @@ export default function GuruPresensi({ onNavigate, onLogout }) {
                 real-time.
               </p>
             </div>
+            <button onClick={() => setSelectedClass(null)} className="dp-btn-cancel" style={{ padding: '8px 12px', fontSize: '0.85rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', height: 'fit-content', marginTop: '16px' }}>
+              Ganti Kelas
+            </button>
             <div className="dp-top-actions" style={{ position: "relative" }}>
               <div
                 className="dp-matkul-selector"
