@@ -1,22 +1,17 @@
-import mammoth from "mammoth";
-import * as XLSX from "xlsx";
-import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Menggunakan worker lokal yang dihandle oleh Vite agar lebih stabil
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export async function extractTextFromFile(file) {
   const ext = file.name.split(".").pop().toLowerCase();
 
   if (ext === "docx") {
+    const mammoth = await import("mammoth");
     const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
+    const result = await mammoth.default.extractRawText({ arrayBuffer });
     return result.value;
   }
 
   if (ext === "xlsx" || ext === "xls" || ext === "csv") {
+    const XLSX = await import("xlsx");
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     let fullText = "";
@@ -28,6 +23,9 @@ export async function extractTextFromFile(file) {
   }
 
   if (ext === "pdf") {
+    const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let fullText = "";
@@ -56,6 +54,7 @@ export async function generateQuizFromText(text, apiKey) {
     );
   }
 
+  const { GoogleGenerativeAI } = await import("@google/generative-ai");
   const genAI = new GoogleGenerativeAI(apiKey);
 
   // Model terbaru yang masih aktif (urutan prioritas)

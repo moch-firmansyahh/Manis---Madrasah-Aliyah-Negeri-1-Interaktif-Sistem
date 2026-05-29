@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Html5Qrcode } from "html5-qrcode";
 import "../../../components/shared.css";
 import "./presensiSiswa.css";
 import Sidebar from "../../../components/Sidebar";
@@ -214,6 +213,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     await new Promise((r) => setTimeout(r, 100));
 
     try {
+      const { Html5Qrcode } = await import("html5-qrcode");
       const html5QrCode = new Html5Qrcode(scannerContainerId);
       html5QrCodeRef.current = html5QrCode;
 

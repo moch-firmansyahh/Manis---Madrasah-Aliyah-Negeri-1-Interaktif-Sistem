@@ -54,13 +54,17 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
     }
   };
 
-  const uniqueTingkatList = Array.from(new Set(classes.map(c => c.tingkat))).sort((a, b) => a - b);
+  const uniqueTingkatList = React.useMemo(() => {
+    return Array.from(new Set(classes.map(c => c.tingkat))).sort((a, b) => a - b);
+  }, [classes]);
 
-  const filteredClasses = classes.filter(cls => {
-    const matchesTingkat = Number(cls.tingkat) === Number(activeTingkat);
-    const matchesSearch = cls.namaKelas.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTingkat && matchesSearch;
-  });
+  const filteredClasses = React.useMemo(() => {
+    return classes.filter(cls => {
+      const matchesTingkat = Number(cls.tingkat) === Number(activeTingkat);
+      const matchesSearch = cls.namaKelas.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesTingkat && matchesSearch;
+    });
+  }, [classes, activeTingkat, searchQuery]);
 
   const renderContent = () => {
     if (loading) {
