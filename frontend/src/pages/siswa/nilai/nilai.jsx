@@ -66,8 +66,9 @@ export default function Nilai({ onNavigate, onLogout }) {
           const matkul = (data[k] || []).map((m) => {
               const tugas = (!isAktif && m.nilaiTugas) ? parseFloat(m.nilaiTugas) : null;
               const kuis = (!isAktif && m.nilaiKuis) ? parseFloat(m.nilaiKuis) : null;
-              const finalScore = (!isAktif && m.nilaiAkhir) ? parseFloat(m.nilaiAkhir) : 
-                (!isAktif && tugas !== null && kuis !== null ? Math.round(tugas * 0.5 + kuis * 0.5) : null);
+              const finalScore = (!isAktif && tugas !== null && kuis !== null) 
+                ? Math.round(tugas * 0.5 + kuis * 0.5) 
+                : null;
 
               if (finalScore !== null) {
                 totalScore += finalScore;

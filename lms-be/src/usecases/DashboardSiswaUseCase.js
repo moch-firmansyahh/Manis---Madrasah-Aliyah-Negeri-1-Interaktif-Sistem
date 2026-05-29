@@ -110,13 +110,11 @@ export class DashboardSiswaUseCase {
         const semester = n.mataKuliah?.semester || n.semester;
         if (!semester || semester > 3) continue;
 
-        let score = n.nilaiAkhir ? parseFloat(n.nilaiAkhir) : null;
-        if (isNaN(score)) {
-          const tugas = n.nilaiTugas ? parseFloat(n.nilaiTugas) : null;
-          const kuis = n.nilaiKuis ? parseFloat(n.nilaiKuis) : null;
-          if (tugas !== null && kuis !== null) {
-            score = Math.round(tugas * 0.5 + kuis * 0.5);
-          }
+        const tugas = n.nilaiTugas ? parseFloat(n.nilaiTugas) : null;
+        const kuis = n.nilaiKuis ? parseFloat(n.nilaiKuis) : null;
+        let score = null;
+        if (tugas !== null && kuis !== null) {
+          score = Math.round(tugas * 0.5 + kuis * 0.5);
         }
         if (score !== null && !isNaN(score)) {
           totalNilai += score;
