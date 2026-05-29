@@ -65,8 +65,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
         const todayStr = getHariIniIndo();
         const todayClasses = formatted.filter(c => {
           if (!c.jadwal) return false;
-          const days = c.jadwal.split(',').map(d => d.trim());
-          return days.includes(todayStr);
+          const days = c.jadwal.split(',').map(d => d.trim().toLowerCase());
+          return days.includes(todayStr.toLowerCase());
         });
 
         if (todayClasses.length > 0) {
@@ -267,7 +267,7 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     const todayStr = getHariIniIndo();
     const targetClasses = filter === "semua" 
       ? upcoming 
-      : upcoming.filter(c => c.jadwal && c.jadwal.split(',').map(d => d.trim()).includes(todayStr));
+      : upcoming.filter(c => c.jadwal && c.jadwal.split(',').map(d => d.trim().toLowerCase()).includes(todayStr.toLowerCase()));
     
     if (targetClasses.length > 0) {
       const isStillAvailable = targetClasses.some(c => c.id === selectedClassId);
@@ -285,8 +285,8 @@ export default function PresensiSiswa({ onNavigate, onLogout }) {
     const todayStr = getHariIniIndo();
     return upcoming.filter(c => {
       if (!c.jadwal) return false;
-      const days = c.jadwal.split(',').map(d => d.trim());
-      return days.includes(todayStr);
+      const days = c.jadwal.split(',').map(d => d.trim().toLowerCase());
+      return days.includes(todayStr.toLowerCase());
     });
   };
 

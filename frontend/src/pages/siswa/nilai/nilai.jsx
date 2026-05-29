@@ -19,16 +19,7 @@ function scoreBar(score) {
   return score;
 }
 
-function getRataRataKumulatif(semesters) {
-  let total = 0, count = 0;
-  semesters.forEach((sem) => {
-    if (sem.rataRataNilai !== null) {
-      total += sem.rataRataNilai;
-      count++;
-    }
-  });
-  return count > 0 ? (total / count).toFixed(1) : "—";
-}
+
 
 export default function Nilai({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
@@ -92,6 +83,8 @@ export default function Nilai({ onNavigate, onLogout }) {
               label: !isAktif ? `Semester ${k}` : `Semester ${k} (Aktif)`,
               year: !isAktif ? "Tahun Akademik 2023/2024" : "Sedang Berlangsung — Nilai belum final",
               rataRataNilai: rataRataNilai,
+              totalScore: totalScore,
+              counted: counted,
               matkul: matkul,
             };
           });
@@ -186,7 +179,16 @@ export default function Nilai({ onNavigate, onLogout }) {
     sks: 0,
     rataRataNilai: null,
   };
-  const rataRataKumulatif = semesters.length > 0 ? getRataRataKumulatif(semesters) : "—";
+  const rataRataKumulatif = (() => {
+    let allTotal = 0, allCount = 0;
+    semesters.forEach(s => {
+      if (s.counted > 0) {
+        allTotal += s.totalScore;
+        allCount += s.counted;
+      }
+    });
+    return allCount > 0 ? (allTotal / allCount).toFixed(1) : "—";
+  })();
 
 
   return (

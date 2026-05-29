@@ -40,13 +40,6 @@ export class DashboardSiswaUseCase {
         };
       }
 
-      const maxSemester = Math.max(...mataKuliahList.map((mk) => mk.semester));
-      if (maxSemester > 0) {
-        mataKuliahList = mataKuliahList.filter(
-          (mk) => mk.semester === maxSemester,
-        );
-      }
-
       const idMataKuliahList = mataKuliahList.map(mk => mk.idMataKuliah);
       const threads = (await this.forumRepository.getRecentThreads)
         ? await this.forumRepository.getRecentThreads(3, idMataKuliahList)
