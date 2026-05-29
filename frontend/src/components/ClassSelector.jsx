@@ -6,6 +6,10 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const [activeTingkat, setActiveTingkat] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedClass, setSelectedClass] = useState(null);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -23,7 +27,16 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
           }
         });
         
-        setClasses(Array.from(uniqueClassesMap.values()));
+        const uniqueClasses = Array.from(uniqueClassesMap.values());
+        setClasses(uniqueClasses);
+        
+        // Auto select first available tingkat
+        if (uniqueClasses.length > 0) {
+          const uniqueTingkat = Array.from(new Set(uniqueClasses.map(c => c.tingkat))).sort((a, b) => a - b);
+          if (uniqueTingkat.length > 0) {
+            setActiveTingkat(uniqueTingkat[0]);
+          }
+        }
       } catch (err) {
         console.error("Gagal memuat kelas:", err);
         setError("Gagal memuat data kelas.");
@@ -34,6 +47,20 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
 
     fetchClasses();
   }, []);
+
+  const handleConfirm = () => {
+    if (selectedClass) {
+      onSelectClass(selectedClass);
+    }
+  };
+
+  const uniqueTingkatList = Array.from(new Set(classes.map(c => c.tingkat))).sort((a, b) => a - b);
+
+  const filteredClasses = classes.filter(cls => {
+    const matchesTingkat = Number(cls.tingkat) === Number(activeTingkat);
+    const matchesSearch = cls.namaKelas.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTingkat && matchesSearch;
+  });
 
   const renderContent = () => {
     if (loading) {
@@ -64,29 +91,86 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
     }
 
     return (
-      <div className="cs-grid">
-        {classes.map((cls, idx) => (
-          <div 
-            key={cls.idKelas} 
-            className="cs-card"
-            style={{ animationDelay: `${idx * 0.05}s` }}
-            onClick={() => onSelectClass(cls)}
-          >
-            <div className="cs-card-bg-blob"></div>
-            <div className="cs-card-content">
-              <div className="cs-card-icon-wrapper">
-                <span className="material-symbols-outlined cs-card-icon">meeting_room</span>
-              </div>
-              <div className="cs-card-text">
-                <h3>{cls.namaKelas}</h3>
-                <span className="cs-badge">Tingkat {cls.tingkat}</span>
-              </div>
-              <div className="cs-card-arrow">
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </div>
+      <div className="cs-layout-container">
+        {/* Left Sidebar */}
+        <div className="cs-sidebar">
+          {uniqueTingkatList.map((tingkat) => {
+            const isActive = Number(tingkat) === Number(activeTingkat);
+            return (
+              <button
+                key={tingkat}
+                className={`cs-sidebar-item ${isActive ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTingkat(tingkat);
+                  setSelectedClass(null); // Clear selection when switching tab
+                }}
+              >
+                <div className={`cs-sidebar-badge ${isActive ? "active" : ""}`}>
+                  <span className="cs-sidebar-badge-top">Tingkat</span>
+                  <span className="cs-sidebar-badge-bottom">{tingkat}</span>
+                </div>
+                <span className="cs-sidebar-text">Tingkat {tingkat}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right Main Content */}
+        <div className="cs-main-content">
+          <div className="cs-content-header">
+            <h3>Tingkat {activeTingkat}</h3>
+            <div className="cs-search-wrapper">
+              <span className="material-symbols-outlined cs-search-icon">search</span>
+              <input
+                type="text"
+                placeholder="Cari kelas..."
+                className="cs-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
-        ))}
+
+          <div className="cs-grid-container">
+            {filteredClasses.length > 0 ? (
+              <div className="cs-classes-grid">
+                {filteredClasses.map((cls) => {
+                  const isSelected = selectedClass?.idKelas === cls.idKelas;
+                  return (
+                    <div
+                      key={cls.idKelas}
+                      className={`cs-class-card ${isSelected ? "selected" : ""}`}
+                      onClick={() => setSelectedClass(cls)}
+                    >
+                      <div className="cs-class-icon-wrapper">
+                        <span className="material-symbols-outlined">group</span>
+                      </div>
+                      <div className="cs-class-info">
+                        <h4>{cls.namaKelas}</h4>
+                        <div className="cs-class-tags">
+                          <span className="cs-class-tag tag-tingkat">
+                            TINGKAT {cls.tingkat}
+                          </span>
+                          <span className="cs-class-tag tag-status">
+                            Aktif
+                          </span>
+                        </div>
+                      </div>
+                      <div className="cs-class-action">
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="cs-no-results">
+                <span className="material-symbols-outlined">search_off</span>
+                <p>Tidak ada kelas yang cocok</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -100,26 +184,34 @@ const ClassSelector = ({ onSelectClass, onCancel }) => {
           </button>
         )}
         
-        <div className="cs-header">
-          <div className="cs-header-icon-box">
-            <span className="material-symbols-outlined">auto_awesome_mosaic</span>
-          </div>
-          <h2>Pilih Kelas</h2>
-          <p>Tentukan ruang lingkup kelas sebelum mengakses fitur utama.</p>
+        <div className="cs-modal-header">
+          <h2>Pilih Lingkup Kelas Anda</h2>
+          <p>Silakan tentukan tingkat dan kelas yang ingin Anda kelola.</p>
         </div>
         
-        <div className="cs-body">
+        <div className="cs-modal-body">
           {renderContent()}
         </div>
         
-        {onCancel && (
-          <div className="cs-footer">
-            <button onClick={onCancel} className="cs-btn-cancel">
-              <span className="material-symbols-outlined">arrow_back</span>
-              Kembali ke Dashboard
+        <div className="cs-modal-footer">
+          <div className="cs-footer-left">
+            {onCancel && (
+              <button onClick={onCancel} className="cs-btn-cancel">
+                <span className="material-symbols-outlined">arrow_back</span>
+                Kembali ke Dashboard
+              </button>
+            )}
+          </div>
+          <div className="cs-footer-right">
+            <button 
+              onClick={handleConfirm} 
+              className="cs-btn-confirm"
+              disabled={!selectedClass}
+            >
+              Konfirmasi Pilihan
             </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

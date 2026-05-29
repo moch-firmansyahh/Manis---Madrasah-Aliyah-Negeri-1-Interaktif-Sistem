@@ -12,6 +12,8 @@ export function GuruClassProvider({ children }) {
     }
   });
 
+  const [previousClass, setPreviousClass] = useState(null);
+
   useEffect(() => {
     if (selectedClass) {
       localStorage.setItem('guruSelectedClass', JSON.stringify(selectedClass));
@@ -20,11 +22,24 @@ export function GuruClassProvider({ children }) {
     }
   }, [selectedClass]);
 
-  const selectClass = (cls) => setSelectedClass(cls);
-  const clearClass = () => setSelectedClass(null);
+  const selectClass = (cls) => {
+    setPreviousClass(cls);
+    setSelectedClass(cls);
+  };
+
+  const clearClass = () => {
+    setPreviousClass(selectedClass);
+    setSelectedClass(null);
+  };
+
+  const restoreClass = () => {
+    if (previousClass) {
+      setSelectedClass(previousClass);
+    }
+  };
 
   return (
-    <GuruClassContext.Provider value={{ selectedClass, selectClass, clearClass }}>
+    <GuruClassContext.Provider value={{ selectedClass, selectClass, clearClass, previousClass, restoreClass }}>
       {children}
     </GuruClassContext.Provider>
   );

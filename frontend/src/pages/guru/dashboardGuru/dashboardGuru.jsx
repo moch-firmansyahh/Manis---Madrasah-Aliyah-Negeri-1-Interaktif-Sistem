@@ -15,7 +15,7 @@ const API_BASE = API_URL;
 
 export default function DashboardGuru({ onNavigate, onLogout }) {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
-  const { selectedClass, selectClass } = useGuruClass();
+  const { selectedClass, selectClass, previousClass, restoreClass } = useGuruClass();
   const [toast, setToast] = useState(null);
   const [selectedMateri, setSelectedMateri] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(AVATAR_GURU);
@@ -75,7 +75,10 @@ export default function DashboardGuru({ onNavigate, onLogout }) {
         />
         <main className="page-main">
           <Navbar role="Guru" onOpenSidebar={openSidebar} onNavigate={nav} />
-          <ClassSelector onSelectClass={selectClass} />
+          <ClassSelector 
+            onSelectClass={selectClass} 
+            onCancel={previousClass ? restoreClass : null} 
+          />
         </main>
       </div>
     );
