@@ -72,14 +72,14 @@ export class PrismaUserRepository {
   async findByNomorInduk(nomorInduk) {
     return await prisma.user.findUnique({
       where: { nomorInduk },
-      include: { role: true, guru: true, siswa: true }
+      include: { role: true, guru: true, siswa: { include: { kelas: true } } }
     });
   }
 
   async findByEmail(email) {
     return await prisma.user.findUnique({
       where: { email },
-      include: { role: true, guru: true, siswa: true }
+      include: { role: true, guru: true, siswa: { include: { kelas: true } } }
     });
   }
 

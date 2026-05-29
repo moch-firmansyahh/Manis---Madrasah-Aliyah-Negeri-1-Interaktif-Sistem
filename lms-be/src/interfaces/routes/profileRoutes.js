@@ -70,7 +70,14 @@ router.get('/me', async (req, res) => {
         email: true,
         telepon: true,
         fotoUrl: true,
-        role: { select: { nama: true } }
+        role: { select: { nama: true } },
+        siswa: {
+          select: {
+            nis: true,
+            idKelas: true,
+            kelas: { select: { namaKelas: true } }
+          }
+        }
       }
     });
     

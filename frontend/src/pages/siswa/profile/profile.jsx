@@ -423,7 +423,7 @@ export default function Profile({ onNavigate, onLogout }) {
 
               <div className="prf-data-field prf-fullwidth">
                 <p className="prf-field-label">KELAS</p>
-                <p className="prf-field-value prf-prodi">XII MIPA 1</p>
+                <p className="prf-field-value prf-prodi">{storedUser.siswa?.kelas?.namaKelas || "-"}</p>
               </div>
 
               <div className="prf-data-grid prf-data-grid--3">

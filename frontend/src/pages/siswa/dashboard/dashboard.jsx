@@ -136,9 +136,9 @@ export default function Dashboard({ onNavigate, onLogout }) {
                   <div className="db-hero-stats">
                     <div className={`db-stat-box ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "60px", minHeight: "45px" } : {}}>
                       <p className="db-stat-val">
-                        {dashboardData?.ipk?.toFixed(2) || "0.00"}
+                        {dashboardData?.rataRataNilai?.toFixed(1) || "0.0"}
                       </p>
-                      <p className="db-stat-lbl">IPK</p>
+                      <p className="db-stat-lbl">Rata Rata Nilai</p>
                     </div>
 
                   </div>

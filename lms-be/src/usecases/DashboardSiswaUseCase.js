@@ -32,7 +32,7 @@ export class DashboardSiswaUseCase {
             totalTugas: 0,
             perMataKuliah: [],
           },
-          ipk: 0,
+          rataRataNilai: 0,
           sks: 0,
           mataKuliah: [],
           jadwal: [],
@@ -63,7 +63,7 @@ export class DashboardSiswaUseCase {
       const persentase =
         totalTugas > 0 ? Math.round((tugasSelesai / totalTugas) * 100) : 0;
 
-      const ipk = await this.calculateIPK(nomorInduk);
+      const rataRataNilai = await this.calculateRataRataNilai(nomorInduk);
       const sks = mataKuliahList.reduce((sum, mk) => sum + (mk.sks || 0), 0);
 
       return {
@@ -73,7 +73,7 @@ export class DashboardSiswaUseCase {
           totalTugas,
           perMataKuliah: tugasData.perCourse || [],
         },
-        ipk,
+        rataRataNilai,
         sks,
         mataKuliah: mataKuliahList.slice(0, 5).map((mk) => ({
           id: mk.idMataKuliah,
@@ -95,41 +95,27 @@ export class DashboardSiswaUseCase {
     }
   }
 
-  async calculateIPK(nomorInduk) {
+  async calculateRataRataNilai(nomorInduk) {
     try {
       const nilaiRecords = await this.prisma.nilai.findMany({
         where: { nomorInduk, semester: { in: [1, 2, 3] } },
-        include: { mataKuliah: true },
       });
 
       if (nilaiRecords.length === 0) return 0;
 
-      const bobotNilai = (n) => {
-        if (n >= 85) return 4.0;
-        if (n >= 80) return 3.7;
-        if (n >= 75) return 3.3;
-        if (n >= 70) return 3.0;
-        if (n >= 65) return 2.7;
-        if (n >= 60) return 2.3;
-        if (n >= 55) return 2.0;
-        if (n >= 50) return 1.7;
-        if (n >= 45) return 1.0;
-        return 0;
-      };
-
-      let totalBobot = 0;
+      let totalNilai = 0;
       let count = 0;
       for (const n of nilaiRecords) {
         const nilai = parseFloat(n.nilaiAkhir);
         if (!isNaN(nilai)) {
-          totalBobot += bobotNilai(nilai);
+          totalNilai += nilai;
           count++;
         }
       }
 
-      return count > 0 ? Math.round((totalBobot / count) * 100) / 100 : 0;
+      return count > 0 ? Math.round((totalNilai / count) * 10) / 10 : 0;
     } catch (error) {
-      console.error("calculateIPK error:", error);
+      console.error("calculateRataRataNilai error:", error);
       return 0;
     }
   }
