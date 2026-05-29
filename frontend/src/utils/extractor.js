@@ -4,14 +4,22 @@ export async function extractTextFromFile(file) {
   const ext = file.name.split(".").pop().toLowerCase();
 
   if (ext === "docx") {
-    const mammoth = await import("mammoth");
+    const mammothModule = await import("mammoth");
+    const mammoth =
+      mammothModule.default && mammothModule.default.extractRawText
+        ? mammothModule.default
+        : mammothModule;
     const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.default.extractRawText({ arrayBuffer });
+    const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value;
   }
 
   if (ext === "xlsx" || ext === "xls" || ext === "csv") {
-    const XLSX = await import("xlsx");
+    const XLSXModule = await import("xlsx");
+    const XLSX =
+      XLSXModule.default && XLSXModule.default.read
+        ? XLSXModule.default
+        : XLSXModule;
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     let fullText = "";
@@ -23,7 +31,10 @@ export async function extractTextFromFile(file) {
   }
 
   if (ext === "pdf") {
-    const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
+    const pdfjsLibModule = await import("pdfjs-dist/build/pdf.mjs");
+    const pdfjsLib = pdfjsLibModule.getDocument
+      ? pdfjsLibModule
+      : pdfjsLibModule.default || pdfjsLibModule;
     pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
     const arrayBuffer = await file.arrayBuffer();
@@ -54,7 +65,12 @@ export async function generateQuizFromText(text, apiKey) {
     );
   }
 
-  const { GoogleGenerativeAI } = await import("@google/generative-ai");
+  const genAIModule = await import("@google/generative-ai");
+  const GoogleGenerativeAI = genAIModule.GoogleGenerativeAI
+    ? genAIModule.GoogleGenerativeAI
+    : genAIModule.default && genAIModule.default.GoogleGenerativeAI
+      ? genAIModule.default.GoogleGenerativeAI
+      : genAIModule.default;
   const genAI = new GoogleGenerativeAI(apiKey);
 
   // Model terbaru yang masih aktif (urutan prioritas)
@@ -91,7 +107,10 @@ ${text.substring(0, 30000)}
   for (const name of modelNames) {
     try {
       console.log(`Mencoba model: ${name}...`);
-      const currentModel = genAI.getGenerativeModel({ model: name });
+      const currentModel = genAI.getGenerativeModel({ 
+        model: name,
+        systemInstruction: "Anda adalah asisten guru yang ahli dalam membuat kuis."
+      });
       result = await currentModel.generateContent(prompt);
       if (result) {
         console.log(`Berhasil menggunakan model: ${name}`);
@@ -129,7 +148,7 @@ ${text.substring(0, 30000)}
         typeof item.correctIndex === "number" ? item.correctIndex : 0,
     }));
   } catch (error) {
-    console.error("Gagal parse respons AI:", responseText);
+    console.error("Gagal parse respons AI:", error, responseText);
     throw new Error(
       "AI gagal menghasilkan format kuis yang valid. Silakan coba lagi.",
     );
