@@ -17,6 +17,7 @@ export default function Profile({ onNavigate, onLogout }) {
   const [toast, setToast] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR);
+  const [className, setClassName] = useState("");
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : {};
@@ -57,6 +58,11 @@ export default function Profile({ onNavigate, onLogout }) {
             email: d.email || storedUser.email || "",
             telepon: d.telepon || storedUser.telepon || "",
           });
+          if (d.siswa?.kelas?.namaKelas) {
+            setClassName(d.siswa.kelas.namaKelas);
+            const updated = { ...storedUser, siswa: d.siswa };
+            localStorage.setItem("user", JSON.stringify(updated));
+          }
         }
       } catch (error) {
         console.error("Gagal memuat profil:", error);
@@ -423,7 +429,7 @@ export default function Profile({ onNavigate, onLogout }) {
 
               <div className="prf-data-field prf-fullwidth">
                 <p className="prf-field-label">KELAS</p>
-                <p className="prf-field-value prf-prodi">{storedUser.siswa?.kelas?.namaKelas || "-"}</p>
+                <p className="prf-field-value prf-prodi">{className || storedUser.siswa?.kelas?.namaKelas || "-"}</p>
               </div>
 
               <div className="prf-data-grid prf-data-grid--3">

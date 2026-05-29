@@ -12,76 +12,22 @@ const AVATAR =
 
 const INITIAL_SEMESTERS = [];
 
-const NILAI_COLOR = {
-  A: { bg: "#ecfdf5", color: "#059669" },
-  "A-": { bg: "#f0fdf4", color: "#16a34a" },
-  "B+": { bg: "#eff6ff", color: "#2563eb" },
-  B: { bg: "#f0f9ff", color: "#0284c7" },
-  "B-": { bg: "#f0f4ff", color: "#4338ca" },
-  C: { bg: "#fff7ed", color: "#ea580c" },
-  D: { bg: "#fff1f2", color: "#dc2626" },
-  E: { bg: "#fef2f2", color: "#b91c1c" },
-};
 
-function NilaiBadge({ nilai }) {
-  if (!nilai)
-    return <span className="nlai-badge nlai-badge--pending">Proses</span>;
-  const style = NILAI_COLOR[nilai] || { bg: "#f8fafc", color: "#64748b" };
-  return (
-    <span
-      className="nlai-badge"
-      style={{ background: style.bg, color: style.color }}
-    >
-      {nilai}
-    </span>
-  );
-}
 
 function scoreBar(score) {
   if (score === null || score === undefined) return "—";
   return score;
 }
 
-// Compute IPK kumulatif from finished semesters
-function getIPKKumulatif(semesters) {
-  let totalIpk = 0,
-    count = 0;
+function getRataRataKumulatif(semesters) {
+  let total = 0, count = 0;
   semesters.forEach((sem) => {
-    if (sem.ipk !== null) {
-      totalIpk += sem.ipk;
+    if (sem.rataRataNilai !== null) {
+      total += sem.rataRataNilai;
       count++;
     }
   });
-  return count > 0 ? (totalIpk / count).toFixed(2) : "—";
-}
-
-function calculateGrade(tugas, kuis) {
-  if (tugas === null && kuis === null) return null;
-  const total = Number(tugas || 0) + Number(kuis || 0);
-  if (total === 0) return null;
-  const avg = Number(tugas || 0) * 0.5 + Number(kuis || 0) * 0.5;
-  if (avg >= 85) return "A";
-  if (avg >= 80) return "A-";
-  if (avg >= 75) return "B+";
-  if (avg >= 70) return "B";
-  if (avg >= 65) return "B-";
-  if (avg >= 60) return "C";
-  if (avg >= 50) return "D";
-  return "E";
-}
-
-function convertGradeToPoint(grade) {
-  const map = {
-    A: 4,
-    "A-": 3.75,
-    "B+": 3.5,
-    B: 3.0,
-    "B-": 2.75,
-    C: 2.0,
-    D: 1.0,
-    E: 0,
-  };
-  return map[grade] || 0;
+  return count > 0 ? (total / count).toFixed(1) : "—";
 }
 
 export default function Nilai({ onNavigate, onLogout }) {
@@ -112,8 +58,8 @@ export default function Nilai({ onNavigate, onLogout }) {
               (a === "null" ? 99 : Number(a)) - (b === "null" ? 99 : Number(b)),
           );
           const formattedSems = keys.map((k) => {
-            let totalPoint = 0;
-            let gradedCount = 0;
+            let totalScore = 0;
+            let counted = 0;
 
             const isAktif = Number(k) > 3;
 
@@ -121,12 +67,11 @@ export default function Nilai({ onNavigate, onLogout }) {
               const tugas = (!isAktif && m.nilaiTugas) ? parseFloat(m.nilaiTugas) : null;
               const kuis = (!isAktif && m.nilaiKuis) ? parseFloat(m.nilaiKuis) : null;
               const finalScore = (!isAktif && m.nilaiAkhir) ? parseFloat(m.nilaiAkhir) : 
-                (!isAktif && tugas !== null && kuis !== null ? Math.round((tugas * 0.5 + kuis * 0.5)) : null);
-              const grade = (!isAktif && finalScore) ? calculateGrade(tugas, kuis) : null;
+                (!isAktif && tugas !== null && kuis !== null ? Math.round(tugas * 0.5 + kuis * 0.5) : null);
 
-              if (grade) {
-                totalPoint += convertGradeToPoint(grade);
-                gradedCount++;
+              if (finalScore !== null) {
+                totalScore += finalScore;
+                counted++;
               }
 
               return {
@@ -135,17 +80,17 @@ export default function Nilai({ onNavigate, onLogout }) {
                 tugas: tugas,
                 uts: kuis,
                 uas: finalScore,
-                nilai: grade,
+                nilai: finalScore,
               };
             });
 
-            const ipk =
-              gradedCount > 0 ? totalPoint / gradedCount : null;
+            const rataRataNilai =
+              counted > 0 ? Math.round((totalScore / counted) * 10) / 10 : null;
 
             return {
               label: !isAktif ? `Semester ${k}` : `Semester ${k} (Aktif)`,
               year: !isAktif ? "Tahun Akademik 2023/2024" : "Sedang Berlangsung — Nilai belum final",
-              ipk: ipk,
+              rataRataNilai: rataRataNilai,
               matkul: matkul,
             };
           });
@@ -180,8 +125,8 @@ export default function Nilai({ onNavigate, onLogout }) {
   const handleUnduhTranskrip = () => {
     const nama = storedUser?.nama || "Siswa";
     const nis = storedUser?.nomorInduk || "-";
-    const selesai = semesters.filter(s => s.ipk !== null);
-    const ipkFinal = ipkKumulatif;
+    const selesai = semesters.filter(s => s.rataRataNilai !== null);
+    const rataRataAkhir = rataRataKumulatif;
 
     const rows = selesai.flatMap(sem =>
       sem.matkul.map(mk => `
@@ -220,7 +165,7 @@ export default function Nilai({ onNavigate, onLogout }) {
         <tbody>${rows}</tbody>
       </table>
       <div class="footer">
-        <span class="ipk">Rata-Rata Nilai Siswa: ${ipkFinal}</span>
+        <span class="ipk">Rata-Rata Nilai Siswa: ${rataRataAkhir}</span>
         <span>Dicetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
       </div>
       </body></html>
@@ -238,9 +183,9 @@ export default function Nilai({ onNavigate, onLogout }) {
     label: "",
     year: "",
     sks: 0,
-    ipk: null,
+    rataRataNilai: null,
   };
-  const ipkKumulatif = semesters.length > 0 ? getIPKKumulatif(semesters) : "—";
+  const rataRataKumulatif = semesters.length > 0 ? getRataRataKumulatif(semesters) : "—";
 
 
   return (
@@ -331,7 +276,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 grade
               </span>
               <div>
-                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "50px", minHeight: "24px" } : {}}>{ipkKumulatif}</p>
+                <p className={`nlai-sum-val ${loading ? "skeleton-shimmer" : ""}`} style={loading ? { minWidth: "50px", minHeight: "24px" } : {}}>{rataRataKumulatif}</p>
                 <p className="nlai-sum-lbl">Rata-Rata Nilai Siswa</p>
               </div>
             </div>
@@ -381,7 +326,7 @@ export default function Nilai({ onNavigate, onLogout }) {
                 <div className="nlai-sem-meta-item">
                   <p className="nlai-sem-meta-lbl">Rata-Rata Semester</p>
                   <p className="nlai-sem-meta-val nlai-sem-meta-val--blue">
-                    {sem.ipk !== null ? sem.ipk.toFixed(2) : "Belum Final"}
+                    {sem.rataRataNilai !== null ? sem.rataRataNilai.toFixed(1) : "Belum Final"}
                   </p>
                 </div>
               </div>
@@ -459,7 +404,9 @@ export default function Nilai({ onNavigate, onLogout }) {
                           </span>
                         </td>
                         <td className="nlai-center">
-                          <NilaiBadge nilai={mk.nilai} />
+                          <span className={mk.nilai !== null ? "nlai-score" : "nlai-score nlai-score--pending"}>
+                            {mk.nilai !== null ? mk.nilai : "—"}
+                          </span>
                         </td>
                       </tr>
                     );

@@ -98,7 +98,8 @@ export class DashboardSiswaUseCase {
   async calculateRataRataNilai(nomorInduk) {
     try {
       const nilaiRecords = await this.prisma.nilai.findMany({
-        where: { nomorInduk, semester: { in: [1, 2, 3] } },
+        where: { nomorInduk },
+        include: { mataKuliah: true },
       });
 
       if (nilaiRecords.length === 0) return 0;
@@ -106,9 +107,19 @@ export class DashboardSiswaUseCase {
       let totalNilai = 0;
       let count = 0;
       for (const n of nilaiRecords) {
-        const nilai = parseFloat(n.nilaiAkhir);
-        if (!isNaN(nilai)) {
-          totalNilai += nilai;
+        const semester = n.mataKuliah?.semester || n.semester;
+        if (!semester || semester > 3) continue;
+
+        let score = n.nilaiAkhir ? parseFloat(n.nilaiAkhir) : null;
+        if (isNaN(score)) {
+          const tugas = n.nilaiTugas ? parseFloat(n.nilaiTugas) : null;
+          const kuis = n.nilaiKuis ? parseFloat(n.nilaiKuis) : null;
+          if (tugas !== null && kuis !== null) {
+            score = Math.round(tugas * 0.5 + kuis * 0.5);
+          }
+        }
+        if (score !== null && !isNaN(score)) {
+          totalNilai += score;
           count++;
         }
       }
