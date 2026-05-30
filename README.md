@@ -2,28 +2,10 @@
 
 > Platform Learning Management System (LMS) interaktif berbasis web untuk memudahkan Guru dalam mengelola kelas, tugas, presensi, serta memantau progres belajar Siswa secara real-time di Madrasah Aliyah Negeri 1 Sumedang.
 
----
-
-## 👥 Informasi Kelompok
-
-| Atribut | Detail |
-| :--- | :--- |
-| **Nama Kelompok** | Kelompok 8 |
-| **Mata Kuliah** | Interaksi Manusia dan Komputer (IMK) |
-| **Semester** | 4 |
-| **Dosen Pengampu** | Muhammad Shiddiq Azis, S.T., MBA |
-
-### 👨‍💻 Anggota Kelompok
-1. **Moch Firmansyah**
-2. **Listianto Hilmi Fauzaan**
-3. **Muhammad Daffa**
-4. **Muhammad Lutfi Fitriansyah**
-
----
-
 ## 📖 Tentang Proyek
 
 **Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)** dirancang untuk mengatasi tantangan interaksi pembelajaran daring dan luring. Platform ini memfasilitasi kebutuhan:
+
 - **Guru**: Mengelola kelas/kelompok belajar, mempublikasikan materi & tugas, mengelola presensi siswa, serta melihat visualisasi performa dan keaktifan siswa.
 - **Siswa**: Mengakses ruang kelas virtual, mengunduh materi, mengumpulkan tugas secara langsung, dan memantau kehadiran mereka secara transparan.
 
@@ -31,12 +13,12 @@
 
 ## 🛠️ Teknologi yang Digunakan
 
-| Komponen | Teknologi |
-| :--- | :--- |
-| **Frontend** | React.js (Vite), Tailwind CSS |
-| **Backend** | Node.js, Express.js, Prisma ORM |
-| **Database** | PostgreSQL |
-| **Design** | Figma |
+| Komponen     | Teknologi                       |
+| :----------- | :------------------------------ |
+| **Frontend** | React.js (Vite), Tailwind CSS   |
+| **Backend**  | Node.js, Express.js, Prisma ORM |
+| **Database** | PostgreSQL                      |
+| **Design**   | Figma                           |
 
 ---
 
@@ -59,12 +41,14 @@ Learning_Management_System/
 Pastikan Anda sudah menginstal [Node.js](https://nodejs.org/) (versi 18+) dan [PostgreSQL](https://www.postgresql.org/) di perangkat Anda.
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/moch-firmansyahh/Madrasah-Aliyah-Negeri-1-Interaktif-Sistem.git
 cd Learning_Management_System
 ```
 
 ### 2. Konfigurasi & Jalankan Backend (`lms-be`)
+
 1. Masuk ke folder backend:
    ```bash
    cd lms-be
@@ -88,9 +72,10 @@ cd Learning_Management_System
    ```bash
    npm run dev
    ```
-   *Backend akan berjalan secara default di `http://localhost:3000`.*
+   _Backend akan berjalan secara default di `http://localhost:3000`._
 
 ### 3. Konfigurasi & Jalankan Frontend (`frontend`)
+
 1. Buka terminal baru dan masuk ke folder frontend:
    ```bash
    cd ../frontend
@@ -103,12 +88,12 @@ cd Learning_Management_System
    ```bash
    npm run dev
    ```
-   *Frontend akan berjalan di `http://localhost:5173`.*
+   _Frontend akan berjalan di `http://localhost:5173`._
 
 ---
 
 ## 🔑 Informasi Akun Uji Coba
 
-Untuk memudahkan pengujian fungsionalitas sistem (Login Guru & Siswa), kami menyediakan daftar akun uji coba yang siap pakai setelah proses seeding database selesai. 
+Untuk memudahkan pengujian fungsionalitas sistem (Login Guru & Siswa), kami menyediakan daftar akun uji coba yang siap pakai setelah proses seeding database selesai.
 
-Silakan cek file [daftar-akun.md](./daftar-akun.md) untuk melihat daftar lengkap *Username*, *Email*, *Password*, serta pembagian *Kelas/Mata Pelajaran*.
+Silakan cek file [daftar-akun.md](./daftar-akun.md) untuk melihat daftar lengkap _Username_, _Email_, _Password_, serta pembagian _Kelas/Mata Pelajaran_.
