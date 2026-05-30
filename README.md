@@ -1,6 +1,6 @@
 # 🎓 Manis — Madrasah Aliyah Negeri 1 Interaktif Sistem
 
-> Platform pembelajaran berbasis web yang memudahkan guru dalam mengelola kelompok dan memantau progress siswa secara real-time.
+> Platform Learning Management System (LMS) interaktif berbasis web untuk memudahkan Guru dalam mengelola kelas, tugas, presensi, serta memantau progres belajar Siswa secara real-time di Madrasah Aliyah Negeri 1 Sumedang.
 
 ---
 
@@ -9,20 +9,23 @@
 | Atribut | Detail |
 | :--- | :--- |
 | **Nama Kelompok** | Kelompok 8 |
-| **Mata Kuliah** | Implementasi Perancangan Perangkat Lunak |
+| **Mata Kuliah** | Interaksi Manusia dan Komputer (IMK) |
+| **Semester** | 4 |
 | **Dosen Pengampu** | Muhammad Shiddiq Azis, S.T., MBA |
 
-**Anggota:**
-1. Moch Firmansyah
-2. Listianto Hilmi Fauzaan
-3. Muhammad Daffa
-4. Muhammad Lutfi Fitriansyah
+### 👨‍💻 Anggota Kelompok
+1. **Moch Firmansyah**
+2. **Listianto Hilmi Fauzaan**
+3. **Muhammad Daffa**
+4. **Muhammad Lutfi Fitriansyah**
 
 ---
 
 ## 📖 Tentang Proyek
 
-**Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)** adalah platform pembelajaran yang memberi akses kepada guru untuk mengelola kelompok dan memantau progress siswa dengan mudah dan efisien.
+**Manis (Madrasah Aliyah Negeri 1 Interaktif Sistem)** dirancang untuk mengatasi tantangan interaksi pembelajaran daring dan luring. Platform ini memfasilitasi kebutuhan:
+- **Guru**: Mengelola kelas/kelompok belajar, mempublikasikan materi & tugas, mengelola presensi siswa, serta melihat visualisasi performa dan keaktifan siswa.
+- **Siswa**: Mengakses ruang kelas virtual, mengunduh materi, mengumpulkan tugas secara langsung, dan memantau kehadiran mereka secara transparan.
 
 ---
 
@@ -30,47 +33,82 @@
 
 | Komponen | Teknologi |
 | :--- | :--- |
-| **Frontend** | React.js, Vite, Tailwind CSS |
-| **Backend** | Node.js, Express.js, Prisma |
-| **Database** | PostgreSQL / MySQL |
+| **Frontend** | React.js (Vite), Tailwind CSS |
+| **Backend** | Node.js, Express.js, Prisma ORM |
+| **Database** | PostgreSQL |
 | **Design** | Figma |
 
 ---
 
-## 📊 Perancangan Sistem
+## 📁 Struktur Monorepo
 
-Pastikan path folder `assets` berada di root repository kamu. Jika folder `assets` ada di luar, gunakan format berikut:
+Proyek ini dibangun menggunakan struktur monorepo yang memisahkan frontend dan backend:
 
-### DFD Level 0
-![DFD Level 0](assets/DFD/DFD_Level_0.png)
-
-### DFD Level 1
-![DFD Level 1](assets/DFD/DFD_Level_1.png)
-
----
-
-## 🗄️ Entity Relationship Diagram (ERD)
-
-![ERD](assets/ERD/ERD.png)
+```text
+Learning_Management_System/
+├── frontend/          # Aplikasi Frontend (React.js + Vite)
+├── lms-be/            # API Server Backend (Express.js + Prisma)
+├── daftar-akun.md     # Daftar akun guru & siswa untuk pengujian/demo
+└── README.md          # Dokumentasi utama proyek
+```
 
 ---
 
-## 🏗️ Class Diagram
+## 🚀 Panduan Instalasi & Menjalankan Aplikasi
 
-![Class Diagram](assets/Class_Diagram/Class_Diagram.png)
-
----
-
-## 🎨 Mockup Antarmuka (Figma)
-
-> [Klik di sini untuk melihat desain Figma](LINK_FIGMA_KAMU_DISINI)
-
----
-
-## 🚀 Panduan Instalasi
+Pastikan Anda sudah menginstal [Node.js](https://nodejs.org/) (versi 18+) dan [PostgreSQL](https://www.postgresql.org/) di perangkat Anda.
 
 ### 1. Clone Repository
 ```bash
-git clone [https://github.com/username/manis.git](https://github.com/username/manis.git)
-cd manis
+git clone https://github.com/moch-firmansyahh/Manis---Madrasah-Aliyah-Negeri-1-Interaktif-Sistem.git
+cd Learning_Management_System
 ```
+
+### 2. Konfigurasi & Jalankan Backend (`lms-be`)
+1. Masuk ke folder backend:
+   ```bash
+   cd lms-be
+   ```
+2. Instal dependensi:
+   ```bash
+   npm install
+   ```
+3. Buat file `.env` di folder `lms-be/` dan isi dengan konfigurasi database Anda:
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/manis_db?schema=public"
+   JWT_SECRET="rahasia_super_aman_kamu"
+   ```
+4. Jalankan migrasi database dan seed data awal (sangat penting untuk membuat role & akun bawaan):
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev --name init_manis
+   npx prisma db seed
+   ```
+5. Jalankan server backend dalam mode pengembangan:
+   ```bash
+   npm run dev
+   ```
+   *Backend akan berjalan secara default di `http://localhost:3000`.*
+
+### 3. Konfigurasi & Jalankan Frontend (`frontend`)
+1. Buka terminal baru dan masuk ke folder frontend:
+   ```bash
+   cd ../frontend
+   ```
+2. Instal dependensi:
+   ```bash
+   npm install
+   ```
+3. Jalankan server frontend:
+   ```bash
+   npm run dev
+   ```
+   *Frontend akan berjalan di `http://localhost:5173`.*
+
+---
+
+## 🔑 Informasi Akun Uji Coba
+
+Untuk memudahkan pengujian fungsionalitas sistem (Login Guru & Siswa), kami menyediakan daftar akun uji coba yang siap pakai setelah proses seeding database selesai. 
+
+Silakan cek file [daftar-akun.md](./daftar-akun.md) untuk melihat daftar lengkap *Username*, *Email*, *Password*, serta pembagian *Kelas/Mata Pelajaran*.
