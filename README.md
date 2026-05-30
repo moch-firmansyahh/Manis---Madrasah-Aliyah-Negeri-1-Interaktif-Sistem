@@ -60,7 +60,7 @@ Pastikan Anda sudah menginstal [Node.js](https://nodejs.org/) (versi 18+) dan [P
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/moch-firmansyahh/Manis---Madrasah-Aliyah-Negeri-1-Interaktif-Sistem.git
+git clone https://github.com/moch-firmansyahh/Madrasah-Aliyah-Negeri-1-Interaktif-Sistem.git
 cd Learning_Management_System
 ```
 
